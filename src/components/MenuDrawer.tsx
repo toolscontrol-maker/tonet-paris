@@ -3,10 +3,19 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUI } from "@/context/UIContext";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/context/LocaleContext";
+import { getRegionLabel, getLanguageLabel } from "@/lib/i18n/regions";
 
 export default function MenuDrawer() {
   const { isMenuOpen, closeMenu } = useUI();
+  const { t } = useTranslation();
+  const { region, language, openSelector } = useLocale();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const shippingLabel = t('locale.shippingTo', {
+    region: getRegionLabel(region, language).toUpperCase(),
+    language: getLanguageLabel(language, language).toUpperCase(),
+  });
 
   // Close when clicking outside
   useEffect(() => {
@@ -36,9 +45,9 @@ export default function MenuDrawer() {
         
         {/* HEADER */}
         <div className="md-header">
-          <Link href="/" className="md-brand" onClick={closeMenu}>TONISTUDIOS.COM</Link>
+          <Link href="/" className="md-brand" onClick={closeMenu}>{t('menu.brand')}</Link>
           <button className="md-close" onClick={closeMenu} aria-label="Close menu">
-            X CLOSE
+            {t('menu.close')}
           </button>
         </div>
 
@@ -46,35 +55,35 @@ export default function MenuDrawer() {
         <div className="md-content">
           
           <button className="md-item justify-between" onClick={closeMenu}>
-            <span>SEARCH</span>
+            <span>{t('menu.search')}</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
             </svg>
           </button>
 
           <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>WOMAN</span>
+            <span>{t('menu.woman')}</span>
             <span className="md-arrow">&gt;</span>
           </Link>
           
           <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>MAN</span>
+            <span>{t('menu.man')}</span>
             <span className="md-arrow">&gt;</span>
           </Link>
           
           <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>BAGS</span>
+            <span>{t('menu.bags')}</span>
             <span className="md-arrow">&gt;</span>
           </Link>
           
           <Link href="#" className="md-item" onClick={closeMenu}>
-            <span>RUNWAY</span>
+            <span>{t('menu.runway')}</span>
           </Link>
 
           <div className="md-spacer"></div>
 
-          <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>WISHLIST</span>
+          <Link href="/wishlist" className="md-item justify-between" onClick={closeMenu}>
+            <span>{t('menu.wishlist')}</span>
             <span className="flex-center gap-1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -84,36 +93,36 @@ export default function MenuDrawer() {
           </Link>
 
           <Link href="/login" className="md-item justify-between" onClick={closeMenu}>
-            <span>ACCOUNT</span>
+            <span>{t('menu.account')}</span>
             <span className="md-arrow">&gt;</span>
           </Link>
 
           <Link href="#" className="md-item" onClick={closeMenu}>
-            <span>STORES</span>
+            <span>{t('menu.stores')}</span>
           </Link>
 
-          <Link href="#" className="md-item" onClick={closeMenu}>
-            <span>SHIPPING TO SPAIN (ENGLISH)</span>
-          </Link>
+          <button className="md-item" onClick={() => { closeMenu(); openSelector(); }}>
+            <span>{shippingLabel}</span>
+          </button>
 
           <div className="md-spacer"></div>
 
           <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>HELP</span>
+            <span>{t('menu.help')}</span>
             <span className="md-arrow">&gt;</span>
           </Link>
 
           <div className="md-spacer-small"></div>
 
           <div className="md-info-block">
-            <strong>LIVE CHAT <span className="muted">OFFLINE</span></strong>
-            <p>Monday to Saturday, 9am to 6pm CET</p>
+            <strong>{t('menu.liveChat')} <span className="muted">{t('menu.offline')}</span></strong>
+            <p>{t('menu.schedule')}</p>
           </div>
 
           <div className="md-info-block border-none">
-            <strong>CALL <span className="muted">OFFLINE</span></strong>
+            <strong>{t('menu.call')} <span className="muted">{t('menu.offline')}</span></strong>
             <p>+46 10 888 73 05</p>
-            <p>Monday to Saturday, 9am to 6pm CET</p>
+            <p>{t('menu.schedule')}</p>
           </div>
 
         </div>
@@ -142,7 +151,7 @@ export default function MenuDrawer() {
           bottom: 0;
           width: 90vw;
           max-width: 440px;
-          background: #fff;
+          background: #FAF8F5;
           color: #000;
           z-index: 1001;
           transform: translateX(-100%);
@@ -203,7 +212,7 @@ export default function MenuDrawer() {
           font-size: 11.5px;
           color: #000;
           text-decoration: none;
-          background: #fff;
+          background: #FAF8F5;
           border-left: none;
           border-right: none;
           border-top: none;

@@ -4,10 +4,18 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUI } from "@/context/UIContext";
+import { useCart } from "@/context/CartContext";
+import { useTranslation } from "@/lib/i18n";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const { openCart, openSearch, openMenu } = useUI();
+  const { cartCount } = useCart();
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const pathname = usePathname();
+  const accountHref = user ? '/account' : '/login';
+  const accountLabel = user ? user.firstName : t('nav.account');
 
   const isHome = pathname === "/";
   const isProduct = pathname.startsWith("/product/");
@@ -36,10 +44,10 @@ export default function Navbar() {
           {/* LEFT: Nav links (desktop) | Hamburger (mobile) */}
           <div className="acne-nav-left">
             <nav className="acne-nav-links desktop-only">
-              <Link href="/">WOMAN</Link>
-              <Link href="/">MAN</Link>
-              <Link href="/">BAGS</Link>
-              <Link href="/">RUNWAY</Link>
+              <Link href="/">{t('nav.woman')}</Link>
+              <Link href="/">{t('nav.man')}</Link>
+              <Link href="/">{t('nav.bags')}</Link>
+              <Link href="/">{t('nav.runway')}</Link>
             </nav>
             <div className="acne-mobile-left mobile-only">
               <button className="acne-icon-btn" aria-label="Menu" onClick={openMenu}>
@@ -55,12 +63,14 @@ export default function Navbar() {
                   <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                 </svg>
               </button>
+              <div className="acne-icon-sep" />
             </div>
           </div>
 
           {!isHome && (
             <Link href="/" className="acne-logo">
-              Toni Studios
+              <span className="acne-logo-star">★</span>
+              <span className="acne-logo-text">Tonet Studios<sup>®</sup></span>
             </Link>
           )}
 
@@ -70,7 +80,7 @@ export default function Navbar() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
-              <span>SEARCH</span>
+              <span>{t('nav.search')}</span>
             </button>
             <Link href="#" className="acne-text-btn desktop-only" aria-label="Help">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -78,17 +88,17 @@ export default function Navbar() {
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              <span>HELP</span>
+              <span>{t('nav.help')}</span>
             </Link>
-            <Link href="/login" className="acne-text-btn desktop-only" aria-label="Account">
+            <Link href={accountHref} className="acne-text-btn desktop-only" aria-label="Account">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
-              <span>ACCOUNT</span>
+              <span>{accountLabel}</span>
             </Link>
             <div className="acne-icon-sep mobile-only" />
-            <Link href="/login" className="acne-icon-btn mobile-only" aria-label="Account">
+            <Link href={accountHref} className="acne-icon-btn mobile-only" aria-label="Account">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
@@ -101,7 +111,7 @@ export default function Navbar() {
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <path d="M16 10a4 4 0 0 1-8 0"/>
               </svg>
-              <span className="bag-count">02</span>
+              <span className="bag-count">{String(cartCount).padStart(2, "0")}</span>
             </button>
           </div>
         </div>
@@ -114,16 +124,16 @@ export default function Navbar() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
-                <span>Gallery</span>
+                <span>{t('nav.gallery')}</span>
               </Link>
               <div className="subnav-links desktop-only">
-                <Link href="#">All collections</Link>
-                <Link href="#">New Arrival</Link>
-                <Link href="#" className="active">Abstracts</Link>
-                <Link href="#">Portraits</Link>
+                <Link href="#">{t('nav.allCollections')}</Link>
+                <Link href="#">{t('nav.newArrival')}</Link>
+                <Link href="#" className="active">{t('nav.abstracts')}</Link>
+                <Link href="#">{t('nav.portraits')}</Link>
               </div>
               <div className="subnav-mobile mobile-only">
-                <span>Abstracts</span>
+                <span>{t('nav.abstracts')}</span>
               </div>
             </div>
           </div>
@@ -142,16 +152,16 @@ export default function Navbar() {
           background: transparent;
         }
         .acne-header.solid {
-          background: #fff;
+          background: #FAF8F5;
           border-bottom: 1px solid #ededed;
         }
 
         .acne-header-inner {
           display: flex;
-          align-items: flex-start;
+          align-items: stretch;
           justify-content: space-between;
-          height: 48px;
-          padding: 4px 20px 0;
+          height: 60px;
+          padding: 0 20px;
           position: relative;
         }
 
@@ -161,52 +171,78 @@ export default function Navbar() {
           top: 50%;
           transform: translate(-50%, -50%);
           z-index: 1;
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
-          font-size: 40px;
-          font-weight: 600;
-          letter-spacing: -0.055em;
-          color: #000;
           text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #000;
           white-space: nowrap;
         }
-
-        .acne-nav-left { display: flex; align-items: flex-start; flex: 1; }
-        .acne-nav-links { display: flex; gap: 28px; }
-        .acne-nav-links a {
-          font-size: 12px; font-family: Arial, sans-serif;
-          text-transform: uppercase; text-decoration: none; color: #000;
-          letter-spacing: 1.2px;
+        .acne-logo-star {
+          font-size: 34px;
+          line-height: 1;
+          color: #000;
+        }
+        .acne-logo-text {
+          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-size: 30px;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          color: #000;
+        }
+        .acne-logo-text sup {
+          font-size: 9px;
+          vertical-align: super;
+          letter-spacing: 0.04em;
         }
 
-        .acne-nav-right { flex: 1; display: flex; align-items: flex-start; justify-content: flex-end; }
+        .acne-nav-left { display: flex; align-items: stretch; flex: 1; }
+        .acne-nav-links { display: flex; align-items: center; gap: 28px; }
+        .acne-nav-links a {
+          font-size: 11px;
+          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-weight: 500;
+          text-transform: uppercase;
+          text-decoration: none;
+          color: #000;
+          letter-spacing: 0.10em;
+          line-height: 1.2;
+        }
+
+        .acne-nav-right { flex: 1; display: flex; align-items: stretch; justify-content: flex-end; }
         .acne-text-btn {
           display: flex; align-items: center; gap: 5px;
-          font-size: 11px; font-family: Arial, sans-serif;
-          text-transform: uppercase; color: #000; text-decoration: none;
+          font-size: 11px;
+          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-weight: 500;
+          text-transform: uppercase;
+          color: #000;
+          text-decoration: none;
           background: none; border: none; cursor: pointer; padding: 0 12px;
-          height: 24px; letter-spacing: 1.2px;
+          height: 100%;
+          letter-spacing: 0.10em;
         }
 
         .acne-bag-btn {
           display: flex; align-items: center; gap: 8px;
           background: none; border: none; cursor: pointer; color: #000;
-          padding: 0 0 0 12px; height: 24px;
+          padding: 0 0 0 12px; height: 100%;
         }
-        .bag-count { font-size: 11px; text-transform: uppercase; }
+        .bag-count { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
 
         .acne-icon-btn {
           display: flex; align-items: center; justify-content: center;
           background: none; border: none; cursor: pointer; color: #000;
-          padding: 0 12px; height: 24px;
+          padding: 0 12px; height: 100%;
         }
 
-        .acne-icon-sep { width: 1px; height: 20px; background: #ededed; }
-        .acne-mobile-left { display: flex; align-items: center; }
+        .acne-icon-sep { width: 1px; height: 100%; background: #ededed; }
+        .acne-mobile-left { display: flex; align-items: stretch; }
 
         /* ── SUBNAV ── */
         .acne-subnav {
           height: 40px;
-          background: #fff;
+          background: #FAF8F5;
           border-top: 1px solid #ededed;
           border-bottom: 1px solid #ededed;
           display: flex;
@@ -225,7 +261,9 @@ export default function Navbar() {
           align-items: center;
           gap: 6px;
           font-size: 11px;
+          font-weight: 400;
           text-transform: uppercase;
+          letter-spacing: 0.08em;
           color: #000;
         }
         .subnav-links {
@@ -234,7 +272,9 @@ export default function Navbar() {
         }
         .subnav-links a {
           font-size: 11px;
+          font-weight: 400;
           text-transform: uppercase;
+          letter-spacing: 0.08em;
           color: #768194;
         }
         .subnav-links a.active { color: #000; font-weight: 500; }
@@ -246,10 +286,22 @@ export default function Navbar() {
         @media (max-width: 767px) {
           .desktop-only { display: none !important; }
           .mobile-only  { display: flex !important; }
-          .acne-header-inner { padding: 0; }
-          .acne-logo { 
-            font-size: 20px; 
-            letter-spacing: -0.055em; 
+          .acne-header-inner { padding: 0; height: 48px; }
+          .acne-logo {
+            gap: 6px;
+            max-width: calc(100vw - 120px);
+            overflow: hidden;
+          }
+          .acne-logo-star {
+            font-size: 26px;
+            flex-shrink: 0;
+          }
+          .acne-logo-text {
+            font-size: 20px;
+            letter-spacing: 0.04em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
           .acne-bag-btn { padding: 0 14px; }
           .acne-subnav-inner { padding: 0 16px; }

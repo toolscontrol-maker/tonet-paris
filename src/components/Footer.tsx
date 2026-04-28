@@ -2,15 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/context/LocaleContext";
+import { getRegionLabel, getLanguageLabel } from "@/lib/i18n/regions";
 
 export default function Footer() {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
+  const isMinimalPage = pathname === "/login"
+    || pathname === "/wishlist"
+    || pathname === "/contact"
+    || pathname.startsWith("/account");
+  const { t } = useTranslation();
+  const { region, language, openSelector } = useLocale();
+  const shippingLabel = t('locale.shippingTo', {
+    region: getRegionLabel(region, language).toUpperCase(),
+    language: getLanguageLabel(language, language).toUpperCase(),
+  });
 
   return (
     <footer className="footer">
       
-      {!isLoginPage && (
+      {!isMinimalPage && (
         <>
           <div className="footer-promos">
             <Link href="#" className="promo-card">
@@ -18,8 +30,8 @@ export default function Footer() {
                 <img src="https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Shipping" />
               </div>
               <div className="promo-content">
-                <h4>FREE SHIPPING & RETURNS</h4>
-                <p>Fast delivery and easy returns or exchanges on all orders.</p>
+                <h4>{t('footer.freeShippingTitle')}</h4>
+                <p>{t('footer.freeShippingDesc')}</p>
               </div>
             </Link>
             <Link href="#" className="promo-card">
@@ -27,8 +39,8 @@ export default function Footer() {
                 <img src="https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Gallery" />
               </div>
               <div className="promo-content">
-                <h4>ACNE PAPER PALAIS ROYAL</h4>
-                <p>A permanent gallery by Acne Studios, merging fashion, art, and publishing beneath the arcades.</p>
+                <h4>{t('footer.palaisTitle')}</h4>
+                <p>{t('footer.palaisDesc')}</p>
               </div>
             </Link>
             <Link href="#" className="promo-card">
@@ -36,8 +48,8 @@ export default function Footer() {
                 <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Gift Card" />
               </div>
               <div className="promo-content">
-                <h4>GIFT CARD</h4>
-                <p>Acne Studios digital gift cards are delivered instantly by email, redeemable online and in store.</p>
+                <h4>{t('footer.giftCardTitle')}</h4>
+                <p>{t('footer.giftCardDesc')}</p>
               </div>
             </Link>
             <Link href="#" className="promo-card">
@@ -45,8 +57,8 @@ export default function Footer() {
                 <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=500" alt="Runway" />
               </div>
               <div className="promo-content">
-                <h4>FW26 RUNWAY</h4>
-                <p>Acne Studios presents Women's Fall/Winter 2026. Launching online and in stores September 2026.</p>
+                <h4>{t('footer.runwayTitle')}</h4>
+                <p>{t('footer.runwayDesc')}</p>
               </div>
             </Link>
             <Link href="#" className="promo-card">
@@ -54,17 +66,17 @@ export default function Footer() {
                 <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=500" alt="Stores" />
               </div>
               <div className="promo-content">
-                <h4>DISCOVER OUR STORES</h4>
-                <p>Explore our store locator to discover your nearest Acne Studios destination.</p>
+                <h4>{t('footer.storesTitle')}</h4>
+                <p>{t('footer.storesDesc')}</p>
               </div>
             </Link>
           </div>
 
           <div className="footer-newsletter">
-            <h3>NEWSLETTER</h3>
-            <p>Receive news about Acne Studios collections, Acne Paper, events and sales.</p>
+            <h3>{t('footer.newsletter')}</h3>
+            <p>{t('footer.newsletterDesc')}</p>
             <div className="newsletter-input-wrapper">
-              <input type="email" placeholder="EMAIL" />
+              <input type="email" placeholder={t('footer.emailPlaceholder')} />
             </div>
           </div>
         </>
@@ -75,49 +87,49 @@ export default function Footer() {
         {/* Column 1 */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-1" className="accordion-toggle" />
-          <label htmlFor="footer-col-1" className="col-title">CONTACT US <span className="chevron"></span></label>
+          <label htmlFor="footer-col-1" className="col-title">{t('footer.contactUs')} <span className="chevron"></span></label>
           <ul className="col-links">
-            <li><Link href="#">Live chat <span className="text-muted">Offline</span></Link></li>
-            <li><Link href="#">Call <span className="text-muted">Offline</span></Link></li>
-            <li><Link href="#">Email</Link></li>
+            <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
+            <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
+            <li><Link href="#">{t('footer.emailLabel')}</Link></li>
           </ul>
         </div>
 
         {/* Column 2 */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-2" className="accordion-toggle" />
-          <label htmlFor="footer-col-2" className="col-title">HELP <span className="chevron"></span></label>
+          <label htmlFor="footer-col-2" className="col-title">{t('footer.helpTitle')} <span className="chevron"></span></label>
           <ul className="col-links">
-            <li><Link href="#">Contact us</Link></li>
-            <li><Link href="#">Order status</Link></li>
-            <li><Link href="#">Register a return</Link></li>
-            <li><Link href="#">FAQs</Link></li>
+            <li><Link href="/contact">{t('footer.contactUsLink')}</Link></li>
+            <li><Link href="/contact/order-status">{t('footer.orderStatus')}</Link></li>
+            <li><Link href="/contact/returns">{t('footer.registerReturn')}</Link></li>
+            <li><Link href="/contact/faqs">{t('footer.faqs')}</Link></li>
           </ul>
         </div>
 
         {/* Column 3 */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-3" className="accordion-toggle" />
-          <label htmlFor="footer-col-3" className="col-title">CLIENT SERVICES <span className="chevron"></span></label>
+          <label htmlFor="footer-col-3" className="col-title">{t('footer.clientServices')} <span className="chevron"></span></label>
           <ul className="col-links">
-            <li><Link href="#">Acne Studios Services</Link></li>
-            <li><Link href="#">Account</Link></li>
-            <li><Link href="#">Find a store</Link></li>
-            <li><Link href="#">Product care</Link></li>
-            <li><Link href="#">Gift Cards</Link></li>
+            <li><Link href="#">{t('footer.services')}</Link></li>
+            <li><Link href="#">{t('footer.accountLabel')}</Link></li>
+            <li><Link href="#">{t('footer.findStore')}</Link></li>
+            <li><Link href="#">{t('footer.productCare')}</Link></li>
+            <li><Link href="#">{t('footer.giftCards')}</Link></li>
           </ul>
         </div>
 
         {/* Column 4 */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-4" className="accordion-toggle" />
-          <label htmlFor="footer-col-4" className="col-title">COMPANY <span className="chevron"></span></label>
+          <label htmlFor="footer-col-4" className="col-title">{t('footer.company')} <span className="chevron"></span></label>
           <ul className="col-links">
-            <li><Link href="#">About</Link></li>
-            <li><Link href="#">Press</Link></li>
-            <li><Link href="#">Careers</Link></li>
-            <li><Link href="#">Sustainability</Link></li>
-            <li><Link href="#">Legal & Privacy</Link></li>
+            <li><Link href="#">{t('footer.about')}</Link></li>
+            <li><Link href="#">{t('footer.press')}</Link></li>
+            <li><Link href="#">{t('footer.careers')}</Link></li>
+            <li><Link href="#">{t('footer.sustainability')}</Link></li>
+            <li><Link href="#">{t('footer.legalPrivacy')}</Link></li>
           </ul>
         </div>
 
@@ -125,16 +137,16 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="bottom-shipping mobile-only-block" style={{ marginBottom: "24px" }}>
-          <Link href="#" className="shipping-link">SHIPPING TO SPAIN (ENGLISH)</Link>
+          <button className="shipping-link" onClick={openSelector}>{shippingLabel}</button>
         </div>
 
         <div className="bottom-left">
-          <span className="copyright desktop-only">© 2026 ACNE STUDIOS</span>
-          <Link href="#" className="cookie-link">Cookie settings</Link>
+          <span className="copyright desktop-only">{t('footer.copyright')}</span>
+          <Link href="#" className="cookie-link">{t('footer.cookieSettings')}</Link>
         </div>
         
         <div className="bottom-center socials">
-          <span className="copyright mobile-only" style={{ marginRight: '8px', color: '#000' }}>© 2026 ACNE STUDIOS</span>
+          <span className="copyright mobile-only" style={{ marginRight: '8px', color: '#000' }}>{t('footer.copyright')}</span>
           <Link href="#">IG</Link>
           <Link href="#">FB</Link>
           <Link href="#">TW</Link>
@@ -144,17 +156,19 @@ export default function Footer() {
         </div>
         
         <div className="bottom-right desktop-only-block">
-          <Link href="#" className="shipping-link">SHIPPING TO SPAIN (ENGLISH)</Link>
+          <button className="shipping-link" onClick={openSelector}>{shippingLabel}</button>
         </div>
       </div>
 
       <style>{`
         .footer {
-          background-color: #fff;
+          background-color: #FAF8F5;
           color: #000;
-          font-family: Arial, Helvetica, sans-serif;
-          font-size: 12px;
+          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-size: 11px;
+          font-weight: 400;
           line-height: 1.6;
+          letter-spacing: 0.02em;
           border-top: 1px solid #ededed;
         }
         
@@ -216,10 +230,11 @@ export default function Footer() {
         .promo-content h4 {
           color: #0000cc;
           font-size: 11px;
-          text-transform: uppercase;
           font-weight: 500;
+          text-transform: uppercase;
           margin: 0 0 10px 0;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.10em;
+          line-height: 1.2;
         }
 
         .promo-content p {
@@ -343,6 +358,16 @@ export default function Footer() {
         
         .shipping-link, .cookie-link {
           text-transform: uppercase;
+        }
+        button.shipping-link {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
+          padding: 0;
+          text-decoration: underline;
+          text-underline-offset: 2px;
         }
 
         .mobile-only, .mobile-only-block {

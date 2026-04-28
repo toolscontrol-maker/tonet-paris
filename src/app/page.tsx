@@ -1,127 +1,42 @@
 import Link from 'next/link';
-import { getProducts } from '@/lib/shopify';
+import { getCollections } from '@/lib/shopify';
+import HeroSection from '@/components/HeroSection';
 
 export default async function Home() {
-  const products = await getProducts();
-
-  // Split products into 4 category columns (round-robin)
-  const categories = [
-    { name: 'ARTE FÍSICO', slug: 'arte-fisico' },
-    { name: 'ARTE DIGITAL', slug: 'arte-digital' },
-    { name: 'ESCULTURAS', slug: 'esculturas' },
-    { name: 'FIGURAS', slug: 'figuras' },
-  ];
-
-  const cols = categories.map((cat, i) => ({
-    ...cat,
-    products: products.filter((_, idx) => idx % 4 === i),
-  }));
+  const collections = await getCollections(20);
 
   return (
     <>
-      {/* ─── HERO: 3 stacked blocks of 125vh each, Acne Studios style ─── */}
-      <div className="hero-wrapper">
+      {/* ─── HERO: randomized images from /public/hero/ ─── */}
+      <HeroSection />
 
-        {/*
-          Sticky anchor: FIRST child. top:50vh → the anchor pins at the
-          viewport centre. Text is centered ON the anchor with translate(-50%,-50%).
-          When hero-wrapper exits the viewport the anchor travels with it.
-        */}
-        <div className="hero-brand-anchor" aria-hidden="true">
-          <div className="hero-brand-text">Toni Studios</div>
-        </div>
-
-        {/* ── Block 1: Split 2 images ── */}
-        <div className="hero-block hero-block--split">
-          <Link href="#" className="hero-panel" style={{ backgroundImage: "url('/img-hero-new-1.png')" }}>
-            <span className="shop-label">SHOP NEW COLLECTION</span>
-          </Link>
-          <Link href="#" className="hero-panel" style={{ backgroundImage: "url('/img-hero-new-2.png')" }}>
-            <span className="shop-label">SHOP LAST COLLECTIONS</span>
-          </Link>
-        </div>
-
-        {/* ── Block 2: Single full-width image ── */}
-        <div className="hero-block hero-block--full">
-          <Link href="#" className="hero-panel" style={{ backgroundImage: "url('/hero-1.webp')" }}>
-            <span className="shop-label">SHOP THE LOOK</span>
-          </Link>
-        </div>
-
-        {/* ── Block 3: Split 2 images ── */}
-        <div className="hero-block hero-block--split">
-          <Link href="#" className="hero-panel" style={{ backgroundImage: "url('/hero-2.webp')" }}>
-            <span className="shop-label">NEW ARRIVALS</span>
-          </Link>
-          <Link href="#" className="hero-panel" style={{ backgroundImage: "url('/hero-1.webp')" }}>
-            <span className="shop-label">CURATED SELECTION</span>
-          </Link>
-        </div>
-
-      </div>
-
-      {/* ─── PRODUCTS SECTION (arriba) — productos individuales, label NO sticky ─── */}
-      <section className="shop-section shop-section--products" id="gallery">
+      {/* ─── COLLECTIONS SECTION ─── */}
+      <section className="shop-section" id="gallery">
         <div className="shop-grid">
-          {products.map((product) => (
-            <div className="shop-col" key={product.id}>
-
-              {/* Static label (no sticky) */}
-              <div className="shop-col-label shop-col-label--static">
-                SHOP NOW
-              </div>
-
-              {/* Single product card */}
-              <Link href={`/product/${product.id}`} className="shop-product shop-product--detail">
-                <div className="shop-product-img">
-                  <img src={product.imageUrl} alt={product.title} />
-                </div>
-                <div className="shop-product-meta">
-                  <span className="shop-product-name">{product.title}</span>
-                  <span className="shop-product-price">${product.price}</span>
-                </div>
-              </Link>
-
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── COLLECTIONS SECTION (abajo) — categorías, label STICKY ─── */}
-      <section className="shop-section shop-section--collections">
-        <div className="shop-grid">
-          {cols.map((col) => (
-            <div className="shop-col" key={col.name}>
-
-              {/* Sticky category label */}
+          {collections.map((col) => (
+            <Link
+              key={col.handle}
+              href={`/collection/${col.handle}`}
+              className="shop-col shop-col-link"
+            >
               <div className="shop-col-label">
-                {col.name} &rsaquo; SHOP NOW
+                {col.title}<span className="shop-now-suffix"> › SHOP NOW</span>
               </div>
-
-              {/* Products in this column */}
-              {col.products.length > 0 ? (
-                col.products.map((product) => (
-                  <Link
-                    key={product.id}
-                    href={`/product/${product.id}`}
-                    className="shop-product"
-                  >
-                    <div className="shop-product-img">
-                      <img src={product.imageUrl} alt={product.title} />
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="shop-col-empty" />
+              {col.imageUrl && (
+                <div className="shop-product shop-product--collection">
+                  <div className="shop-product-img">
+                    <img src={col.imageUrl} alt={col.title} />
+                  </div>
+                </div>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </section>
 
       <style>{`
         /* ═══════════════════════════════════════════════════
-           HERO — 3 blocks of 125vh, Acne Studios style
+           HERO — 2 blocks of 125vh, Tonet Studios style
         ═══════════════════════════════════════════════════ */
 
         .hero-wrapper {
@@ -133,6 +48,7 @@ export default async function Home() {
           position: relative;
           height: 125vh;
           overflow: hidden;
+          contain: paint;
         }
 
         .hero-block--split { display: flex; }
@@ -143,24 +59,18 @@ export default async function Home() {
           display: block;
           position: relative;
           background-size: cover;
-          background-position: center;
+          background-position: center top;
           text-decoration: none;
-          transition: filter 0.4s ease;
+          transition: filter 0.4s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
           overflow: hidden;
+          will-change: transform;
+          transform: translateZ(0);
         }
 
-        .hero-panel:hover { filter: brightness(0.88); }
-
-        .hero-panel::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: inherit;
-          background-size: cover;
-          background-position: center;
-          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        .hero-panel:hover {
+          filter: brightness(0.88);
+          transform: scale(1.03) translateZ(0);
         }
-        .hero-panel:hover::before { transform: scale(1.03); }
 
         .shop-label {
           position: absolute;
@@ -203,58 +113,58 @@ export default async function Home() {
         }
 
         /* ═══════════════════════════════════════════════════
-           PRODUCT SECTION — 4 columns, Acne Studios style
+           PRODUCT SECTION — 4 columns, Tonet Studios style
         ═══════════════════════════════════════════════════ */
 
         .shop-section {
-          background: #f5f5f5;
-          border-top: 1px solid #e4e4e4;
-          /* Ensure this stacks on top so hero brand text disappears under it */
+          background: #f0f0f0;
           position: relative;
           z-index: 10;
         }
 
-        /* 4 equal columns with left border on section + right border on each col */
         .shop-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          border-left: 1px solid #e4e4e4;
         }
 
-        .shop-col {
-          border-right: 1px solid #e4e4e4;
-          /* min-height so empty cols look intentional */
-          min-height: 80vh;
+        .shop-col {}
+        .shop-col-link {
+          display: block;
+          text-decoration: none;
+          color: inherit;
         }
+        .shop-col-link:hover { opacity: 1; }
+        .shop-product--collection { cursor: pointer; }
 
-        /* ── Sticky category label ── */
         .shop-col-label {
-          position: sticky;
-          top: 80px;
-          padding: 14px 16px;
-          font-size: 0.76rem;
+          position: relative;
+          padding: 12px 16px;
+          font-size: 0.82rem;
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           color: #000;
-          text-align: center;
-          z-index: 4;
+          text-align: left;
           white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
-        /* ── Product card inside a column ── */
+        .shop-now-suffix {
+          display: none;
+        }
+
+        .shop-col:hover .shop-now-suffix {
+          display: inline;
+        }
+
         .shop-product {
           display: block;
           padding: 48px 15% 32px;
           text-decoration: none;
-          border-bottom: 1px solid #e4e4e4;
           transition: background 0.2s ease;
         }
 
         .shop-product:hover {
-          background: #ebebeb;
+          background: #e8e8e8;
         }
 
         /* Image wrapper: portrait 3:4 ratio, float-like appearance */
@@ -280,44 +190,8 @@ export default async function Home() {
 
 
 
-        /* Empty column: leave space */
         .shop-col-empty {
           height: 400px;
-        }
-
-        /* Section separator */
-        .shop-section--collections {
-          border-top: 1px solid #e4e4e4;
-        }
-
-        /* Label overide: NOT sticky in products section */
-        .shop-col-label--static {
-          position: relative;
-          top: 0;
-        }
-
-        /* Product name + price (product section only) */
-        .shop-product--detail .shop-product-meta {
-          margin-top: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          text-align: center;
-        }
-
-        .shop-product-name {
-          font-size: 12.5px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.02em;
-          color: #111;
-          display: block;
-        }
-
-        .shop-product-price {
-          font-size: 12.5px;
-          color: #666;
-          display: block;
         }
 
         /* ═══════════════════════════════════════════════════
@@ -337,21 +211,13 @@ export default async function Home() {
             grid-template-columns: repeat(2, 1fr);
           }
 
-          /* Labels: not sticky on mobile */
           .shop-col-label {
-            position: relative;
-            top: 0;
-            font-size: 0.55rem;
+            font-size: 0.6875rem;
             padding: 10px 12px;
           }
 
           .shop-product {
             padding: 24px 10% 20px;
-          }
-
-          .shop-product-name,
-          .shop-product-price {
-            font-size: 9.5px;
           }
         }
 

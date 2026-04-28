@@ -1,81 +1,81 @@
 "use client";
 
 import { useUI } from "@/context/UIContext";
+import { useCart, CartLine } from "@/context/CartContext";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/context/LocaleContext";
 
 interface CartItem {
   id: string;
+  variantId: string;
   name: string;
   price: number;
   colour: string;
   size: string;
   qty: number;
   image: string;
-  removed?: boolean;
-  wishlisted?: boolean;
 }
 
-const INITIAL_ITEMS: CartItem[] = [
-  {
-    id: "1",
-    name: "MULTIPOCKET SUEDE SHOULDER BAG",
-    price: 1500,
-    colour: "Violet purple",
-    size: "One size",
-    qty: 1,
-    image:
-      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-  },
-];
+function lineToItem(line: CartLine): CartItem {
+  const colourOpt = line.options.find(
+    (o) => o.name.toLowerCase() === "color" || o.name.toLowerCase() === "colour"
+  );
+  const sizeOpt = line.options.find((o) => o.name.toLowerCase() === "size");
+  return {
+    id: line.id,
+    variantId: line.variantId,
+    name: line.name,
+    price: line.price,
+    colour: colourOpt?.value ?? "",
+    size: sizeOpt?.value ?? (line.variantTitle || ""),
+    qty: line.quantity,
+    image: line.image,
+  };
+}
 
 export default function CartDrawer() {
   const { isCartOpen, closeCart } = useUI();
-  const [items, setItems] = useState<CartItem[]>(INITIAL_ITEMS);
-  // undoItem: stores a removed/wishlisted item until undo window closes
+  const { cart, cartCount, addToCart, removeFromCart, updateQty } = useCart();
+  const { t } = useTranslation();
+  const { formatPrice } = useLocale();
+
+  const items: CartItem[] = cart.lines.map(lineToItem);
+
   const [undoItem, setUndoItem] = useState<CartItem | null>(null);
   const [undoType, setUndoType] = useState<"remove" | "wishlist" | null>(null);
 
-  // Prevent background scroll when open
   useEffect(() => {
     document.body.style.overflow = isCartOpen ? "hidden" : "unset";
     return () => { document.body.style.overflow = "unset"; };
   }, [isCartOpen]);
 
-  function changeQty(id: string, delta: number) {
-    setItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item
-        )
-        .filter((item) => item.qty > 0)
-    );
+  async function changeQty(id: string, delta: number) {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+    await updateQty(id, item.qty + delta);
   }
 
-  function removeItem(id: string, type: "remove" | "wishlist") {
+  async function removeItem(id: string, type: "remove" | "wishlist") {
     const item = items.find((i) => i.id === id);
     if (!item) return;
     setUndoItem(item);
     setUndoType(type);
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    // auto-clear undo after 5s
+    await removeFromCart(id);
     setTimeout(() => {
       setUndoItem(null);
       setUndoType(null);
     }, 5000);
   }
 
-  function undoRemove() {
+  async function undoRemove() {
     if (!undoItem) return;
-    setItems((prev) => [...prev, undoItem]);
+    await addToCart(undoItem.variantId, undoItem.qty);
     setUndoItem(null);
     setUndoType(null);
   }
 
-  const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const totalFormatted = total.toLocaleString("en-EU", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const totalFormatted = formatPrice(cart.totalAmount, cart.currencyCode ?? 'EUR');
 
   return (
     <>
@@ -96,13 +96,13 @@ export default function CartDrawer() {
         {/* ── HEADER ── */}
         <div className="cd-header">
           <span className="cd-bag-label">
-            BAG{" "}
+            {t('cart.bag')}{" "}
             <span className="cd-count">
-              {String(items.reduce((s, i) => s + i.qty, 0)).padStart(2, "0")}
+              {String(cartCount).padStart(2, "0")}
             </span>
           </span>
           <button className="cd-close" onClick={closeCart}>
-            X CLOSE
+            {t('cart.close')}
           </button>
         </div>
 
@@ -113,18 +113,19 @@ export default function CartDrawer() {
             <div className="cd-undo-bar">
               <span>
                 {undoType === "wishlist"
-                  ? "MOVED TO WISHLIST"
-                  : "ITEM REMOVED"}
+                  ? t('cart.movedToWishlist')
+                  : t('cart.itemRemoved')}
               </span>
               <button className="cd-undo-btn" onClick={undoRemove}>
-                UNDO
+                {t('cart.undo')}
               </button>
             </div>
           )}
 
           {items.length === 0 && !undoItem && (
-            <div className="cd-empty">Your bag is empty</div>
+            <div className="cd-empty">{t('cart.empty')}</div>
           )}
+
 
           {items.map((item) => (
             <div key={item.id} className="cd-item">
@@ -132,10 +133,7 @@ export default function CartDrawer() {
               <div className="cd-item-header">
                 <span className="cd-item-name">{item.name}</span>
                 <span className="cd-item-price">
-                  {(item.price * item.qty).toLocaleString("en-EU", {
-                    minimumFractionDigits: 2,
-                  })}{" "}
-                  €
+                  {formatPrice(item.price * item.qty, 'EUR')}
                 </span>
               </div>
 
@@ -145,8 +143,8 @@ export default function CartDrawer() {
                   <img src={item.image} alt={item.name} />
                 </div>
                 <div className="cd-item-attrs">
-                  <div className="cd-attr">COLOUR: {item.colour.toUpperCase()}</div>
-                  <div className="cd-attr">{item.size.toUpperCase()}</div>
+                  <div className="cd-attr">{t('cart.colour')}: {item.name.toUpperCase()}</div>
+                  <div className="cd-attr">{(item.size || t('cart.oneSize')).toUpperCase()}</div>
                   <div className="cd-qty-row">
                     <button
                       className="cd-qty-btn"
@@ -173,13 +171,13 @@ export default function CartDrawer() {
                   className="cd-action-btn"
                   onClick={() => removeItem(item.id, "wishlist")}
                 >
-                  + MOVE TO WISHLIST
+                  {t('cart.moveToWishlist')}
                 </button>
                 <button
                   className="cd-action-btn"
                   onClick={() => removeItem(item.id, "remove")}
                 >
-                  X REMOVE
+                  {t('cart.remove')}
                 </button>
               </div>
             </div>
@@ -190,23 +188,31 @@ export default function CartDrawer() {
         <div className="cd-footer">
           <div className="cd-shipping-row">
             <div className="cd-row-top">
-              <span>SHIPPING</span>
-              <span>FREE</span>
+              <span>{t('cart.shipping')}</span>
+              <span>{t('cart.free')}</span>
             </div>
             <p className="cd-row-sub">
-              UPS Access Point Standard — Estimated delivery within 2–4 business days
+              {t('cart.shippingEstimate')}
             </p>
           </div>
 
           <div className="cd-total-row">
             <div className="cd-row-top">
-              <span>TOTAL</span>
-              <span>{totalFormatted} €</span>
+              <span>{t('cart.total')}</span>
+              <span>{totalFormatted}</span>
             </div>
-            <p className="cd-row-sub">Incl. VAT</p>
+            <p className="cd-row-sub">{t('cart.inclVat')}</p>
           </div>
 
-          <button className="cd-checkout-btn">CHECKOUT</button>
+          <button
+            className="cd-checkout-btn"
+            onClick={() => {
+              if (cart.checkoutUrl) window.location.href = cart.checkoutUrl;
+            }}
+            disabled={items.length === 0}
+          >
+            {t('cart.checkout')}
+          </button>
 
           <div className="cd-payment-icons">
             <span className="pi pi-visa">VISA</span>
@@ -242,7 +248,7 @@ export default function CartDrawer() {
           background: rgba(0,0,0,0.35);
           z-index: 1000;
           opacity: 0; pointer-events: none;
-          transition: opacity 0.3s ease;
+          transition: none;
         }
         .cd-backdrop.open { opacity: 1; pointer-events: auto; }
 
@@ -250,18 +256,19 @@ export default function CartDrawer() {
         .cd-drawer {
           position: fixed;
           top: 0; right: 0;
-          /* Acne Studios: ~420px on desktop, 100vw on mobile */
-          width: min(100vw, 420px);
+          /* Tonet Studios: ~400px on desktop, 100vw on mobile */
+          width: min(100vw, 400px);
           height: 100dvh;
-          background: #fff;
+          background: #FAF8F5;
           border-left: 1px solid #d0d0d0;
           z-index: 1001;
           display: flex;
           flex-direction: column;
           transform: translateX(100%);
-          transition: transform 0.38s cubic-bezier(0.25, 1, 0.5, 1);
-          font-family: Arial, Helvetica, sans-serif;
-          font-size: 12px;
+          transition: none;
+          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-size: 11px;
+          font-weight: 400;
           color: #000;
           overflow: hidden;
         }
@@ -276,12 +283,13 @@ export default function CartDrawer() {
           border-bottom: 1px solid #000;
           flex-shrink: 0;
         }
-        .cd-bag-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cd-bag-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.10em; }
         .cd-close {
           background: none; border: none;
           color: #0000cc; font-family: inherit;
-          font-size: 12px; cursor: pointer;
+          font-size: 11px; font-weight: 400; cursor: pointer;
           text-transform: uppercase; padding: 4px 0;
+          letter-spacing: 0.08em;
           /* Larger tap target on mobile */
           min-width: 72px; text-align: right;
         }
@@ -289,6 +297,7 @@ export default function CartDrawer() {
         /* ── BODY ── */
         .cd-body {
           flex: 1;
+          min-height: 0;
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
         }
@@ -333,11 +342,14 @@ export default function CartDrawer() {
           border-bottom: 1px solid #ededed;
         }
         .cd-item-name {
-          font-size: 12px; font-weight: 400;
-          text-transform: uppercase; flex: 1;
-          line-height: 1.4;
+          font-size: 11px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          flex: 1;
+          line-height: 1.3;
         }
-        .cd-item-price { font-size: 12px; white-space: nowrap; }
+        .cd-item-price { font-size: 12px; font-weight: 400; letter-spacing: 0.03em; white-space: nowrap; }
 
         /* Thumbnail + attrs row */
         .cd-item-body { display: flex; }
@@ -369,7 +381,7 @@ export default function CartDrawer() {
           display: flex; height: 44px;
         }
         .cd-qty-btn {
-          flex: 1; background: #fff; border: none;
+          flex: 1; background: #FAF8F5; border: none;
           font-size: 1.1rem; cursor: pointer; color: #000;
           /* Tap target */
           min-width: 44px;
@@ -424,13 +436,18 @@ export default function CartDrawer() {
           display: block;
           width: calc(100% - 32px);
           margin: 0 16px 14px;
-          background: #a0ff00;
+          background: #111;
+          color: #fff;
           border: none;
           /* Tall enough for easy tapping */
           padding: 17px;
-          font-size: 12px; font-family: inherit;
-          text-transform: uppercase; letter-spacing: 1px;
-          cursor: pointer; font-weight: 400;
+          font-size: 11px;
+          font-family: inherit;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.16em;
+          cursor: pointer;
+          border-radius: 0;
           transition: opacity 0.2s;
         }
         .cd-checkout-btn:hover { opacity: 0.85; }

@@ -2,53 +2,52 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Product } from "@/lib/shopify";
+import { CollectionSummary } from "@/lib/shopify";
 import { useUI } from "@/context/UIContext";
+import { useTranslation } from "@/lib/i18n";
+
+interface GridProduct {
+  handle: string;
+  title: string;
+  imageUrl: string;
+}
 
 export default function SearchDrawer() {
   const { isSearchOpen, closeSearch } = useUI();
+  const { t } = useTranslation();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [collections, setCollections] = useState<CollectionSummary[]>([]);
+  const [gridProducts, setGridProducts] = useState<GridProduct[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
         closeSearch();
       }
     };
-
     if (isSearchOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      // Prevent body scroll
       document.body.style.overflow = "hidden";
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
   }, [isSearchOpen, closeSearch]);
 
-  const suggestions = [
-    "Outerwear",
-    "Knitwear",
-    "Bags",
-    "Scarves",
-    "Jeans"
-  ];
-
-  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
-
   useEffect(() => {
-    // Fetch real products for suggestions
-    import("@/lib/shopify").then(({ getProducts }) => {
-      getProducts().then((products) => {
-        const sorted = [...products].sort((a, b) => a.title.localeCompare(b.title));
-        // Take first 6 for the grid limit
-        setSuggestedProducts(sorted.slice(0, 6));
+    if (loaded) return;
+    import("@/lib/shopify").then(({ getCollections }) => {
+      getCollections(6).then((cols) => {
+        setCollections(cols);
+        setGridProducts(
+          cols.slice(0, 6).map(c => ({ handle: c.handle, title: c.title, imageUrl: c.imageUrl }))
+        );
+        setLoaded(true);
       });
     });
-  }, []);
+  }, [loaded]);
 
   return (
     <>
@@ -58,37 +57,49 @@ export default function SearchDrawer() {
         
         {/* HEADER */}
         <div className="sd-header">
-          <span className="sd-title">SEARCH</span>
+          <span className="sd-title">{t('search.title')}</span>
           <button className="sd-close" onClick={closeSearch} aria-label="Close search">
-            X CLOSE
+            {t('search.close')}
           </button>
         </div>
 
         {/* SEARCH INPUT */}
         <div className="sd-input-sec">
-          <svg className="sd-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input type="text" placeholder="SEARCH HERE" className="sd-input" autoFocus={isSearchOpen} />
+          <div className="sd-input-box">
+            <svg className="sd-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder={t('search.placeholder')} className="sd-input" autoFocus={isSearchOpen} />
+          </div>
         </div>
 
         {/* SUGGESTIONS */}
         <div className="sd-section">
-          <div className="sd-section-title">SUGGESTIONS</div>
+          <div className="sd-section-title">{t('search.suggestions')}</div>
           <div className="sd-suggestions-list">
-            {suggestions.map((item) => (
-              <a href="#" key={item} className="sd-suggestion-link">{item}</a>
-            ))}
+            {collections.length > 0
+              ? collections.map((col) => (
+                  <Link
+                    href={`/collection/${col.handle}`}
+                    key={col.handle}
+                    className="sd-suggestion-link"
+                    onClick={closeSearch}
+                  >
+                    {col.title}
+                  </Link>
+                ))
+              : <span className="sd-empty">{t('search.noCollections')}</span>
+            }
           </div>
         </div>
 
         {/* SUGGESTED PRODUCTS */}
         <div className="sd-section sd-section-products">
-          <div className="sd-section-title">SUGGESTED PRODUCTS</div>
+          <div className="sd-section-title">{t('search.suggestedProducts')}</div>
           <div className="sd-products-grid">
-            {suggestedProducts.map((product: Product) => (
-              <Link href={`/product/${product.id}`} onClick={closeSearch} key={product.id} className="sd-product-card">
-                <img src={product.imageUrl} alt={product.title} title={product.title} />
+            {gridProducts.map((p) => (
+              <Link href={`/collection/${p.handle}`} onClick={closeSearch} key={p.handle} className="sd-product-card">
+                {p.imageUrl && <img src={p.imageUrl} alt={p.title} />}
               </Link>
             ))}
           </div>
@@ -100,144 +111,149 @@ export default function SearchDrawer() {
         /* BACKDROP */
         .sd-backdrop {
           position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.4);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s ease;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.32);
+          opacity: 0; pointer-events: none;
+          transition: none;
           z-index: 1000;
         }
-        .sd-backdrop.open {
-          opacity: 1;
-          pointer-events: auto;
-        }
+        .sd-backdrop.open { opacity: 1; pointer-events: auto; }
 
-        /* DRAWER BASE */
+        /* DRAWER — single vertical column */
         .sd-drawer {
           position: fixed;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          width: 440px;
-          max-width: 100%;
-          background: #f7f7f7;
-          color: #000;
+          top: 0; right: 0; bottom: 60px;
+          width: 370px; max-width: 100%;
+          background: #FAF8F5; color: #000;
           z-index: 1001;
           transform: translateX(100%);
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          display: flex;
-          flex-direction: column;
+          transition: none;
+          display: flex; flex-direction: column;
           overflow-y: auto;
-          border-left: 1px solid #111;
+          border-left: 1px solid #d0d0d0;
+          font-family: Arial, Helvetica, sans-serif;
         }
-        .sd-drawer.open {
-          transform: translateX(0);
-        }
+        .sd-drawer.open { transform: translateX(0); }
 
-        /* HEADER */
+        /* HEADER ROW */
         .sd-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px 16px;
+          padding: 5px 16px 20px 10px;
           border-bottom: 1px solid #111;
-          font-family: Arial, sans-serif;
-          font-size: 11px;
-          text-transform: uppercase;
+          flex-shrink: 0;
+          background: #FAF8F5;
         }
         .sd-title {
+          font-size: 11.5px;
           font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #111;
         }
         .sd-close {
-          background: none;
-          border: none;
-          color: #0000ee; /* Blue color matching Acne */
+          background: none; border: none;
           font-family: inherit;
-          font-size: 11px;
-          cursor: pointer;
+          font-size: 11.5px; font-weight: 400;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #0033bb; cursor: pointer;
+          padding: 0;
         }
 
-        /* INPUT */
+        /* INPUT ROW — compact with bordered box */
         .sd-input-sec {
-          display: flex;
-          align-items: center;
-          padding: 12px 16px;
+          padding: 5px 12px;
           border-bottom: 1px solid #111;
-          background: #fff;
+          background: #FAF8F5;
+          flex-shrink: 0;
+          transition: background 0.1s;
         }
-        .sd-search-icon {
-          margin-right: 12px;
-          color: #777;
+        .sd-input-sec:focus-within { background: #ddeeff; }
+        .sd-input-box {
+          display: flex; align-items: center;
+          gap: 7px;
+          border: 1px solid #aaa;
+          padding: 4px 8px;
+          background: inherit;
         }
+        .sd-search-icon { flex-shrink: 0; color: #888; }
         .sd-input {
-          flex: 1;
-          border: none;
-          background: transparent;
-          font-family: Arial, sans-serif;
-          font-size: 12px;
-          text-transform: uppercase;
-          color: #000;
-          outline: none;
+          flex: 1; border: none; background: transparent;
+          font-family: inherit;
+          font-size: 11px; text-transform: uppercase;
+          color: #111; outline: none;
         }
-        .sd-input::placeholder {
-          color: #999;
-        }
+        .sd-input::placeholder { color: #bbb; }
+        .sd-input:focus { caret-color: #0033bb; }
 
         /* SECTIONS */
         .sd-section {
-          padding: 16px;
           border-bottom: 1px solid #111;
-          background: #fff;
+          flex-shrink: 0;
         }
         .sd-section-products {
           border-bottom: none;
-          background: #f7f7f7;
-          flex: 1;
+          flex-shrink: 0;
         }
         .sd-section-title {
-          font-family: Arial, sans-serif;
-          font-size: 11px;
-          text-transform: uppercase;
+          padding: 7px 16px;
+          font-size: 10px;
           font-weight: 500;
-          margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #444;
+          background: #f0f0f0;
+          border-bottom: 1px solid #ddd;
         }
 
-        /* SUGGESTIONS LIST */
+        /* SUGGESTIONS — grey bg, blue links, grey separators */
         .sd-suggestions-list {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+          display: flex; flex-direction: column;
+          background: #f2f2f2;
         }
         .sd-suggestion-link {
-          font-family: Arial, sans-serif;
+          display: block;
+          padding: 9px 16px;
           font-size: 12px;
-          color: #0000ee; /* acne studio blue link */
+          color: #0033bb;
           text-decoration: none;
+          border-bottom: 1px solid #e0e0e0;
         }
-        .sd-suggestion-link:hover {
-          text-decoration: underline;
+        .sd-suggestion-link:last-child { border-bottom: none; }
+        .sd-suggestion-link:hover { background: #eeeeee; }
+        .sd-empty {
+          display: block; padding: 8px 16px;
+          font-size: 11px; color: #999;
+          background: #f7f7f7;
         }
 
-        /* PRODUCTS GRID */
+        /* PRODUCT GRID — uniform cells, contained images */
         .sd-products-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          padding-top: 10px;
+          gap: 1px;
+          background: #ccc;
         }
         .sd-product-card {
-          aspect-ratio: 3/4;
-          background: transparent;
+          aspect-ratio: 1;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
+          background: #FAF8F5;
+          padding: 6px;
         }
+        .sd-product-card:hover { background: #f5f5f5; }
         .sd-product-card img {
-          width: 80%;
-          height: auto;
+          width: 100%; height: 100%;
+          display: block;
           object-fit: contain;
-          mix-blend-mode: multiply; /* to remove white background if any */
+        }
+
+        @media (max-width: 480px) {
+          .sd-drawer { width: 100vw; border-left: none; }
         }
       `}</style>
     </>
