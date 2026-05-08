@@ -172,7 +172,7 @@ export default function Navbar() {
               </Link>
               <div className="subnav-right">
                 {currentCollection && (
-                  <span className="subnav-current">{currentCollection.title}</span>
+                  <span className="subnav-current">{currentCollection?.title}</span>
                 )}
                 <button className="subnav-toggle" onClick={() => setSubnavOpen(!subnavOpen)} aria-label="All collections">
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
