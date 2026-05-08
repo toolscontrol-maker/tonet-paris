@@ -15,8 +15,8 @@ export default function RecommendedCard({ product }: Props) {
   const [showSwatches, setShowSwatches] = useState(false);
 
   const displayImage = hoveredSibling?.imageUrl ?? product.imageUrl;
-  const displayHref = hoveredSibling
-    ? `/product/${hoveredSibling.handle}`
+  const displayHref = product.collectionHandle
+    ? `/collection/${product.collectionHandle}`
     : `/product/${product.handle}`;
 
   // Total colour count = self + siblings
@@ -87,7 +87,7 @@ export default function RecommendedCard({ product }: Props) {
           position: relative;
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: #f5f5f5;
+          background: #ffffff;
           overflow: hidden;
         }
         .rec-img {

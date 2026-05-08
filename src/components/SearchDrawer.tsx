@@ -124,7 +124,7 @@ export default function SearchDrawer() {
           position: fixed;
           top: 0; right: 0; bottom: 60px;
           width: 370px; max-width: 100%;
-          background: #FAF8F5; color: #000;
+          background: #ffffff; color: #000;
           z-index: 1001;
           transform: translateX(100%);
           transition: none;
@@ -143,7 +143,7 @@ export default function SearchDrawer() {
           padding: 5px 16px 20px 10px;
           border-bottom: 1px solid #111;
           flex-shrink: 0;
-          background: #FAF8F5;
+          background: #ffffff;
         }
         .sd-title {
           font-size: 11.5px;
@@ -166,7 +166,7 @@ export default function SearchDrawer() {
         .sd-input-sec {
           padding: 5px 12px;
           border-bottom: 1px solid #111;
-          background: #FAF8F5;
+          background: #ffffff;
           flex-shrink: 0;
           transition: background 0.1s;
         }
@@ -242,7 +242,7 @@ export default function SearchDrawer() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #FAF8F5;
+          background: #ffffff;
           padding: 6px;
         }
         .sd-product-card:hover { background: #f5f5f5; }

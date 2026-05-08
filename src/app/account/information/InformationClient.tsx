@@ -191,7 +191,7 @@ export default function InformationClient() {
           font-weight: 500;
           transition: background 0.2s, color 0.2s;
         }
-        .info-btn:hover { background: #FAF8F5; color: #000; }
+        .info-btn:hover { background: #ffffff; color: #000; }
         .info-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         @media (max-width: 767px) {

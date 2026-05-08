@@ -1,7 +1,16 @@
 @import url('https://fonts.cdnfonts.com/css/hk-grotesk');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+
+@font-face {
+  font-family: 'Twilight New Moon';
+  src: url('/fonts/TwilightNewMoon.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  --background-color: #FAF8F5;
+  --background-color: #ffffff;
   --text-color: #121212;
   --accent-color: #2a2a2a;
   --secondary-text-color: #666666;
@@ -9,7 +18,8 @@
   --error-color: #d32f2f;
 
   /* ── Typography system ─────────────────────────────────── */
-  --font-primary: 'HK Grotesk', 'Inter', -apple-system, Helvetica, Arial, sans-serif;
+  --font-brand: 'Twilight New Moon', serif;
+  --font-primary: 'DM Sans', 'HK Grotesk', 'Inter', -apple-system, Helvetica, Arial, sans-serif;
 
   /* Scale — 5 levels */
   --t-xl:  18px;   /* brand / logo */
@@ -25,9 +35,9 @@
 
   /* Tracking */
   --tk-tight:  0em;      /* body */
-  --tk-base:   0.03em;   /* price, subtitle */
-  --tk-wide:   0.10em;   /* labels, nav, meta */
-  --tk-wider:  0.16em;   /* CTA, structural uppercase */
+  --tk-base:   0.015em;  /* price, subtitle */
+  --tk-wide:   0.05em;   /* labels, nav, meta */
+  --tk-wider:  0.08em;   /* CTA, structural uppercase */
 
   /* Line-height */
   --lh-tight:  1.2;
@@ -57,7 +67,16 @@
   margin: 0;
 }
 
+/* Hide scrollbar globally */
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
+  overflow-x: hidden;
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: var(--font-primary);

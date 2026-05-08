@@ -198,7 +198,7 @@ export default function WelcomeClient() {
           margin-bottom: 12px;
         }
         .wb-btn-primary:hover {
-          background: #FAF8F5;
+          background: #ffffff;
           color: #000;
         }
         .wb-btn-skip {

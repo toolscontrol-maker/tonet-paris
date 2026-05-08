@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { cookies } from "next/headers";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import LocaleSelectorModal from "@/components/LocaleSelectorModal";
+import FindStore from '@/components/FindStore';
 
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
@@ -12,45 +11,54 @@ import { LocaleProvider } from "@/context/LocaleContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/context/AuthContext";
 import CartDrawer from "@/components/CartDrawer";
-import SearchDrawer from "@/components/SearchDrawer";
 import MenuDrawer from "@/components/MenuDrawer";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Tonet Studios",
-  description: "Tonet Studios — Online Store",
+  title: "TONET PARIS",
+  description: "TONET PARIS — Online Store",
+  icons: {
+    icon: '/icon.png',
+  },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let initialLang = 'en';
-  try {
-    const cookieStore = await cookies();
-    const localeCookie = cookieStore.get('site_locale');
-    if (localeCookie?.value) {
-      const parsed = JSON.parse(decodeURIComponent(localeCookie.value));
-      if (parsed.language) initialLang = parsed.language;
-    }
-  } catch { /* cookie not available or invalid */ }
-
   return (
-    <html lang={initialLang} className={inter.className} suppressHydrationWarning>
+    <html lang="en" className={inter.className} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <LocaleProvider initialLanguage={initialLang}>
+        <LocaleProvider>
           <UIProvider>
             <CartProvider>
               <AuthProvider>
               <WishlistProvider>
+                <div style={{
+                  width: '100%',
+                  background: '#000',
+                  borderBottom: 'none',
+                  textAlign: 'center',
+                  padding: '3px 16px',
+                  fontSize: '10px',
+                  fontWeight: 400,
+                  letterSpacing: '0.06em',
+                  color: '#fff',
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 600,
+                }}>
+                  Free shipping to Spain on all orders
+                </div>
                 <Navbar />
                 <CartDrawer />
-                <SearchDrawer />
                 <MenuDrawer />
-                <LocaleSelectorModal />
                 <main>{children}</main>
+                <FindStore />
                 <Footer />
               </WishlistProvider>
               </AuthProvider>

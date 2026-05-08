@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUI } from "@/context/UIContext";
@@ -9,7 +9,7 @@ import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
-  const { openCart, openSearch, openMenu } = useUI();
+  const { openCart, openMenuWithSearch, openMenu } = useUI();
   const { cartCount } = useCart();
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -19,105 +19,149 @@ export default function Navbar() {
 
   const isHome = pathname === "/";
   const isProduct = pathname.startsWith("/product/");
+  const isCollection = pathname.startsWith("/collection/");
+  const hasSubnav = isProduct || isCollection;
 
-  // All pages now start below the header, ensuring it doesn't overlap content.
+  const [collections, setCollections] = useState<{handle: string; title: string}[]>([]);
+  useEffect(() => {
+    if (!hasSubnav) return;
+    const domain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
+    const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_PUBLIC_TOKEN;
+    if (!domain || !token) return;
+    fetch(`https://${domain}/api/2024-10/graphql.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Shopify-Storefront-Access-Token': token },
+      body: JSON.stringify({ query: '{ collections(first: 10) { edges { node { handle title } } } }' }),
+    })
+      .then(r => r.json())
+      .then(d => setCollections(d.data?.collections?.edges?.map((e: any) => ({ handle: e.node.handle, title: e.node.title })) ?? []))
+      .catch(() => {});
+  }, [hasSubnav]);
+
+  const currentCollectionHandle = isCollection ? pathname.split('/collection/')[1]?.split('/')[0] : '';
+  const [subnavOpen, setSubnavOpen] = useState(false);
+  const currentCollection = collections.find(c => c.handle === currentCollectionHandle);
+
+  // Pages with fullbleed gallery (transparent header overlay)
+  const isFullbleed = isProduct || isCollection;
+
+  // Smart header: hide on scroll down, show solid on scroll up
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [scrolledPast, setScrolledPast] = useState(false);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  // Track if scrolled past the first viewport (video hero)
+  const [pastVideo, setPastVideo] = useState(false);
+  const [overDark, setOverDark] = useState(false);
+
+  const handleScroll = useCallback(() => {
+    if (ticking.current) return;
+    ticking.current = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      // Past the header height threshold
+      setScrolledPast(y > 80);
+      // Past the video hero section (~one viewport)
+      setPastVideo(y > window.innerHeight * 0.5);
+      if (window.location.pathname === '/') {
+        // Home: always show header, never hide
+        setHeaderVisible(true);
+      } else if (delta > 4 && y > 80) {
+        // Scrolling down — hide
+        setHeaderVisible(false);
+      } else if (delta < -4) {
+        // Scrolling up — show
+        setHeaderVisible(true);
+      }
+
+      // Check for dark sections
+      const header = document.querySelector('.acne-header');
+      let isDark = false;
+      if (header) {
+        const headerRect = header.getBoundingClientRect();
+        const darkSections = document.querySelectorAll('.dark-section');
+        for (let i = 0; i < darkSections.length; i++) {
+          const rect = darkSections[i].getBoundingClientRect();
+          if (rect.top <= headerRect.bottom && rect.bottom >= headerRect.top) {
+            isDark = true;
+            break;
+          }
+        }
+      }
+      setOverDark(isDark);
+
+      lastScrollY.current = y;
+      ticking.current = false;
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Body padding
   useEffect(() => {
     const body = document.body;
-    if (isProduct) {
-      body.style.paddingTop = "88px";
+    if (isFullbleed || isHome) {
+      body.style.paddingTop = "0px";
     } else {
       body.style.paddingTop = "48px";
     }
+    return () => { body.style.paddingTop = "48px"; };
+  }, [isFullbleed, isHome]);
 
-    // Return to default padding on unmount
-    return () => {
-      body.style.paddingTop = "48px";
-    };
-  }, [isProduct]);
-
-  const solid = true;
+  // Determine header style class
+  // Home: always transparent. Other pages: solid when scrolled up past threshold.
+  const solid = !isHome && scrolledPast && headerVisible;
 
   return (
     <>
-      <header className={`acne-header ${solid ? "solid" : "transparent"}`}>
+      <header className={`acne-header ${solid ? "solid" : "transparent"} ${isHome && !pastVideo ? "home-top" : ""} ${isHome && pastVideo ? "home-dark" : ""} ${!headerVisible ? "header-hidden" : ""} ${overDark ? "over-dark" : ""}`}>
         <div className="acne-header-inner">
-          {/* LEFT: Nav links (desktop) | Hamburger (mobile) */}
+          {/* LEFT: Hamburger + Search */}
           <div className="acne-nav-left">
-            <nav className="acne-nav-links desktop-only">
-              <Link href="/">{t('nav.woman')}</Link>
-              <Link href="/">{t('nav.man')}</Link>
-              <Link href="/">{t('nav.bags')}</Link>
-              <Link href="/">{t('nav.runway')}</Link>
-            </nav>
-            <div className="acne-mobile-left mobile-only">
-              <button className="acne-icon-btn" aria-label="Menu" onClick={openMenu}>
-                <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
-                  <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" strokeWidth="1.5"/>
-                  <line x1="0" y1="6" x2="18" y2="6" stroke="currentColor" strokeWidth="1.5"/>
-                  <line x1="0" y1="11" x2="18" y2="11" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
-              </button>
-              <div className="acne-icon-sep" />
-              <button className="acne-icon-btn" aria-label="Search" onClick={openSearch}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-                </svg>
-              </button>
-              <div className="acne-icon-sep" />
-            </div>
-          </div>
-
-          {!isHome && (
-            <Link href="/" className="acne-logo">
-              <span className="acne-logo-star">★</span>
-              <span className="acne-logo-text">Tonet Studios<sup>®</sup></span>
-            </Link>
-          )}
-
-          {/* RIGHT: SEARCH HELP ACCOUNT BAG (desktop) | ACCOUNT BAG (mobile) */}
-          <div className="acne-nav-right">
-            <button className="acne-text-btn desktop-only" aria-label="Search" onClick={openSearch}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <button className="acne-mob-icon" aria-label="Menu" onClick={openMenu}>
+              <svg width="14" height="10" viewBox="0 0 20 14" fill="none">
+                <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="1.4"/>
+                <line x1="0" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="1.4"/>
+                <line x1="0" y1="13" x2="20" y2="13" stroke="currentColor" strokeWidth="1.4"/>
+              </svg>
+            </button>
+            <button className="acne-mob-icon" aria-label="Search" onClick={openMenuWithSearch}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
-              <span>{t('nav.search')}</span>
             </button>
-            <Link href="#" className="acne-text-btn desktop-only" aria-label="Help">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-              <span>{t('nav.help')}</span>
-            </Link>
-            <Link href={accountHref} className="acne-text-btn desktop-only" aria-label="Account">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span>{accountLabel}</span>
-            </Link>
-            <div className="acne-icon-sep mobile-only" />
-            <Link href={accountHref} className="acne-icon-btn mobile-only" aria-label="Account">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          </div>
+
+          <Link href="/" className="acne-logo">
+            <span className="acne-logo-text">TONET PARIS<sup>®</sup></span>
+          </Link>
+
+          {/* RIGHT: 3 icon buttons — Account, Wishlist, Cart */}
+          <div className="acne-nav-right">
+            <Link href={accountHref} className="acne-right-icon" aria-label="Account">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
             </Link>
-            <div className="acne-icon-sep mobile-only" />
-            <button className="acne-bag-btn" onClick={openCart} aria-label="Open bag">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#a3ff00" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+
+            <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <path d="M16 10a4 4 0 0 1-8 0"/>
               </svg>
-              <span className="bag-count">{String(cartCount).padStart(2, "0")}</span>
             </button>
           </div>
         </div>
 
-        {/* ── SECONDARY STICKY NAV (Product Only) ── */}
-        {isProduct && (
+        {/* ── SECONDARY STICKY NAV – hidden when transparent header is active ── */}
+        {false && isCollection && (
           <div className="acne-subnav">
             <div className="acne-subnav-inner">
               <Link href="/" className="back-link">
@@ -126,15 +170,30 @@ export default function Navbar() {
                 </svg>
                 <span>{t('nav.gallery')}</span>
               </Link>
-              <div className="subnav-links desktop-only">
-                <Link href="#">{t('nav.allCollections')}</Link>
-                <Link href="#">{t('nav.newArrival')}</Link>
-                <Link href="#" className="active">{t('nav.abstracts')}</Link>
-                <Link href="#">{t('nav.portraits')}</Link>
+              <div className="subnav-right">
+                {currentCollection && (
+                  <span className="subnav-current">{currentCollection.title}</span>
+                )}
+                <button className="subnav-toggle" onClick={() => setSubnavOpen(!subnavOpen)} aria-label="All collections">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d={subnavOpen ? "M1 7L5 3L9 7" : "M1 3L5 7L9 3"} />
+                  </svg>
+                </button>
               </div>
-              <div className="subnav-mobile mobile-only">
-                <span>{t('nav.abstracts')}</span>
-              </div>
+              {subnavOpen && (
+                <div className="subnav-dropdown">
+                  {collections.map(c => (
+                    <Link
+                      key={c.handle}
+                      href={`/collection/${c.handle}`}
+                      className={`subnav-drop-item${currentCollectionHandle === c.handle ? ' active' : ''}`}
+                      onClick={() => setSubnavOpen(false)}
+                    >
+                      {c.title}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -143,16 +202,76 @@ export default function Navbar() {
       <style>{`
         .acne-header {
           position: fixed;
-          top: 0;
+          top: 22px;
           left: 0; right: 0;
           z-index: 500;
-          transition: background-color 0.25s ease, border-bottom-color 0.25s ease;
+          transition: transform 0.3s ease, background-color 0.25s ease, border-bottom-color 0.25s ease;
+        }
+        .acne-header.header-hidden {
+          transform: translateY(-100%);
         }
         .acne-header.transparent {
           background: transparent;
+          border-bottom: none;
         }
+        /* Fullbleed pages (collection/product): white icons/text on transparent */
+        .acne-header.transparent .acne-nav-links a,
+        .acne-header.transparent .acne-mob-icon,
+        .acne-header.transparent .acne-right-icon,
+        .acne-header.transparent .acne-logo-text {
+          color: #000;
+        }
+        .acne-header.transparent .acne-icon-sep {
+          background: #ededed;
+        }
+        .acne-header.transparent svg {
+          stroke: #000;
+        }
+
+        /* Home page at top: transparent with WHITE icons/text (over video) */
+        .acne-header.home-top .acne-nav-links a,
+        .acne-header.home-top .acne-mob-icon,
+        .acne-header.home-top .acne-right-icon,
+        .acne-header.home-top .acne-logo-text {
+          color: #fff;
+        }
+        .acne-header.home-top .acne-icon-sep {
+          background: rgba(255,255,255,0.3);
+        }
+        .acne-header.home-top svg {
+          stroke: #fff;
+        }
+
+        /* Home page past video: transparent with BLACK icons/text */
+        .acne-header.home-dark .acne-nav-links a,
+        .acne-header.home-dark .acne-mob-icon,
+        .acne-header.home-dark .acne-right-icon,
+        .acne-header.home-dark .acne-logo-text {
+          color: #000;
+        }
+        .acne-header.home-dark .acne-icon-sep {
+          background: #ededed;
+        }
+        .acne-header.home-dark svg {
+          stroke: #000;
+        }
+
+        /* Over dark section: force white text/icons */
+        .acne-header.over-dark .acne-nav-links a,
+        .acne-header.over-dark .acne-mob-icon,
+        .acne-header.over-dark .acne-right-icon,
+        .acne-header.over-dark .acne-logo-text {
+          color: #fff !important;
+        }
+        .acne-header.over-dark .acne-icon-sep {
+          background: rgba(255,255,255,0.3) !important;
+        }
+        .acne-header.over-dark svg {
+          stroke: #fff !important;
+        }
+
         .acne-header.solid {
-          background: #FAF8F5;
+          background: #ffffff;
           border-bottom: 1px solid #ededed;
         }
 
@@ -173,10 +292,11 @@ export default function Navbar() {
           z-index: 1;
           text-decoration: none;
           display: flex;
-          align-items: center;
+          align-items: baseline;
           gap: 8px;
           color: #000;
           white-space: nowrap;
+          line-height: 1;
         }
         .acne-logo-star {
           font-size: 34px;
@@ -184,11 +304,12 @@ export default function Navbar() {
           color: #000;
         }
         .acne-logo-text {
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
-          font-size: 30px;
-          font-weight: 500;
+          font-family: var(--font-brand);
+          font-size: 37.5px;
+          font-weight: normal;
           letter-spacing: 0.01em;
           color: #000;
+          line-height: 60px;
         }
         .acne-logo-text sup {
           font-size: 9px;
@@ -200,7 +321,7 @@ export default function Navbar() {
         .acne-nav-links { display: flex; align-items: center; gap: 28px; }
         .acne-nav-links a {
           font-size: 11px;
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-family: var(--font-primary);
           font-weight: 500;
           text-transform: uppercase;
           text-decoration: none;
@@ -209,40 +330,30 @@ export default function Navbar() {
           line-height: 1.2;
         }
 
-        .acne-nav-right { flex: 1; display: flex; align-items: stretch; justify-content: flex-end; }
-        .acne-text-btn {
-          display: flex; align-items: center; gap: 5px;
-          font-size: 11px;
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
-          font-weight: 500;
-          text-transform: uppercase;
-          color: #000;
-          text-decoration: none;
-          background: none; border: none; cursor: pointer; padding: 0 12px;
-          height: 100%;
-          letter-spacing: 0.10em;
-        }
-
-        .acne-bag-btn {
-          display: flex; align-items: center; gap: 8px;
-          background: none; border: none; cursor: pointer; color: #000;
-          padding: 0 0 0 12px; height: 100%;
-        }
-        .bag-count { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
-
-        .acne-icon-btn {
+        .acne-nav-right { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+        .acne-right-icon {
           display: flex; align-items: center; justify-content: center;
-          background: none; border: none; cursor: pointer; color: #000;
-          padding: 0 12px; height: 100%;
+          width: 36px; height: 36px;
+          background: none; border: none; border-radius: 0;
+          cursor: pointer; color: #000;
+          text-decoration: none;
+          padding: 0;
+          transition: opacity 0.15s;
         }
+        .acne-right-icon:hover { opacity: 0.6; }
 
-        .acne-icon-sep { width: 1px; height: 100%; background: #ededed; }
-        .acne-mobile-left { display: flex; align-items: stretch; }
+        .acne-mob-icon {
+          display: flex; align-items: center; justify-content: center;
+          width: 40px; height: 48px;
+          background: none; border: none; border-radius: 0;
+          cursor: pointer; color: #000; padding: 0;
+        }
+        .acne-mobile-left { display: flex; align-items: center; gap: 0; }
 
         /* ── SUBNAV ── */
         .acne-subnav {
           height: 40px;
-          background: #FAF8F5;
+          background: #ffffff;
           border-top: 1px solid #ededed;
           border-bottom: 1px solid #ededed;
           display: flex;
@@ -255,6 +366,7 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          position: relative;
         }
         .back-link {
           display: flex;
@@ -266,19 +378,54 @@ export default function Navbar() {
           letter-spacing: 0.08em;
           color: #000;
         }
-        .subnav-links {
+        .subnav-right {
           display: flex;
-          gap: 24px;
+          align-items: center;
+          gap: 8px;
         }
-        .subnav-links a {
+        .subnav-current {
+          font-size: 11px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #000;
+        }
+        .subnav-toggle {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          color: #000;
+        }
+        .subnav-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background: #ffffff;
+          border: 1px solid #ededed;
+          border-top: none;
+          display: flex;
+          flex-direction: column;
+          min-width: 200px;
+          z-index: 600;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .subnav-drop-item {
+          padding: 12px 20px;
           font-size: 11px;
           font-weight: 400;
           text-transform: uppercase;
           letter-spacing: 0.08em;
           color: #768194;
+          text-decoration: none;
+          border-bottom: 1px solid #f0f0f0;
+          transition: background 0.12s, color 0.12s;
         }
-        .subnav-links a.active { color: #000; font-weight: 500; }
-        .subnav-mobile span { font-size: 11px; text-transform: uppercase; font-weight: 500; }
+        .subnav-drop-item:last-child { border-bottom: none; }
+        .subnav-drop-item:hover { background: #f8f8f8; color: #000; }
+        .subnav-drop-item.active { color: #000; font-weight: 500; }
 
         .desktop-only { display: flex !important; }
         .mobile-only  { display: none !important; }
@@ -286,24 +433,39 @@ export default function Navbar() {
         @media (max-width: 767px) {
           .desktop-only { display: none !important; }
           .mobile-only  { display: flex !important; }
-          .acne-header-inner { padding: 0; height: 48px; }
-          .acne-logo {
-            gap: 6px;
-            max-width: calc(100vw - 120px);
-            overflow: hidden;
+          .acne-header-inner {
+            padding: 0 4px;
+            height: 48px;
           }
-          .acne-logo-star {
-            font-size: 26px;
-            flex-shrink: 0;
+          .acne-logo {
+            gap: 0;
+            max-width: calc(100vw - 144px);
+            overflow: visible;
           }
           .acne-logo-text {
-            font-size: 20px;
-            letter-spacing: 0.04em;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 32px;
+            letter-spacing: 0.01em;
             white-space: nowrap;
+            line-height: 48px;
           }
-          .acne-bag-btn { padding: 0 14px; }
+          .acne-mob-icon {
+            width: 28px;
+          }
+          .acne-mob-icon svg {
+            width: 18px;
+            height: auto;
+          }
+          .acne-nav-right {
+            gap: 0;
+          }
+          .acne-right-icon {
+            width: 28px;
+            height: 48px;
+          }
+          .acne-right-icon svg {
+            width: 18px;
+            height: 18px;
+          }
           .acne-subnav-inner { padding: 0 16px; }
         }
       `}</style>

@@ -1,139 +1,237 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUI } from "@/context/UIContext";
-import { useTranslation } from "@/lib/i18n";
-import { useLocale } from "@/context/LocaleContext";
-import { getRegionLabel, getLanguageLabel } from "@/lib/i18n/regions";
+
+interface CollectionNav {
+  handle: string;
+  title: string;
+  tags: string[];
+}
 
 export default function MenuDrawer() {
-  const { isMenuOpen, closeMenu } = useUI();
-  const { t } = useTranslation();
-  const { region, language, openSelector } = useLocale();
+  const { isMenuOpen, closeMenu, menuSearchMode, clearMenuSearchMode } = useUI();
+  const router = useRouter();
   const drawerRef = useRef<HTMLDivElement>(null);
-  const shippingLabel = t('locale.shippingTo', {
-    region: getRegionLabel(region, language).toUpperCase(),
-    language: getLanguageLabel(language, language).toUpperCase(),
-  });
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [collections, setCollections] = useState<CollectionNav[]>([]);
+  const [activeHandle, setActiveHandle] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Close when clicking outside
+  const rightPanelOpen = activeHandle !== null || searchOpen;
+
+  const openSearchPanel = useCallback(() => {
+    setActiveHandle(null);
+    setSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 100);
+  }, []);
+
+  const closeRightPanel = useCallback(() => {
+    setActiveHandle(null);
+    setSearchOpen(false);
+    setSearchQuery('');
+  }, []);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    closeMenu();
+    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
+  const handleSearchTag = (term: string) => {
+    closeMenu();
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  };
+
+  // Fetch collections + their product tags
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
-        closeMenu();
-      }
-    };
+    if (!isMenuOpen || collections.length > 0) return;
+    const domain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
+    const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_PUBLIC_TOKEN;
+    if (!domain || !token) return;
+    fetch(`https://${domain}/api/2024-10/graphql.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Shopify-Storefront-Access-Token': token },
+      body: JSON.stringify({
+        query: `{
+          collections(first: 20) {
+            edges {
+              node {
+                handle
+                title
+                products(first: 30) {
+                  edges { node { tags } }
+                }
+              }
+            }
+          }
+        }`
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        const cols: CollectionNav[] = (d.data?.collections?.edges ?? []).map((e: any) => {
+          const allTags: string[] = [];
+          (e.node.products?.edges ?? []).forEach((pe: any) => {
+            (pe.node.tags ?? []).forEach((t: string) => {
+              if (!allTags.includes(t)) allTags.push(t);
+            });
+          });
+          return { handle: e.node.handle, title: e.node.title, tags: allTags };
+        });
+        setCollections(cols);
+      })
+      .catch(() => {});
+  }, [isMenuOpen, collections.length]);
 
+  // Close on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) closeMenu();
+    };
     if (isMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      // Prevent body scroll
+      document.addEventListener("mousedown", handleClick);
       document.body.style.overflow = "hidden";
     }
-
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClick);
       document.body.style.overflow = "unset";
     };
   }, [isMenuOpen, closeMenu]);
 
+  // Reset panels when closing
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setActiveHandle(null);
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+  }, [isMenuOpen]);
+
+  // Auto-open search panel when triggered from header
+  useEffect(() => {
+    if (isMenuOpen && menuSearchMode) {
+      setActiveHandle(null);
+      setSearchOpen(true);
+      clearMenuSearchMode();
+      setTimeout(() => searchInputRef.current?.focus(), 150);
+    }
+  }, [isMenuOpen, menuSearchMode, clearMenuSearchMode]);
+
+  const activeCol = collections.find(c => c.handle === activeHandle);
+
   return (
     <>
       <div className={`md-backdrop ${isMenuOpen ? "open" : ""}`} aria-hidden="true" />
-      
-      <div className={`md-drawer ${isMenuOpen ? "open" : ""}`} ref={drawerRef} role="dialog" aria-modal="true">
-        
-        {/* HEADER */}
-        <div className="md-header">
-          <Link href="/" className="md-brand" onClick={closeMenu}>{t('menu.brand')}</Link>
-          <button className="md-close" onClick={closeMenu} aria-label="Close menu">
-            {t('menu.close')}
-          </button>
-        </div>
 
-        {/* LIST */}
-        <div className="md-content">
-          
-          <button className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.search')}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-            </svg>
-          </button>
+      <div className={`md-drawer ${isMenuOpen ? "open" : ""} ${rightPanelOpen ? "md-expanded" : ""}`} ref={drawerRef} role="dialog" aria-modal="true">
 
-          <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.woman')}</span>
-            <span className="md-arrow">&gt;</span>
-          </Link>
-          
-          <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.man')}</span>
-            <span className="md-arrow">&gt;</span>
-          </Link>
-          
-          <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.bags')}</span>
-            <span className="md-arrow">&gt;</span>
-          </Link>
-          
-          <Link href="#" className="md-item" onClick={closeMenu}>
-            <span>{t('menu.runway')}</span>
-          </Link>
-
-          <div className="md-spacer"></div>
-
-          <Link href="/wishlist" className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.wishlist')}</span>
-            <span className="flex-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        {/* ── LEFT COLUMN (main nav) ── */}
+        <div className={`md-col-left ${rightPanelOpen ? 'md-col-left-hidden-mobile' : ''}`}>
+          {/* Top bar: search + close */}
+          <div className="md-topbar">
+            <button className="md-topbar-btn" onClick={openSearchPanel} aria-label="Search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
-              2
-            </span>
-          </Link>
-
-          <Link href="/login" className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.account')}</span>
-            <span className="md-arrow">&gt;</span>
-          </Link>
-
-          <Link href="#" className="md-item" onClick={closeMenu}>
-            <span>{t('menu.stores')}</span>
-          </Link>
-
-          <button className="md-item" onClick={() => { closeMenu(); openSelector(); }}>
-            <span>{shippingLabel}</span>
-          </button>
-
-          <div className="md-spacer"></div>
-
-          <Link href="#" className="md-item justify-between" onClick={closeMenu}>
-            <span>{t('menu.help')}</span>
-            <span className="md-arrow">&gt;</span>
-          </Link>
-
-          <div className="md-spacer-small"></div>
-
-          <div className="md-info-block">
-            <strong>{t('menu.liveChat')} <span className="muted">{t('menu.offline')}</span></strong>
-            <p>{t('menu.schedule')}</p>
+            </button>
+            <button className="md-topbar-btn" onClick={closeMenu} aria-label="Close menu">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
           </div>
 
-          <div className="md-info-block border-none">
-            <strong>{t('menu.call')} <span className="muted">{t('menu.offline')}</span></strong>
-            <p>+46 10 888 73 05</p>
-            <p>{t('menu.schedule')}</p>
+          {/* Collections */}
+          <nav className="md-nav">
+            {collections.map(c => (
+              <button
+                key={c.handle}
+                className={`md-nav-item ${activeHandle === c.handle ? 'md-nav-active' : ''}`}
+                onClick={() => { setSearchOpen(false); setActiveHandle(activeHandle === c.handle ? null : c.handle); }}
+              >
+                {c.title}
+              </button>
+            ))}
+          </nav>
+
+          {/* Bottom links */}
+          <div className="md-bottom-links">
+            <Link href="/stores" className="md-bottom-link" onClick={closeMenu}>Tiendas</Link>
+            <Link href="/gift-cards" className="md-bottom-link" onClick={closeMenu}>Tarjetas regalo</Link>
           </div>
 
+          <div className="md-locale">
+            Spain | español
+          </div>
         </div>
 
+        {/* ── RIGHT COLUMN (tags or search) ── */}
+        <div className={`md-col-right ${rightPanelOpen ? 'md-col-right-open' : ''}`}>
+          {/* Search panel */}
+          {searchOpen && (
+            <>
+              <button className="md-back-btn" onClick={closeRightPanel}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              </button>
+              <h3 className="md-sub-title">Buscar</h3>
+              <form className="md-search-form" onSubmit={handleSearchSubmit}>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="md-search-input"
+                  placeholder="Buscar, trajes, abrigos, etc"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+              </form>
+              <p className="md-search-popular-title">Lo más buscado</p>
+              <nav className="md-sub-nav">
+                {['hoodie', 'camiseta', 'pantalón'].map(term => (
+                  <button key={term} className="md-sub-item md-search-tag" onClick={() => handleSearchTag(term)}>
+                    {term}
+                  </button>
+                ))}
+              </nav>
+            </>
+          )}
+          {/* Collection tags panel */}
+          {activeCol && !searchOpen && (
+            <>
+              <button className="md-back-btn" onClick={closeRightPanel}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              </button>
+              <h3 className="md-sub-title">{activeCol.title}</h3>
+              <nav className="md-sub-nav">
+                {activeCol.tags.map(tag => (
+                  <Link
+                    key={tag}
+                    href={`/collection/${activeCol.handle}?tag=${encodeURIComponent(tag)}`}
+                    className="md-sub-item"
+                    onClick={closeMenu}
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </nav>
+            </>
+          )}
+        </div>
       </div>
 
       <style>{`
         .md-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.4);
+          background: rgba(0,0,0,0.35);
           opacity: 0;
           pointer-events: none;
           transition: opacity 0.3s ease;
@@ -149,132 +247,267 @@ export default function MenuDrawer() {
           top: 0;
           left: 0;
           bottom: 0;
-          width: 90vw;
-          max-width: 440px;
-          background: #FAF8F5;
-          color: #000;
+          display: flex;
+          flex-direction: row;
           z-index: 1001;
           transform: translateX(-100%);
           transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          border-right: 1px solid #111;
         }
-        @media(max-width: 440px) {
-          .md-drawer {
-            width: 100vw;
-            border-right: none;
-          }
-        }
-
         .md-drawer.open {
           transform: translateX(0);
         }
 
-        .md-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px 20px;
-          border-bottom: 1px solid #111;
-          font-family: Arial, sans-serif;
-          font-size: 11px;
-          text-transform: uppercase;
-        }
-        
-        .md-brand {
-          font-weight: 500;
-          text-decoration: none;
-          color: #000;
-        }
-
-        .md-close {
-          background: none;
-          border: none;
-          color: #0000ee;
-          font-family: inherit;
-          font-size: 11px;
-          cursor: pointer;
-        }
-
-        .md-content {
+        /* ── Left column ── */
+        .md-col-left {
+          width: 300px;
+          background: #fff;
           display: flex;
           flex-direction: column;
+          overflow-y: auto;
+          border-right: 1px solid #e5e5e5;
+          scrollbar-width: none;
         }
+        .md-col-left::-webkit-scrollbar { display: none; }
 
-        .md-item {
+        .md-topbar {
           display: flex;
           align-items: center;
-          padding: 18px 20px;
-          border-bottom: 1px solid #e4e4e4;
-          font-family: Arial, sans-serif;
-          font-size: 11.5px;
-          color: #000;
-          text-decoration: none;
-          background: #FAF8F5;
-          border-left: none;
-          border-right: none;
-          border-top: none;
-          text-align: left;
+          justify-content: space-between;
+          padding: 20px 24px;
+          border-bottom: 1px solid #e5e5e5;
+        }
+        .md-topbar-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: none !important;
+          border: none !important;
           cursor: pointer;
+          color: #111 !important;
+          transform: none !important;
+          border-radius: 0 !important;
+          padding: 4px !important;
+        }
+
+        .md-nav {
+          display: flex;
+          flex-direction: column;
+          padding: 16px 0;
+          flex: 1;
+        }
+        .md-nav-item {
+          display: block;
           width: 100%;
+          text-align: left;
+          padding: 10px 28px;
+          font-family: var(--font-primary);
+          font-size: 17px;
+          font-weight: 500;
+          color: #111;
+          background: none !important;
+          border: none !important;
+          cursor: pointer;
+          text-decoration: none;
+          line-height: 1.5;
+          letter-spacing: 0 !important;
+          border-radius: 0 !important;
+          transform: none !important;
+          transition: color 0.15s;
+        }
+        .md-nav-item:hover {
+          opacity: 1 !important;
+        }
+        .md-nav-active {
+          font-weight: 700;
+        }
+        .md-nav-item:not(.md-nav-active) {
+          color: #111;
+        }
+        /* When a sub-panel is open, dim non-active items */
+        .md-expanded .md-nav-item:not(.md-nav-active) {
+          color: #999;
         }
 
-        .justify-between {
-          justify-content: space-between;
-        }
-
-        .flex-center {
-          display: flex;
-          align-items: center;
-        }
-
-        .gap-1 {
-          gap: 4px;
-        }
-
-        .md-arrow {
-          font-family: monospace;
-          color: #000;
-        }
-
-        .md-spacer {
-          height: 18px;
-          border-bottom: 1px solid #e4e4e4;
-        }
-
-        .md-spacer-small {
-          height: 8px;
-        }
-
-        .md-info-block {
-          padding: 16px 20px;
-          border-bottom: 1px solid #e4e4e4;
-          font-family: Arial, sans-serif;
-          font-size: 10px;
+        .md-bottom-links {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          padding: 16px 0;
+          border-top: 1px solid #e5e5e5;
+          margin-top: auto;
+        }
+        .md-bottom-link {
+          display: block;
+          padding: 8px 28px;
+          font-family: var(--font-primary);
+          font-size: 16px;
+          font-weight: 400;
+          color: #111;
+          text-decoration: none;
+        }
+        .md-bottom-link:hover {
+          opacity: 0.7 !important;
         }
 
-        .border-none {
-          border-bottom: none;
+        .md-locale {
+          padding: 16px 28px 24px;
+          font-family: var(--font-primary);
+          font-size: 14px;
+          color: #999;
         }
 
-        .md-info-block strong {
+        /* ── Right column (tags) ── */
+        .md-col-right {
+          width: 0;
+          overflow: hidden;
+          background: #fff;
+          transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          scrollbar-width: none;
+        }
+        .md-col-right::-webkit-scrollbar { display: none; }
+        .md-col-right-open {
+          width: 280px;
+          border-right: 1px solid #e5e5e5;
+        }
+
+        /* Search form */
+        .md-search-form {
+          padding: 0 28px 16px;
+        }
+        .md-search-input {
+          width: 100%;
+          padding: 12px 14px;
+          font-family: var(--font-primary);
+          font-size: 15px;
+          color: #111;
+          border: 1px solid #ccc;
+          border-radius: 0;
+          outline: none;
+          background: #fff;
+        }
+        .md-search-input:focus {
+          border-color: #111;
+        }
+        .md-search-input::placeholder {
+          color: #999;
+        }
+        .md-search-popular-title {
+          padding: 8px 28px;
+          font-family: var(--font-primary);
+          font-size: 14px;
           font-weight: 500;
-          font-size: 10.5px;
-        }
-
-        .md-info-block p {
+          color: #111;
+          text-decoration: underline;
+          text-underline-offset: 2px;
           margin: 0;
-          color: #333;
+        }
+        .md-search-tag {
+          display: block;
+          width: 100%;
+          text-align: left;
+          background: none !important;
+          border: none !important;
+          cursor: pointer;
+          font-family: var(--font-primary);
+          font-size: 16px;
+          font-weight: 400;
+          color: #0066cc;
+          padding: 6px 28px;
+          line-height: 1.5;
+          letter-spacing: 0 !important;
+          border-radius: 0 !important;
+          transform: none !important;
+        }
+        .md-search-tag:hover {
+          text-decoration: underline;
+          opacity: 1 !important;
         }
 
-        .muted {
-          color: #888;
-          margin-left: 4px;
+        .md-sub-title {
+          font-family: var(--font-primary);
+          font-size: 17px;
+          font-weight: 600;
+          color: #111;
+          padding: 24px 28px 16px;
+          margin: 0;
+        }
+        .md-sub-nav {
+          display: flex;
+          flex-direction: column;
+        }
+        .md-sub-item {
+          display: block;
+          padding: 8px 28px;
+          font-family: var(--font-primary);
+          font-size: 16px;
+          font-weight: 400;
+          color: #111;
+          text-decoration: none;
+          line-height: 1.5;
+        }
+        .md-sub-item:hover {
+          text-decoration: underline;
+          opacity: 1 !important;
+        }
+
+        /* Back button — only visible on mobile */
+        .md-back-btn {
+          display: none;
+          align-items: center;
+          padding: 20px 28px 8px;
+          background: none !important;
+          border: none !important;
+          cursor: pointer;
+          color: #111 !important;
+          transform: none !important;
+          border-radius: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+          .md-backdrop {
+            display: none;
+          }
+          .md-drawer {
+            width: 100vw;
+            overflow: hidden;
+          }
+
+          /* Left column — swipes out to the left */
+          .md-col-left {
+            width: 100vw;
+            border-right: none;
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            transform: translateX(0);
+            transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .md-col-left-hidden-mobile {
+            transform: translateX(-100%);
+            pointer-events: none;
+          }
+
+          /* Right column — swipes in from the right */
+          .md-col-right {
+            width: 100vw;
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            transform: translateX(100%);
+            overflow-y: auto;
+            border-right: none;
+            transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+          }
+          .md-col-right-open {
+            transform: translateX(0);
+            pointer-events: auto;
+            border-right: none;
+          }
+
+          .md-back-btn {
+            display: flex;
+          }
         }
       `}</style>
     </>

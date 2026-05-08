@@ -1,6 +1,6 @@
 export default function AnnouncementBar() {
-  const text = "Easy returns & exchanges • No extra fees on orders - taxes & duties included • New collection is live now • ";
-  const repeatedText = text.repeat(4);
+  const text = "all units are limited, no restocks • ";
+  const repeatedText = text.repeat(20);
 
   return (
     <div className="announcement-bar">

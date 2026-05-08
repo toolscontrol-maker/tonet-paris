@@ -42,8 +42,8 @@ export default function ContactPage() {
               <div className="contact-option-header">
                 <span className="contact-option-title">Email</span>
               </div>
-              <a href="mailto:contact@tonetstudios.com" className="contact-email">
-                contact@tonetstudios.com
+              <a href="mailto:contact@tonetparis.com" className="contact-email">
+                contact@tonetparis.com
               </a>
             </div>
           </div>

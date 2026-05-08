@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
-import { useLocale } from "@/context/LocaleContext";
-import { getRegionLabel, getLanguageLabel } from "@/lib/i18n/regions";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -13,74 +11,11 @@ export default function Footer() {
     || pathname === "/contact"
     || pathname.startsWith("/account");
   const { t } = useTranslation();
-  const { region, language, openSelector } = useLocale();
-  const shippingLabel = t('locale.shippingTo', {
-    region: getRegionLabel(region, language).toUpperCase(),
-    language: getLanguageLabel(language, language).toUpperCase(),
-  });
 
   return (
     <footer className="footer">
       
-      {!isMinimalPage && (
-        <>
-          <div className="footer-promos">
-            <Link href="#" className="promo-card">
-              <div className="promo-image">
-                <img src="https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Shipping" />
-              </div>
-              <div className="promo-content">
-                <h4>{t('footer.freeShippingTitle')}</h4>
-                <p>{t('footer.freeShippingDesc')}</p>
-              </div>
-            </Link>
-            <Link href="#" className="promo-card">
-              <div className="promo-image">
-                <img src="https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Gallery" />
-              </div>
-              <div className="promo-content">
-                <h4>{t('footer.palaisTitle')}</h4>
-                <p>{t('footer.palaisDesc')}</p>
-              </div>
-            </Link>
-            <Link href="#" className="promo-card">
-              <div className="promo-image">
-                <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Gift Card" />
-              </div>
-              <div className="promo-content">
-                <h4>{t('footer.giftCardTitle')}</h4>
-                <p>{t('footer.giftCardDesc')}</p>
-              </div>
-            </Link>
-            <Link href="#" className="promo-card">
-              <div className="promo-image">
-                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=500" alt="Runway" />
-              </div>
-              <div className="promo-content">
-                <h4>{t('footer.runwayTitle')}</h4>
-                <p>{t('footer.runwayDesc')}</p>
-              </div>
-            </Link>
-            <Link href="#" className="promo-card">
-              <div className="promo-image">
-                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=500" alt="Stores" />
-              </div>
-              <div className="promo-content">
-                <h4>{t('footer.storesTitle')}</h4>
-                <p>{t('footer.storesDesc')}</p>
-              </div>
-            </Link>
-          </div>
 
-          <div className="footer-newsletter">
-            <h3>{t('footer.newsletter')}</h3>
-            <p>{t('footer.newsletterDesc')}</p>
-            <div className="newsletter-input-wrapper">
-              <input type="email" placeholder={t('footer.emailPlaceholder')} />
-            </div>
-          </div>
-        </>
-      )}
 
       <div className="footer-links-container">
         
@@ -92,6 +27,17 @@ export default function Footer() {
             <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.emailLabel')}</Link></li>
+            {!isMinimalPage && (
+              <li className="fnc-wrapper">
+                <div className="footer-newsletter-compact">
+                  <h4 className="fnc-title">Lo último en productos y diseño</h4>
+                  <div className="fnc-form">
+                    <input type="email" placeholder="Ingresa tu correo electrónico" className="fnc-input" />
+                    <button type="submit" className="fnc-submit">Suscribirse</button>
+                  </div>
+                </div>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -136,10 +82,6 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <div className="bottom-shipping mobile-only-block" style={{ marginBottom: "24px" }}>
-          <button className="shipping-link" onClick={openSelector}>{shippingLabel}</button>
-        </div>
-
         <div className="bottom-left">
           <span className="copyright desktop-only">{t('footer.copyright')}</span>
           <Link href="#" className="cookie-link">{t('footer.cookieSettings')}</Link>
@@ -155,34 +97,38 @@ export default function Footer() {
           <Link href="#">WB</Link>
         </div>
         
-        <div className="bottom-right desktop-only-block">
-          <button className="shipping-link" onClick={openSelector}>{shippingLabel}</button>
-        </div>
       </div>
 
       <style>{`
         .footer {
-          background-color: #FAF8F5;
+          background-color: #fff;
           color: #000;
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-family: var(--font-primary);
           font-size: 11px;
           font-weight: 400;
           line-height: 1.6;
           letter-spacing: 0.02em;
-          border-top: 1px solid #ededed;
+          border-top: none;
+          scroll-snap-align: start;
+          min-height: 80vh;
+          min-height: 80dvh;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
         
         .footer a {
-          color: #0000cc;
+          color: #000;
           text-decoration: none;
         }
 
         .footer a:hover {
+          color: #333;
           text-decoration: underline;
         }
 
         .text-muted {
-          color: #888;
+          color: #777;
           font-size: 10px;
           margin-left: 4px;
         }
@@ -191,7 +137,7 @@ export default function Footer() {
         .footer-promos {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          border-bottom: 1px solid #ededed;
+          border-bottom: 1px solid rgba(255,255,255,0.12);
           padding: 2vw 2vw 0 2vw;
           gap: 0;
           width: 100%;
@@ -228,7 +174,7 @@ export default function Footer() {
         }
 
         .promo-content h4 {
-          color: #0000cc;
+          color: #fff;
           font-size: 11px;
           font-weight: 500;
           text-transform: uppercase;
@@ -238,45 +184,57 @@ export default function Footer() {
         }
 
         .promo-content p {
-          color: #555;
+          color: #999;
           font-size: 11px;
           line-height: 1.6;
           margin: 0;
         }
 
-        /* Newsletter */
-        .footer-newsletter {
-          text-align: center;
-          padding: 60px 20px;
-          border-bottom: 1px solid #ededed;
+        /* Newsletter Compact */
+        .footer-newsletter-compact {
+          margin-top: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
-
-        .footer-newsletter h3 {
-          font-size: 12px;
-          font-weight: 400;
-          margin: 0 0 6px 0;
+        .fnc-title {
+          font-size: 11px;
+          font-weight: 500;
           text-transform: uppercase;
+          margin: 0;
+          color: #000;
         }
-
-        .footer-newsletter p {
-          margin: 0 0 24px 0;
-          color: #333;
+        .fnc-form {
+          display: flex;
+          border-bottom: 1px solid #000;
+          padding-bottom: 4px;
         }
-
-        .newsletter-input-wrapper input {
-          width: 100%;
-          max-width: 440px;
-          background-color: #f9f9f9;
-          border: none;
-          padding: 16px 16px;
-          font-size: 12px;
+        .fnc-input {
+          flex: 1;
+          background: transparent !important;
+          border: none !important;
+          padding: 4px 0 !important;
           font-family: inherit;
-          text-transform: uppercase;
+          font-size: 11px;
           outline: none;
+          color: #000 !important;
         }
-
-        .newsletter-input-wrapper input::placeholder {
-          color: #888;
+        .fnc-input::placeholder {
+          color: #666;
+        }
+        .fnc-submit {
+          background: transparent !important;
+          border: none !important;
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: 500;
+          cursor: pointer;
+          padding: 4px 0 4px 12px !important;
+          color: #000 !important;
+          text-transform: uppercase;
+        }
+        .fnc-submit:hover {
+          color: #666 !important;
         }
 
         /* Columns Desktop */
@@ -352,7 +310,9 @@ export default function Footer() {
         }
 
         .copyright {
-          text-transform: uppercase;
+          font-family: var(--font-brand);
+          font-size: 14px;
+          text-transform: none;
           color: #000;
         }
         
@@ -388,9 +348,7 @@ export default function Footer() {
             display: block;
           }
 
-          .footer-newsletter {
-            padding: 40px 20px;
-          }
+
 
           .footer-links-container {
             display: flex;
@@ -460,7 +418,7 @@ export default function Footer() {
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
-            border-bottom: 1px solid #ededed;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
             gap: 0;
           }
 
@@ -472,7 +430,7 @@ export default function Footer() {
             flex: 0 0 72vw; /* About 72% of viewport so you can peek the next one */
             max-width: 72vw;
             scroll-snap-align: start;
-            border-right: 1px solid #ededed;
+            border-right: 1px solid rgba(255,255,255,0.12);
           }
 
           .promo-card:last-child {

@@ -56,7 +56,7 @@ export default function LocaleSelectorModal() {
     <>
       <div className="ls-overlay" onClick={isBlocking ? undefined : closeSelector} />
       <div className="ls-modal" role="dialog" aria-modal="true">
-        <div className="ls-logo">★ Tonet Studios®</div>
+        <div className="ls-logo">★ TONET PARIS®</div>
 
         <h2 className="ls-title">{t('locale.title')}</h2>
 
@@ -108,7 +108,9 @@ export default function LocaleSelectorModal() {
         .ls-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,0.45);
+          background: rgba(255,255,255,0.15);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           z-index: 9998;
         }
         .ls-modal {
@@ -128,8 +130,9 @@ export default function LocaleSelectorModal() {
           box-shadow: 0 8px 40px rgba(0,0,0,0.18);
         }
         .ls-logo {
-          font-size: 22px;
-          font-weight: 600;
+          font-family: var(--font-brand);
+          font-size: 26px;
+          font-weight: normal;
           letter-spacing: 0.01em;
           text-align: center;
           margin-bottom: 32px;

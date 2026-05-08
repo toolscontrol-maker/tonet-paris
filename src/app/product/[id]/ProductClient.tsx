@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useUI } from '@/context/UIContext';
 import { useCart } from '@/context/CartContext';
 import { useTranslation } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 import { Product, ShopifyVariant, RecommendedProduct } from '@/lib/shopify';
-import ProductInfoBlock from '@/components/ProductInfoBlock';
-import ProductInfoDrawer from '@/components/ProductInfoDrawer';
 import { useTranslatedText } from '@/hooks/useTranslatedText';
 import RecommendedCard from '@/components/RecommendedCard';
 import { useWishlist } from '@/context/WishlistContext';
@@ -33,17 +30,18 @@ export default function ProductClient({ product }: Props) {
         .catch(() => {});
     });
   }, [product.handle]);
+
   const images = product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean);
   const [activeImage, setActiveImage] = useState(0);
   const [displayImageUrl, setDisplayImageUrl] = useState<string>(() => images[0] ?? product.imageUrl);
-  const [showMoreDetails, setShowMoreDetails] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant>(
     product.variants[0] ?? { id: '', title: '', availableForSale: true, price: { amount: String(product.price), currencyCode: product.currencyCode }, selectedOptions: [] }
   );
   const [adding, setAdding] = useState(false);
-  const [activeDrawer, setActiveDrawer] = useState<string | null>(null);
+  const [sizeOpen, setSizeOpen] = useState(false);
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
   const { t } = useTranslation();
-  const { formatPrice } = useLocale();
+  useLocale();
   const { toggle, has } = useWishlist();
   const inWishlist = has(product.handle);
   const wishlistItem = {
@@ -59,13 +57,10 @@ export default function ProductClient({ product }: Props) {
       const n = o.name.toLowerCase(); return n === 'color' || n === 'colour';
     })?.value ?? ''
   );
-  const [selectedSize, setSelectedSize] = useState<string>(
-    () => product.variants[0]?.selectedOptions.find(o =>
-      o.name.toLowerCase() === 'size'
-    )?.value ?? ''
-  );
+  const [selectedSize, setSelectedSize] = useState<string>('');
   const { openCart } = useUI();
   const { addToCart } = useCart();
+  const thumbsRef = useRef<HTMLDivElement>(null);
 
   const colorOptionName = useMemo(() => {
     for (const v of product.variants)
@@ -108,15 +103,18 @@ export default function ProductClient({ product }: Props) {
     return result;
   }, [sizeOptionName]);
 
-  const priceFormatted = parseFloat(selectedVariant.price.amount).toLocaleString('es-ES', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const priceNum = parseFloat(selectedVariant.price.amount);
+  const priceFormatted = Number.isInteger(priceNum)
+    ? `€${priceNum}`
+    : `€${priceNum.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const hasMultipleVariants = product.variants.length > 1;
+  const hasSizes = sizeOptions.length > 0;
+  const needsSizeSelection = hasSizes && !selectedSize;
 
   async function handleAddToBag() {
     if (!selectedVariant.id || adding) return;
+    if (needsSizeSelection) { setSizeOpen(true); return; }
     setAdding(true);
     try {
       await addToCart(selectedVariant.id, 1);
@@ -156,14 +154,14 @@ export default function ProductClient({ product }: Props) {
       );
       if (fallback) {
         setSelectedVariant(fallback);
-        const s = sizeOptionName ? fallback.selectedOptions.find(o => o.name === sizeOptionName)?.value ?? '' : '';
-        setSelectedSize(s);
+        setSelectedSize('');
       }
     }
   }
 
-  function handleSizeChange(sizeValue: string) {
+  function handleSizeSelect(sizeValue: string) {
     setSelectedSize(sizeValue);
+    setSizeOpen(false);
     const next = findVariant(selectedColor, sizeValue);
     if (next) setSelectedVariant(next);
   }
@@ -173,434 +171,609 @@ export default function ProductClient({ product }: Props) {
     return v?.availableForSale ?? false;
   }
 
-  const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+  function toggleAccordion(key: string) {
+    setExpandedAccordion(prev => prev === key ? null : key);
+  }
+
+  function scrollThumbs(dir: number) {
+    if (thumbsRef.current) {
+      thumbsRef.current.scrollBy({ left: dir * 120, behavior: 'smooth' });
+    }
+  }
+
+  const descriptionFirstLine = product.description?.split(/[.\n]/)[0]?.trim() || '';
 
   return (
     <>
-      <div className="pdp-layout">
-        <div className="pdp-gallery">
-          <img
-            key={displayImageUrl}
-            src={displayImageUrl}
-            alt={product.title}
-            className="pdp-main-img"
-          />
+      <div className="ss-pdp-layout">
+        {/* ── GALLERY (vertical scroll, each image = 100vh) ── */}
+        <div className="ss-gallery">
+          {images.map((img, i) => (
+            <div key={i} className="ss-gallery-slide">
+              <img
+                src={img}
+                alt={`${product.title} – ${i + 1}`}
+                className="ss-gallery-img"
+              />
+            </div>
+          ))}
+          {/* Description block after the images */}
+          {product.description && (
+            <div className="ss-gallery-desc">
+              <TranslatedDesc text={product.description} className="ss-gallery-desc-text" />
+            </div>
+          )}
         </div>
 
-        <div className="pdp-info">
-          <div className="pdp-sticky-block">
-            <div className="pdp-title-row">
-              <h1 className="pdp-title">{product.title}</h1>
-              <span className="pdp-price">{priceFormatted} {selectedVariant.price.currencyCode}</span>
+        {/* ── INFO PANEL ── */}
+        <div className="ss-info">
+          {/* Title + Price */}
+          <div className="ss-header">
+            <h1 className="ss-title">{product.title}</h1>
+            <span className="ss-price">{priceFormatted}</span>
+          </div>
+
+          {/* Subtitle / description line */}
+          {descriptionFirstLine && (
+            <p className="ss-subtitle">{descriptionFirstLine}</p>
+          )}
+
+          {/* Image thumbnails */}
+          <div className="ss-thumbs-wrap">
+            <div className="ss-thumbs" ref={thumbsRef}>
+              {colorOptions.length > 0
+                ? colorOptions.map((col) => (
+                    <button
+                      key={col.value}
+                      className={`ss-thumb ${selectedColor === col.value ? 'active' : ''}`}
+                      onClick={() => handleColorChange(col.value)}
+                      title={col.value}
+                    >
+                      <img src={col.imageUrl || product.imageUrl} alt={col.value} />
+                    </button>
+                  ))
+                : images.map((img, i) => (
+                    <button
+                      key={i}
+                      className={`ss-thumb ${activeImage === i ? 'active' : ''}`}
+                      onClick={() => { setActiveImage(i); setDisplayImageUrl(img); }}
+                    >
+                      <img src={img} alt={`View ${i + 1}`} />
+                    </button>
+                  ))
+              }
             </div>
-            {(selectedColor || selectedVariant.title) && (
-              <p className="pdp-colour-label">
-                {selectedColor || selectedVariant.title}
-              </p>
+            {images.length > 5 && (
+              <button className="ss-thumbs-arrow" onClick={() => scrollThumbs(1)} aria-label="More images">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
             )}
           </div>
 
-          <div className="pdp-swatches">
-            {colorOptions.length > 0
-              ? colorOptions.map((col) => (
-                  <button
-                    key={col.value}
-                    className={`swatch-thumb ${selectedColor === col.value ? 'active' : ''}`}
-                    onClick={() => handleColorChange(col.value)}
-                    title={col.value}
-                  >
-                    <img src={col.imageUrl || product.imageUrl} alt={col.value} />
-                  </button>
-                ))
-              : images.map((img, i) => (
-                  <button
-                    key={i}
-                    className={`swatch-thumb ${activeImage === i ? 'active' : ''}`}
-                    onClick={() => { setActiveImage(i); setDisplayImageUrl(img); }}
-                  >
-                    <img src={img} alt={`View ${i + 1}`} />
-                  </button>
-                ))
-            }
-          </div>
-
-          {sizeOptions.length > 0 ? (
-            <>
-              <div className="pdp-sizes">
-                {STANDARD_SIZES.map((size) => {
-                  const available = isSizeAvailable(size);
-                  return (
-                    <button
-                      key={size}
-                      className={`pdp-size-btn${selectedSize === size ? ' active' : ''}${!available ? ' sold-out' : ''}`}
-                      onClick={() => available ? handleSizeChange(size) : undefined}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="pdp-out-of-stock">Out of stock? <a href="mailto:contact@tonetstudios.com" className="pdp-notify-link">Get notified</a></p>
-            </>
-          ) : hasMultipleVariants && (
-            <div className="pdp-variants">
-              {product.variants.map((v) => (
-                <button
-                  key={v.id}
-                  className={`pdp-variant-btn ${selectedVariant.id === v.id ? 'active' : ''} ${!v.availableForSale ? 'sold-out' : ''}`}
-                  onClick={() => setSelectedVariant(v)}
-                  disabled={!v.availableForSale}
-                >
-                  {v.title}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="pdp-atb-row">
+          {/* Action row: bookmark + select size / add to bag */}
+          <div className="ss-actions">
             <button
-              className="pdp-atb-btn"
+              className="ss-bookmark"
+              aria-label="Add to wishlist"
+              onClick={() => toggle(wishlistItem)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={inWishlist ? '#111' : 'none'} stroke="#111" strokeWidth="1.5">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+            <button
+              className="ss-cta-btn"
               onClick={handleAddToBag}
               disabled={adding || !selectedVariant.availableForSale}
             >
-              {adding ? t('common.adding') : selectedVariant.availableForSale ? t('common.addToBag') : t('common.soldOut')}
-            </button>
-            <button className="pdp-wish-btn" aria-label="Add to wishlist" onClick={() => toggle(wishlistItem)}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={inWishlist ? '#111' : 'none'} stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
+              {adding
+                ? t('common.adding')
+                : !selectedVariant.availableForSale
+                ? t('common.soldOut')
+                : needsSizeSelection
+                ? t('common.selectSize')
+                : t('common.addToBag')}
             </button>
           </div>
 
-          <ProductInfoBlock
-            title={t('common.freeDelivery')}
-            badge={t('common.enterPostalCode')}
-            subtitle={t('common.deliveryEstimate')}
-            onClick={() => setActiveDrawer('delivery')}
-          />
-          <ProductInfoBlock
-            title={t('common.giftWrapping')}
-            subtitle={t('common.giftWrappingDesc')}
-            borderBottom
-            onClick={() => setActiveDrawer('gift')}
-          />
+          {/* Size selector dropdown */}
+          {sizeOpen && hasSizes && (
+            <div className="ss-size-dropdown">
+              {sizeOptions.map((size) => {
+                const available = isSizeAvailable(size);
+                return (
+                  <button
+                    key={size}
+                    className={`ss-size-option${selectedSize === size ? ' active' : ''}${!available ? ' unavailable' : ''}`}
+                    onClick={() => available && handleSizeSelect(size)}
+                    disabled={!available}
+                  >
+                    <span>{size}</span>
+                    {!available && <span className="ss-size-oos">—</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-          <ProductInfoDrawer
-            isOpen={activeDrawer === 'delivery'}
-            onClose={() => setActiveDrawer(null)}
-            title={t('common.drawerDeliveryTitle')}
-          >
-            {product.description && (
-              <TranslatedDesc text={product.description} />
-            )}
-            <p><strong>{t('common.drawerDeliveryLabel')}</strong><br />{t('common.drawerDeliveryBody')}</p>
-            <p style={{ marginTop: '16px' }}><strong>{t('common.drawerReturnsLabel')}</strong><br />{t('common.drawerReturnsBody')}</p>
-          </ProductInfoDrawer>
-
-          <ProductInfoDrawer
-            isOpen={activeDrawer === 'gift'}
-            onClose={() => setActiveDrawer(null)}
-            title={t('common.drawerGiftTitle')}
-            heroImage="/logotipo.png"
-          >
-            <p>{t('common.drawerGiftBody')}</p>
-            <p style={{ marginTop: '14px' }}>{t('common.drawerGiftNote1')}</p>
-            <p style={{ marginTop: '14px' }}>{t('common.drawerGiftNote2')}</p>
-          </ProductInfoDrawer>
-
-          <TranslatedDesc text={product.description} className="pdp-desc" />
-
-          <div className="pdp-need-help">
-            <Link href="/contact">{t('common.needHelp')}</Link>
+          {/* Delivery info */}
+          <div className="ss-delivery">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{t('common.freeDeliveryShort')}</span>
           </div>
+
+          {/* Accordion sections */}
+          <div className="ss-accordions">
+            <div className="ss-accordion-item">
+              <button className="ss-accordion-header" onClick={() => toggleAccordion('sizefit')}>
+                <span>{t('common.sizeAndFit')}</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'sizefit' ? ' open' : ''}`}>+</span>
+              </button>
+              {expandedAccordion === 'sizefit' && (
+                <div className="ss-accordion-body">
+                  {hasSizes && (
+                    <div className="ss-inline-sizes">
+                      {sizeOptions.map((size) => {
+                        const available = isSizeAvailable(size);
+                        return (
+                          <button
+                            key={size}
+                            className={`ss-inline-size${selectedSize === size ? ' active' : ''}${!available ? ' sold-out' : ''}`}
+                            onClick={() => available && handleSizeSelect(size)}
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <p className="ss-accordion-text">{t('common.deliveryEstimate')}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="ss-accordion-item">
+              <button className="ss-accordion-header" onClick={() => toggleAccordion('details')}>
+                <span>{t('common.detailsAndCare')}</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'details' ? ' open' : ''}`}>+</span>
+              </button>
+              {expandedAccordion === 'details' && (
+                <div className="ss-accordion-body">
+                  <TranslatedDesc text={product.description} className="ss-accordion-text" />
+                </div>
+              )}
+            </div>
+
+            <div className="ss-accordion-item">
+              <button className="ss-accordion-header" onClick={() => toggleAccordion('delivery')}>
+                <span>{t('common.deliveryAndReturns')}</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'delivery' ? ' open' : ''}`}>+</span>
+              </button>
+              {expandedAccordion === 'delivery' && (
+                <div className="ss-accordion-body">
+                  <p className="ss-accordion-text">
+                    <strong>{t('common.drawerDeliveryLabel')}</strong><br />
+                    {t('common.drawerDeliveryBody')}
+                  </p>
+                  <p className="ss-accordion-text" style={{ marginTop: 12 }}>
+                    <strong>{t('common.drawerReturnsLabel')}</strong><br />
+                    {t('common.drawerReturnsBody')}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* ── RECOMMENDED SECTION ── */}
-      {recommended.length > 0 && (
-        <section className="rec-section">
-          <p className="rec-label">{t('common.recommended')}</p>
-          <div className="rec-grid">
-            {recommended.map((p) => (
-              <RecommendedCard key={p.handle} product={p} />
-            ))}
-          </div>
-        </section>
-      )}
 
-      <div className="pdp-mobile-sticky">
+
+      {/* ── MOBILE STICKY BAR ── */}
+      <div className="ss-mobile-sticky">
         <button
-          className="pdp-atb-btn"
+          className="ss-mobile-bookmark"
+          aria-label="Add to wishlist"
+          onClick={() => toggle(wishlistItem)}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={inWishlist ? '#111' : 'none'} stroke="#111" strokeWidth="1.5">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+        <button
+          className="ss-mobile-cta"
           onClick={handleAddToBag}
           disabled={adding || !selectedVariant.availableForSale}
         >
-          {adding ? t('common.adding') : selectedVariant.availableForSale ? t('common.addToBag') : t('common.soldOut')}
-        </button>
-        <button className="pdp-wish-btn" aria-label="Add to wishlist" onClick={() => toggle(wishlistItem)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill={inWishlist ? '#111' : 'none'} stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
+          {adding
+            ? t('common.adding')
+            : !selectedVariant.availableForSale
+            ? t('common.soldOut')
+            : needsSizeSelection
+            ? t('common.selectSize')
+            : t('common.addToBag')}
         </button>
       </div>
 
       <style>{`
-        .pdp-layout {
-          display: grid;
-          grid-template-columns: 1fr;
+        /* ══════════════════════════════════════
+           SUITSUPPLY-STYLE PRODUCT PAGE
+        ══════════════════════════════════════ */
+
+        .ss-pdp-layout {
+          display: flex;
+          flex-direction: column;
           font-family: 'HK Grotesk', 'Inter', sans-serif;
-          font-size: 11px;
-          font-weight: 400;
-          color: #000;
+          color: #111;
         }
 
-        .pdp-main-img {
+        /* ── GALLERY ── */
+        .ss-gallery {
+          position: relative;
+          background: #e8e4df;
+        }
+        .ss-gallery-slide {
           width: 100%;
-          height: 80vw;
+          height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          background: #e8e4df;
+        }
+        .ss-gallery-img {
+          width: 100%;
+          height: 100%;
           object-fit: cover;
           display: block;
         }
-
-        .pdp-info {
-          padding: 24px 20px 120px 20px;
+        .ss-gallery-desc {
+          padding: 40px 24px 60px;
+          background: #fff;
+        }
+        .ss-gallery-desc-text {
+          font-size: 14px;
+          line-height: 1.7;
+          color: #444;
+          margin: 0;
+          max-width: 480px;
         }
 
-        .pdp-title-row {
+        /* ── INFO PANEL ── */
+        .ss-info {
+          padding: 24px 20px 140px 20px;
+        }
+
+        /* Header: title + price */
+        .ss-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          gap: 20px;
           margin-bottom: 6px;
-          gap: 16px;
         }
-        .pdp-title {
-          font-size: 14px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.07em;
-          line-height: 1.2;
+        .ss-title {
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 1.3;
           margin: 0;
-          flex: 1;
+          letter-spacing: 0.01em;
         }
-        .pdp-price {
+        .ss-price {
+          font-size: 16px;
+          font-weight: 600;
+          white-space: nowrap;
+          letter-spacing: 0.01em;
+        }
+
+        /* Subtitle */
+        .ss-subtitle {
           font-size: 13px;
           font-weight: 400;
-          letter-spacing: 0.03em;
-          white-space: nowrap;
+          color: #666;
+          margin: 0 0 20px 0;
+          line-height: 1.5;
         }
-        .pdp-colour-label { margin: 5px 0 14px 0; font-size: 11px; font-weight: 400; color: #555; text-transform: uppercase; letter-spacing: 0.10em; }
 
-        .pdp-swatches {
+        /* Thumbnails */
+        .ss-thumbs-wrap {
+          position: relative;
+          margin-bottom: 20px;
+        }
+        .ss-thumbs {
           display: flex;
           gap: 0;
-          margin-bottom: 16px;
-          flex-wrap: wrap;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
           border: 1px solid #e0e0e0;
           width: fit-content;
+          max-width: 100%;
         }
-        .swatch-thumb {
-          width: 53px;
-          height: 84px;
+        .ss-thumbs::-webkit-scrollbar { display: none; }
+        .ss-thumb {
+          width: 56px;
+          height: 72px;
           padding: 0;
-          border: 2px solid transparent;
+          border: none;
           border-right: 1px solid #e0e0e0;
           border-radius: 0;
           cursor: pointer;
-          background: #f5f5f5;
-          transition: border-color 0.15s;
+          background: #fff;
           flex-shrink: 0;
           box-sizing: border-box;
           overflow: hidden;
+          transition: opacity 0.15s;
         }
-        .swatch-thumb:last-child { border-right: none; }
-        .swatch-thumb.active { border: 2px solid #99bbff; }
-        .swatch-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; background: #f5f5f5; border-radius: 0; }
-
-        /* SIZE SELECTOR — Tonet Studios style */
-        .pdp-sizes {
+        .ss-thumb:last-child { border-right: none; }
+        .ss-thumb.active { box-shadow: inset 0 0 0 2px #111; }
+        .ss-thumb:hover:not(.active) { opacity: 0.7; }
+        .ss-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          display: block;
+        }
+        .ss-thumbs-arrow {
+          position: absolute;
+          right: -4px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 28px;
+          height: 28px;
+          background: #fff;
+          border: 1px solid #ddd;
+          border-radius: 50%;
           display: flex;
-          flex-wrap: wrap;
-          margin: 12px 0 20px;
-          border: 1px solid #e0e0e0;
-        }
-        .pdp-size-btn {
-          flex: 1 0 auto;
-          padding: 12px 16px;
-          font-size: 11px;
-          font-family: inherit;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          border: none;
-          border-right: 1px solid #e0e0e0;
-          border-radius: 0;
-          background: #FAF8F5;
+          align-items: center;
+          justify-content: center;
           cursor: pointer;
-          color: #111;
-          min-width: 44px;
-          text-align: center;
-          transition: background 0.12s, box-shadow 0.12s;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+          z-index: 2;
         }
-        .pdp-size-btn:last-child { border-right: none; }
-        .pdp-size-btn:hover:not(.sold-out):not(.active) { background: #f5f5f5; }
-        .pdp-size-btn.active { background: #99bbff; color: #111; box-shadow: inset 0 0 0 2px #6699ee; border-radius: 0; }
-        .pdp-size-btn.sold-out { color: #ccc; cursor: not-allowed; text-decoration: line-through; }
+        .ss-thumbs-arrow:hover { background: #f5f5f5; }
 
-        .pdp-out-of-stock {
-          font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 0.06em;
-          color: #666;
-          margin: -8px 0 18px;
-        }
-        .pdp-notify-link { color: #0000cc; text-decoration: none; }
-        .pdp-notify-link:hover { text-decoration: underline; }
-
-        /* Fallback variant buttons */
-        .pdp-variants {
+        /* Action row */
+        .ss-actions {
           display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin: 12px 0 20px;
+          gap: 0;
+          margin-bottom: 16px;
+          height: 48px;
         }
-        .pdp-variant-btn {
-          padding: 8px 14px;
-          font-size: 11px;
-          font-family: inherit;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          border: 1px solid #ccc;
-          background: #FAF8F5;
-          cursor: pointer;
-          transition: border-color 0.2s, background 0.2s;
-        }
-        .pdp-variant-btn.active { border-color: #000; background: #000; color: #fff; }
-        .pdp-variant-btn.sold-out { opacity: 0.4; cursor: not-allowed; }
-        .pdp-variant-btn:hover:not(.sold-out):not(.active) { border-color: #000; }
-
-        .pdp-atb-row {
-          display: flex;
-          height: 50px;
-          margin-bottom: 36px;
-          border: 1px solid #111;
-        }
-        .pdp-atb-btn {
-          flex: 1;
-          background: #111;
-          color: #fff;
-          border: none;
-          border-radius: 0;
-          padding: 0 24px;
-          font-size: 11px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          line-height: 1.2;
-          cursor: pointer;
-          font-family: inherit;
-          transition: opacity 0.2s;
-        }
-        .pdp-atb-btn:hover { opacity: 0.85; }
-        .pdp-wish-btn {
-          width: 50px;
-          align-self: stretch;
-          border: none;
-          border-left: 1px solid #111;
-          border-radius: 0;
-          background: #FAF8F5;
+        .ss-bookmark {
+          width: 48px;
+          height: 48px;
+          border: 1px solid #d0d0d0;
+          background: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           flex-shrink: 0;
-          padding: 0;
+          border-radius: 0;
+          transition: background 0.15s;
+        }
+        .ss-bookmark:hover { background: #f5f5f5; }
+        .ss-cta-btn {
+          flex: 1;
+          height: 48px;
+          background: #111;
+          color: #fff;
+          border: 1px solid #111;
+          border-left: none;
+          border-radius: 0;
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .ss-cta-btn:hover:not(:disabled) { background: #333; }
+        .ss-cta-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Size dropdown */
+        .ss-size-dropdown {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+          gap: 0;
+          border: 1px solid #e0e0e0;
+          margin-bottom: 16px;
+          background: #fff;
+        }
+        .ss-size-option {
+          padding: 12px 8px;
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 400;
+          text-align: center;
+          border: none;
+          border-right: 1px solid #e0e0e0;
+          border-bottom: 1px solid #e0e0e0;
+          background: #fff;
+          cursor: pointer;
+          color: #111;
+          transition: background 0.12s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+        .ss-size-option:hover:not(.unavailable):not(.active) { background: #f5f5f5; }
+        .ss-size-option.active { background: #111; color: #fff; }
+        .ss-size-option.unavailable { color: #ccc; cursor: not-allowed; }
+        .ss-size-oos { color: #ccc; }
+
+        /* Delivery line */
+        .ss-delivery {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 14px 0;
+          font-size: 12px;
+          font-weight: 400;
+          color: #444;
+          border-bottom: 1px solid #e8e8e8;
+          margin-bottom: 0;
         }
 
-
-        .pdp-desc { margin: 20px 0 16px 0; font-size: 12px; font-weight: 400; line-height: 1.75; letter-spacing: 0.01em; }
-        .pdp-details { list-style: none; padding: 0; margin: 0 0 8px 0; font-size: 11px; font-weight: 400; line-height: 1.9; letter-spacing: 0.02em; }
-        .pdp-details .faded { color: #bbb; }
-        .pdp-show-more {
-          background: none; border: none; color: #0000cc;
-          font-size: 11px; font-weight: 400; padding: 0; cursor: pointer; font-family: inherit; margin-bottom: 24px; letter-spacing: 0.04em;
+        /* Accordion sections */
+        .ss-accordions {
+          margin-top: 0;
         }
-        .pdp-need-help a { color: #0000cc; font-size: 11px; font-weight: 400; letter-spacing: 0.04em; text-decoration: none; }
-        .pdp-need-help a:hover { text-decoration: underline; }
+        .ss-accordion-item {
+          border-bottom: 1px solid #e8e8e8;
+        }
+        .ss-accordion-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 0;
+          background: none;
+          border: none;
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 400;
+          color: #111;
+          cursor: pointer;
+          text-align: left;
+          letter-spacing: 0.01em;
+        }
+        .ss-accordion-header:hover { opacity: 0.7; }
+        .ss-accordion-icon {
+          font-size: 18px;
+          font-weight: 300;
+          color: #111;
+          transition: transform 0.2s ease;
+          line-height: 1;
+        }
+        .ss-accordion-icon.open { transform: rotate(45deg); }
+        .ss-accordion-body {
+          padding: 0 0 16px 0;
+        }
+        .ss-accordion-text {
+          font-size: 13px;
+          font-weight: 400;
+          line-height: 1.7;
+          color: #555;
+          margin: 0;
+        }
 
-        .pdp-mobile-sticky {
+        /* Inline size buttons inside accordion */
+        .ss-inline-sizes {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 12px;
+        }
+        .ss-inline-size {
+          padding: 8px 14px;
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: 500;
+          border: 1px solid #d0d0d0;
+          background: #fff;
+          cursor: pointer;
+          color: #111;
+          border-radius: 0;
+          transition: all 0.12s;
+        }
+        .ss-inline-size:hover:not(.sold-out):not(.active) { border-color: #111; }
+        .ss-inline-size.active { background: #111; color: #fff; border-color: #111; }
+        .ss-inline-size.sold-out { color: #ccc; border-color: #eee; cursor: not-allowed; text-decoration: line-through; }
+
+        /* ── MOBILE STICKY BAR ── */
+        .ss-mobile-sticky {
           position: fixed;
           bottom: 0; left: 0; right: 0;
           display: flex;
-          padding: 0;
-          padding-bottom: env(safe-area-inset-bottom, 0px);
-          background: #FAF8F5;
-          border-top: 1px solid #ededed;
-          z-index: 200;
-          gap: 0;
           height: 56px;
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+          background: #fff;
+          border-top: 1px solid #e0e0e0;
+          z-index: 200;
         }
-        .pdp-mobile-sticky .pdp-atb-btn {
-          flex: 1;
-          height: 100%;
-          border: none;
-          border-radius: 0;
-        }
-        .pdp-mobile-sticky .pdp-wish-btn {
-          border: none;
-          border-left: 1px solid #ededed;
-          height: 100%;
+        .ss-mobile-bookmark {
           width: 56px;
+          height: 56px;
+          border: none;
+          border-right: 1px solid #e0e0e0;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          flex-shrink: 0;
         }
+        .ss-mobile-cta {
+          flex: 1;
+          height: 56px;
+          background: #111;
+          color: #fff;
+          border: none;
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          cursor: pointer;
+        }
+        .ss-mobile-cta:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* ══════════════════════════════════════
+           DESKTOP: side-by-side layout
+           Gallery = 4/6 (66.66%), Info = 2/6
+        ══════════════════════════════════════ */
         @media (min-width: 768px) {
-          .pdp-breadcrumb {
-            padding-top: 70px;
-            padding-left: 0;
+          .ss-pdp-layout {
+            flex-direction: row;
+            min-height: 100vh;
           }
 
-          .pdp-layout {
-            grid-template-columns: 1fr 1fr;
-            align-items: start;
+          /* Gallery: 4/6 width, scrollable vertically */
+          .ss-gallery {
+            width: 66.666%;
+            flex-shrink: 0;
           }
-
-          .pdp-main-img {
+          .ss-gallery-slide {
+            height: 100vh;
+          }
+          .ss-gallery-img {
             width: 100%;
-            height: calc(100vh - 60px);
+            height: 100%;
             object-fit: cover;
-            position: sticky;
-            top: 60px;
+          }
+          .ss-gallery-desc {
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            padding: 60px 48px;
           }
 
-          .pdp-info {
-            position: sticky;
-            top: 120px;
-            padding: 0 48px 80px 48px;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-            scrollbar-width: none;
-          }
-          .pdp-info::-webkit-scrollbar { display: none; }
-
-          .pdp-sticky-block {
+          /* Info panel: sticky on the right, full viewport height */
+          .ss-info {
+            width: 33.334%;
             position: sticky;
             top: 0;
-            z-index: 5;
-            background: #FAF8F5;
-            padding-top: 40px;
-            padding-bottom: 12px;
-            margin: 0 -48px;
-            padding-left: 48px;
-            padding-right: 48px;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 100px 40px 80px 40px;
+            scrollbar-width: none;
+            box-sizing: border-box;
           }
+          .ss-info::-webkit-scrollbar { display: none; }
 
-          .pdp-atb-row {
-            position: sticky;
-            top: 114px;
-            z-index: 4;
-            background: #FAF8F5;
-            margin-bottom: 36px;
+          .ss-mobile-sticky { display: none; }
+        }
+
+        @media (min-width: 1200px) {
+          .ss-info {
+            padding: 100px 48px 80px 48px;
           }
-
-          .pdp-mobile-sticky { display: none; }
         }
 
         /* ── RECOMMENDED ── */

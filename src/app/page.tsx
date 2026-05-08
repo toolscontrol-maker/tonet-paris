@@ -25,7 +25,7 @@ export default async function Home() {
               {col.imageUrl && (
                 <div className="shop-product shop-product--collection">
                   <div className="shop-product-img">
-                    <img src={col.imageUrl} alt={col.title} />
+                    <img src={col.imageUrl} alt={col.title} loading="lazy" decoding="async" />
                   </div>
                 </div>
               )}
@@ -35,99 +35,47 @@ export default async function Home() {
       </section>
 
       <style>{`
-        /* ═══════════════════════════════════════════════════
-           HERO — 2 blocks of 125vh, Tonet Studios style
-        ═══════════════════════════════════════════════════ */
-
-        .hero-wrapper {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .hero-block {
-          position: relative;
-          height: 125vh;
-          overflow: hidden;
-          contain: paint;
-        }
-
-        .hero-block--split { display: flex; }
-        .hero-block--full  { display: flex; }
-
-        .hero-panel {
-          flex: 1;
-          display: block;
-          position: relative;
-          background-size: cover;
-          background-position: center top;
-          text-decoration: none;
-          transition: filter 0.4s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-          overflow: hidden;
-          will-change: transform;
-          transform: translateZ(0);
-        }
-
-        .hero-panel:hover {
-          filter: brightness(0.88);
-          transform: scale(1.03) translateZ(0);
-        }
-
-        .shop-label {
-          position: absolute;
-          top: 120px;
-          left: 20px;
-          color: rgba(255,255,255,0.92);
-          font-size: 0.7rem;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          z-index: 10;
-        }
-
-        /* Sticky brand anchor */
-        .hero-brand-anchor {
-          position: sticky;
-          top: 50vh;
-          height: 0;
-          overflow: visible;
-          z-index: 6;
-          pointer-events: none;
-        }
-
-        .hero-brand-text {
-          position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
-          font-size: clamp(3rem, 10vw, 13rem);
-          font-weight: 600;
-          color: #000;
-          white-space: nowrap;
-          letter-spacing: -0.055em;
-          pointer-events: none;
-        }
-
-        .hero-block--split .hero-panel + .hero-panel {
-          border-left: 1px solid rgba(255,255,255,0.12);
+        /* Scroll-snap at page level for homepage — mandatory snapping */
+        html {
+          scroll-snap-type: y mandatory;
+          scroll-behavior: smooth;
         }
 
         /* ═══════════════════════════════════════════════════
-           PRODUCT SECTION — 4 columns, Tonet Studios style
+           PRODUCT SECTION — 4 columns, Tonet Paris style
         ═══════════════════════════════════════════════════ */
 
         .shop-section {
-          background: #f0f0f0;
+          background: #ffffff;
           position: relative;
           z-index: 10;
+          scroll-snap-align: start;
+          height: 100vh;
+          height: 100dvh;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
         }
 
         .shop-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          width: 100%;
+        }
+        .shop-grid::-webkit-scrollbar {
+          display: none;
         }
 
-        .shop-col {}
+        .shop-col {
+          flex: 0 0 25vw;
+          width: 25vw;
+          scroll-snap-align: start;
+        }
         .shop-col-link {
           display: block;
           text-decoration: none;
@@ -198,17 +146,9 @@ export default async function Home() {
            MOBILE — 2 columns, labels not sticky
         ═══════════════════════════════════════════════════ */
         @media (max-width: 767px) {
-          /* Hero */
-          .hero-block { height: auto; }
-          .hero-block--split { flex-direction: column; }
-          .hero-block--split .hero-panel { height: 125vw; flex: none; }
-          .hero-block--full  .hero-panel { height: 125vw; }
-          .hero-brand-text { font-size: 13vw; }
-          .shop-label { top: 80px; }
-
-          /* Shop grid: 2 columns */
-          .shop-grid {
-            grid-template-columns: repeat(2, 1fr);
+          .shop-col {
+            flex: 0 0 75vw;
+            width: 75vw;
           }
 
           .shop-col-label {
@@ -222,8 +162,9 @@ export default async function Home() {
         }
 
         @media (min-width: 768px) and (max-width: 1024px) {
-          .shop-grid {
-            grid-template-columns: repeat(2, 1fr);
+          .shop-col {
+            flex: 0 0 50vw;
+            width: 50vw;
           }
         }
       `}</style>

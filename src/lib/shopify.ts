@@ -222,6 +222,7 @@ export interface RecommendedProduct {
   price: number;
   currencyCode: string;
   collectionTitle: string;
+  collectionHandle: string;
   siblings: CollectionSibling[];
 }
 
@@ -251,6 +252,7 @@ export async function getRecommendedProducts(
         collections(first: $first) {
           edges {
             node {
+              handle
               title
               products(first: 30) {
                 edges {
@@ -270,6 +272,7 @@ export async function getRecommendedProducts(
 
   // Build handle → collectionTitle map AND handle → siblings list
   const handleToCollection: Record<string, string> = {};
+  const handleToCollectionHandle: Record<string, string> = {};
   const handleToSiblings: Record<string, CollectionSibling[]> = {};
 
   for (const { node: col } of collectionsData.collections.edges) {
@@ -282,6 +285,7 @@ export async function getRecommendedProducts(
     for (const p of colProducts) {
       if (!handleToCollection[p.handle]) {
         handleToCollection[p.handle] = col.title as string;
+        handleToCollectionHandle[p.handle] = col.handle as string;
         // Siblings = other products in the same collection (excluding self)
         handleToSiblings[p.handle] = colProducts.filter(s => s.handle !== p.handle);
       }
@@ -296,6 +300,7 @@ export async function getRecommendedProducts(
       price: parseFloat(node.priceRange?.minVariantPrice?.amount ?? '0'),
       currencyCode: (node.priceRange?.minVariantPrice?.currencyCode as string) ?? 'EUR',
       collectionTitle: handleToCollection[node.handle as string] ?? '',
+      collectionHandle: handleToCollectionHandle[node.handle as string] ?? '',
       siblings: handleToSiblings[node.handle as string] ?? [],
     }))
     .filter(p => p.handle !== excludeHandle)

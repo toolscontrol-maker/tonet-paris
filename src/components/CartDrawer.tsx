@@ -256,10 +256,10 @@ export default function CartDrawer() {
         .cd-drawer {
           position: fixed;
           top: 0; right: 0;
-          /* Tonet Studios: ~400px on desktop, 100vw on mobile */
+          /* Tonet Paris: ~400px on desktop, 100vw on mobile */
           width: min(100vw, 400px);
           height: 100dvh;
-          background: #FAF8F5;
+          background: #ffffff;
           border-left: 1px solid #d0d0d0;
           z-index: 1001;
           display: flex;
@@ -381,7 +381,7 @@ export default function CartDrawer() {
           display: flex; height: 44px;
         }
         .cd-qty-btn {
-          flex: 1; background: #FAF8F5; border: none;
+          flex: 1; background: #ffffff; border: none;
           font-size: 1.1rem; cursor: pointer; color: #000;
           /* Tap target */
           min-width: 44px;

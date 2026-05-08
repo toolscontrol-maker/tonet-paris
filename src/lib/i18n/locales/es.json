@@ -40,7 +40,7 @@
     "noCollections": "Aún no hay colecciones"
   },
   "menu": {
-    "brand": "TONETSTUDIOS.COM",
+    "brand": "TONETPARIS.COM",
     "close": "X CERRAR",
     "search": "BUSCAR",
     "woman": "MUJER",
@@ -58,18 +58,18 @@
   },
   "footer": {
     "newsletter": "NEWSLETTER",
-    "newsletterDesc": "Recibe novedades sobre las colecciones de Tonet Studios, eventos y rebajas.",
+    "newsletterDesc": "Recibe novedades sobre las colecciones de TONET PARIS, eventos y rebajas.",
     "emailPlaceholder": "EMAIL",
     "freeShippingTitle": "ENVÍO Y DEVOLUCIONES GRATIS",
     "freeShippingDesc": "Entrega rápida y devoluciones o cambios sencillos en todos los pedidos.",
     "palaisTitle": "TONET PAPER PALAIS ROYAL",
-    "palaisDesc": "Una galería permanente de Tonet Studios, fusionando moda, arte y publicación bajo las arcadas.",
+    "palaisDesc": "Una galería permanente de TONET PARIS, fusionando moda, arte y publicación bajo las arcadas.",
     "giftCardTitle": "TARJETA REGALO",
-    "giftCardDesc": "Las tarjetas regalo digitales de Tonet Studios se envían al instante por email, canjeables online y en tienda.",
+    "giftCardDesc": "Las tarjetas regalo digitales de TONET PARIS se envían al instante por email, canjeables online y en tienda.",
     "runwayTitle": "FW26 PASARELA",
-    "runwayDesc": "Tonet Studios presenta Mujer Otoño/Invierno 2026. Disponible online y en tiendas en septiembre 2026.",
+    "runwayDesc": "TONET PARIS presenta Mujer Otoño/Invierno 2026. Disponible online y en tiendas en septiembre 2026.",
     "storesTitle": "DESCUBRE NUESTRAS TIENDAS",
-    "storesDesc": "Explora nuestro localizador de tiendas para descubrir tu destino Tonet Studios más cercano.",
+    "storesDesc": "Explora nuestro localizador de tiendas para descubrir tu destino TONET PARIS más cercano.",
     "contactUs": "CONTÁCTANOS",
     "liveChat": "Chat en vivo",
     "callLabel": "Llamar",
@@ -81,7 +81,7 @@
     "registerReturn": "Registrar una devolución",
     "faqs": "Preguntas frecuentes",
     "clientServices": "ATENCIÓN AL CLIENTE",
-    "services": "Servicios Tonet Studios",
+    "services": "Servicios TONET PARIS",
     "accountLabel": "Cuenta",
     "findStore": "Buscar tienda",
     "productCare": "Cuidado del producto",
@@ -93,7 +93,7 @@
     "sustainability": "Sostenibilidad",
     "legalPrivacy": "Legal y privacidad",
     "cookieSettings": "Ajustes de cookies",
-    "copyright": "© 2026 TONET STUDIOS"
+    "copyright": "© 2026 TONET PARIS"
   },
   "locale": {
     "title": "SELECCIONA TU UBICACIÓN",
@@ -128,7 +128,12 @@
     "drawerGiftTitle": "Envoltorio de regalo",
     "drawerGiftBody": "Descubre nuestro servicio de envoltorio de regalo gratuito. Todos los pedidos incluyen un elegante empaquetado con un lazo distintivo.",
     "drawerGiftNote1": "Ten en cuenta que todo el pedido se envolverá junto, no por separado.",
-    "drawerGiftNote2": "Pueden aplicarse excepciones en productos de mayor tamaño que superen las dimensiones del envoltorio disponible."
+    "drawerGiftNote2": "Pueden aplicarse excepciones en productos de mayor tamaño que superen las dimensiones del envoltorio disponible.",
+    "selectSize": "Selecciona talla",
+    "sizeAndFit": "Talla y cortes",
+    "detailsAndCare": "Detalles y cuidado",
+    "deliveryAndReturns": "Entrega y devoluciones",
+    "freeDeliveryShort": "Entrega gratuita en 2–4 días hábiles"
   },
   "wishlist": {
     "account": "Cuenta",
@@ -169,7 +174,7 @@
     "phone": "Teléfono (opcional)",
     "phonePlaceholder": "Número de teléfono",
     "birthDate": "Fecha de nacimiento (opcional)",
-    "newsletter": "Me gustaría recibir novedades y ofertas exclusivas de Tonet Studios.",
+    "newsletter": "Me gustaría recibir novedades y ofertas exclusivas de TONET PARIS.",
     "continue": "CONTINUAR",
     "skip": "SALTAR Y CONTINUAR"
   },
