@@ -24,6 +24,7 @@ export interface Product {
   handle: string;
   title: string;
   description: string;
+  tags: string[];
   price: number;
   currencyCode: string;
   imageUrl: string;
@@ -66,6 +67,7 @@ const PRODUCT_FIELDS = `
   handle
   title
   description
+  tags
   priceRange { minVariantPrice { amount currencyCode } }
   featuredImage { url }
   images(first: 10) { edges { node { url } } }
@@ -88,6 +90,7 @@ const COLLECTION_PRODUCT_FIELDS = `
   handle
   title
   description
+  tags
   priceRange { minVariantPrice { amount currencyCode } }
   featuredImage { url }
   images(first: 10) { edges { node { url } } }
@@ -110,6 +113,7 @@ function normalizeProduct(node: Record<string, any>): Product {
     handle: node.handle as string,
     title: node.title as string,
     description: (node.description as string) ?? '',
+    tags: (node.tags as string[]) ?? [],
     price: parseFloat(node.priceRange?.minVariantPrice?.amount ?? '0'),
     currencyCode: (node.priceRange?.minVariantPrice?.currencyCode as string) ?? 'EUR',
     imageUrl: (node.featuredImage?.url as string) ?? '',

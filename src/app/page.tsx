@@ -1,31 +1,31 @@
 import Link from 'next/link';
-import { getCollections } from '@/lib/shopify';
+import { getProducts } from '@/lib/shopify';
 import HeroSection from '@/components/HeroSection';
 
 export default async function Home() {
-  const collections = await getCollections(20);
+  const products = await getProducts();
 
   return (
     <>
       {/* ─── HERO: randomized images from /public/hero/ ─── */}
       <HeroSection />
 
-      {/* ─── COLLECTIONS SECTION ─── */}
+      {/* ─── PRODUCTS SECTION ─── */}
       <section className="shop-section" id="gallery">
         <div className="shop-grid">
-          {collections.map((col) => (
+          {products.slice(0, 4).map((product) => (
             <Link
-              key={col.handle}
-              href={`/collection/${col.handle}`}
+              key={product.handle}
+              href={`/product/${product.handle}`}
               className="shop-col shop-col-link"
             >
               <div className="shop-col-label">
-                {col.title}<span className="shop-now-suffix"> › SHOP NOW</span>
+                {product.title}<span className="shop-now-suffix"> › SHOP NOW</span>
               </div>
-              {col.imageUrl && (
+              {product.imageUrl && (
                 <div className="shop-product shop-product--collection">
                   <div className="shop-product-img">
-                    <img src={col.imageUrl} alt={col.title} loading="lazy" decoding="async" />
+                    <img src={product.imageUrl} alt={product.title} loading="lazy" decoding="async" />
                   </div>
                 </div>
               )}
@@ -58,14 +58,8 @@ export default async function Home() {
         }
 
         .shop-grid {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          overflow-x: auto;
-          scroll-snap-type: x mandatory;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
         }
         .shop-grid::-webkit-scrollbar {
           display: none;
@@ -75,6 +69,7 @@ export default async function Home() {
           flex: 0 0 25vw;
           width: 25vw;
           scroll-snap-align: start;
+          min-width: 0;
         }
         .shop-col-link {
           display: block;
@@ -94,6 +89,8 @@ export default async function Home() {
           color: #000;
           text-align: left;
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .shop-now-suffix {
@@ -146,9 +143,11 @@ export default async function Home() {
            MOBILE — 2 columns, labels not sticky
         ═══════════════════════════════════════════════════ */
         @media (max-width: 767px) {
+          .shop-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
           .shop-col {
-            flex: 0 0 75vw;
-            width: 75vw;
+            width: 100%;
           }
 
           .shop-col-label {
@@ -162,9 +161,11 @@ export default async function Home() {
         }
 
         @media (min-width: 768px) and (max-width: 1024px) {
+          .shop-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
           .shop-col {
-            flex: 0 0 50vw;
-            width: 50vw;
+            width: 100%;
           }
         }
       `}</style>

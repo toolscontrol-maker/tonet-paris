@@ -13,5 +13,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const product = await getProduct(id);
   if (!product) return <div style={{ padding: '80px 24px' }}>Product not found.</div>;
-  return <ProductClient product={product} />;
+  
+  // Find related products by tag
+  // We filter products that share at least one tag with the current product.
+  // We ignore tags that might be too generic if needed, but for now we just intersect.
+  const allProducts = await getProducts();
+  const relatedProductsByTag = allProducts.filter(p => 
+    p.handle !== product.handle && 
+    p.tags && product.tags && p.tags.some(t => product.tags.includes(t))
+  );
+
+  return <ProductClient product={product} relatedProductsByTag={relatedProductsByTag} />;
 }

@@ -8,10 +8,12 @@ import { useLocale } from '@/context/LocaleContext';
 import { Product, ShopifyVariant, RecommendedProduct } from '@/lib/shopify';
 import { useTranslatedText } from '@/hooks/useTranslatedText';
 import RecommendedCard from '@/components/RecommendedCard';
+import { useRouter } from 'next/navigation';
 import { useWishlist } from '@/context/WishlistContext';
 
 interface Props {
   product: Product;
+  relatedProductsByTag?: Product[];
 }
 
 function TranslatedDesc({ text, className }: { text?: string | null; className?: string }) {
@@ -20,7 +22,8 @@ function TranslatedDesc({ text, className }: { text?: string | null; className?:
   return <p className={className}>{translated}</p>;
 }
 
-export default function ProductClient({ product }: Props) {
+export default function ProductClient({ product, relatedProductsByTag }: Props) {
+  const router = useRouter();
   const [recommended, setRecommended] = useState<RecommendedProduct[]>([]);
 
   useEffect(() => {
@@ -61,6 +64,46 @@ export default function ProductClient({ product }: Props) {
   const { openCart } = useUI();
   const { addToCart } = useCart();
   const thumbsRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+  const isDragging = useRef(false);
+
+  function goToSlide(idx: number) {
+    const next = Math.max(0, Math.min(idx, images.length - 1));
+    setActiveImage(next);
+    setDisplayImageUrl(images[next]);
+    carouselRef.current?.scrollTo({ left: next * carouselRef.current.offsetWidth, behavior: 'smooth' });
+  }
+
+  function handleCarouselTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleCarouselTouchEnd(e: React.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      goToSlide(activeImage + (dx < 0 ? 1 : -1));
+    }
+  }
+
+  function handleCarouselMouseDown(e: React.MouseEvent) {
+    isDragging.current = false;
+    touchStartX.current = e.clientX;
+  }
+
+  function handleCarouselMouseMove(e: React.MouseEvent) {
+    if (Math.abs(e.clientX - touchStartX.current) > 5) isDragging.current = true;
+  }
+
+  function handleCarouselMouseUp(e: React.MouseEvent) {
+    const dx = e.clientX - touchStartX.current;
+    if (Math.abs(dx) > 50) {
+      goToSlide(activeImage + (dx < 0 ? 1 : -1));
+    }
+  }
 
   const colorOptionName = useMemo(() => {
     for (const v of product.variants)
@@ -186,22 +229,53 @@ export default function ProductClient({ product }: Props) {
   return (
     <>
       <div className="ss-pdp-layout">
-        {/* ── GALLERY (vertical scroll, each image = 100vh) ── */}
+        {/* ── CAROUSEL ── */}
         <div className="ss-gallery">
-          {images.map((img, i) => (
-            <div key={i} className="ss-gallery-slide">
-              <img
-                src={img}
-                alt={`${product.title} – ${i + 1}`}
-                className="ss-gallery-img"
-              />
+          <div
+            className="ss-carousel"
+            ref={carouselRef}
+            onTouchStart={handleCarouselTouchStart}
+            onTouchEnd={handleCarouselTouchEnd}
+            onMouseDown={handleCarouselMouseDown}
+            onMouseMove={handleCarouselMouseMove}
+            onMouseUp={handleCarouselMouseUp}
+          >
+            {images.map((img, i) => (
+              <div key={i} className="ss-carousel-slide">
+                <img
+                  src={img}
+                  alt={`${product.title} – ${i + 1}`}
+                  className="ss-gallery-img"
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Dot indicators */}
+          {images.length > 1 && (
+            <div className="ss-carousel-dots">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  className={`ss-carousel-dot${activeImage === i ? ' active' : ''}`}
+                  onClick={() => goToSlide(i)}
+                  aria-label={`Image ${i + 1}`}
+                />
+              ))}
             </div>
-          ))}
-          {/* Description block after the images */}
-          {product.description && (
-            <div className="ss-gallery-desc">
-              <TranslatedDesc text={product.description} className="ss-gallery-desc-text" />
-            </div>
+          )}
+
+          {/* Arrow buttons (desktop) */}
+          {images.length > 1 && (
+            <>
+              <button className="ss-carousel-arrow prev" onClick={() => goToSlide(activeImage - 1)} aria-label="Previous" disabled={activeImage === 0}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button className="ss-carousel-arrow next" onClick={() => goToSlide(activeImage + 1)} aria-label="Next" disabled={activeImage === images.length - 1}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </>
           )}
         </div>
 
@@ -221,15 +295,15 @@ export default function ProductClient({ product }: Props) {
           {/* Image thumbnails */}
           <div className="ss-thumbs-wrap">
             <div className="ss-thumbs" ref={thumbsRef}>
-              {colorOptions.length > 0
-                ? colorOptions.map((col) => (
+              {(relatedProductsByTag && relatedProductsByTag.length > 0)
+                ? [product, ...relatedProductsByTag].map((vp) => (
                     <button
-                      key={col.value}
-                      className={`ss-thumb ${selectedColor === col.value ? 'active' : ''}`}
-                      onClick={() => handleColorChange(col.value)}
-                      title={col.value}
+                      key={vp.handle}
+                      className={`ss-thumb ${vp.handle === product.handle ? 'active' : ''}`}
+                      onClick={() => { if (vp.handle !== product.handle) router.push(`/product/${vp.handle}`) }}
+                      title={vp.title}
                     >
-                      <img src={col.imageUrl || product.imageUrl} alt={col.value} />
+                      <img src={vp.imageUrl} alt={vp.title} />
                     </button>
                   ))
                 : images.map((img, i) => (
@@ -409,36 +483,65 @@ export default function ProductClient({ product }: Props) {
           color: #111;
         }
 
-        /* ── GALLERY ── */
+        /* ── CAROUSEL ── */
         .ss-gallery {
           position: relative;
           background: #e8e4df;
+          overflow: hidden;
         }
-        .ss-gallery-slide {
+        .ss-carousel {
           width: 100%;
-          height: 100vh;
+          aspect-ratio: 2 / 3;
+          display: flex;
+          overflow: hidden;
+          user-select: none;
+          cursor: grab;
+        }
+        .ss-carousel:active { cursor: grabbing; }
+        .ss-carousel-slide {
+          width: 100%;
+          flex-shrink: 0;
+          aspect-ratio: 2 / 3;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
           background: #e8e4df;
+          overflow: hidden;
         }
         .ss-gallery-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
           display: block;
+          pointer-events: none;
         }
-        .ss-gallery-desc {
-          padding: 40px 24px 60px;
-          background: #fff;
+        /* Dots */
+        .ss-carousel-dots {
+          position: absolute;
+          bottom: 14px;
+          left: 0; right: 0;
+          display: flex;
+          justify-content: center;
+          gap: 6px;
+          z-index: 5;
         }
-        .ss-gallery-desc-text {
-          font-size: 14px;
-          line-height: 1.7;
-          color: #444;
-          margin: 0;
-          max-width: 480px;
+        .ss-carousel-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(0,0,0,0.25);
+          padding: 0;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+        }
+        .ss-carousel-dot.active {
+          background: #111;
+          transform: scale(1.3);
+        }
+        /* Arrow buttons */
+        .ss-carousel-arrow {
+          display: none;
         }
 
         /* ── INFO PANEL ── */
@@ -739,14 +842,35 @@ export default function ProductClient({ product }: Props) {
             width: 66.666%;
             flex-shrink: 0;
           }
-          .ss-gallery-slide {
-            height: 100vh;
+          .ss-carousel {
+            aspect-ratio: 2 / 3;
+            height: auto;
           }
-          .ss-gallery-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+          .ss-carousel-slide {
+            aspect-ratio: 2 / 3;
           }
+          /* Show arrows on desktop */
+          .ss-carousel-arrow {
+            display: flex;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            color: #111;
+            transition: background 0.15s, opacity 0.15s;
+          }
+          .ss-carousel-arrow:disabled { opacity: 0.25; cursor: default; }
+          .ss-carousel-arrow:hover:not(:disabled) { background: #fff; }
+          .ss-carousel-arrow.prev { left: 14px; }
+          .ss-carousel-arrow.next { right: 14px; }
           .ss-gallery-desc {
             min-height: 50vh;
             display: flex;
