@@ -249,7 +249,7 @@ export async function getRecommendedProducts(
           }
         }
       }`,
-      { first: count + 10 }
+      { first: 50 }
     ),
     shopifyFetch<{ collections: { edges: { node: Record<string, any> }[] } }>(
       `query GetCollectionsForRec($first: Int!) {
@@ -296,7 +296,7 @@ export async function getRecommendedProducts(
     }
   }
 
-  return productsData.products.edges
+  const mapped = productsData.products.edges
     .map(({ node }) => ({
       handle: node.handle as string,
       title: node.title as string,
@@ -307,8 +307,15 @@ export async function getRecommendedProducts(
       collectionHandle: handleToCollectionHandle[node.handle as string] ?? '',
       siblings: handleToSiblings[node.handle as string] ?? [],
     }))
-    .filter(p => p.handle !== excludeHandle)
-    .slice(0, count);
+    .filter(p => p.handle !== excludeHandle);
+
+  // Shuffle the pool for true randomness
+  for (let i = mapped.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
+  }
+
+  return mapped.slice(0, count);
 }
 
 export async function getProduct(handle: string): Promise<Product | null> {

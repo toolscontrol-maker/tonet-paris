@@ -4,6 +4,7 @@ import HeroSection from '@/components/HeroSection';
 
 export default async function Home() {
   const products = await getProducts();
+  const shuffled = [...products].sort(() => Math.random() - 0.5);
 
   return (
     <>
@@ -13,7 +14,7 @@ export default async function Home() {
       {/* ─── PRODUCTS SECTION ─── */}
       <section className="shop-section" id="gallery">
         <div className="shop-grid">
-          {products.slice(0, 4).map((product) => (
+          {shuffled.slice(0, 4).map((product) => (
             <Link
               key={product.handle}
               href={`/product/${product.handle}`}

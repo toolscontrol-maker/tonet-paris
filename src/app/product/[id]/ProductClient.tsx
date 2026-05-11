@@ -443,7 +443,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         </div>
       </div>
 
-
+      {/* ── RECOMMENDED ── */}
+      {recommended.length > 0 && (
+        <section className="rec-section">
+          <h2 className="rec-label">TAMBIÉN TE PUEDE GUSTAR</h2>
+          <div className="rec-grid">
+            {recommended.map((p) => (
+              <RecommendedCard key={p.handle} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── MOBILE STICKY BAR ── */}
       <div className="ss-mobile-sticky">
