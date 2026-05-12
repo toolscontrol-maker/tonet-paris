@@ -440,7 +440,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                 : !selectedVariant.availableForSale
                 ? t('common.soldOut')
                 : needsSizeSelection
-                ? (isGiftCard ? 'SELECT TYPE' : t('common.selectSize'))
+                ? (
+                  <span style={{display:'flex',alignItems:'center',gap:8,justifyContent:'center'}}>
+                    <span style={{width:7,height:7,borderRadius:'50%',background:'#fff',display:'inline-block',flexShrink:0}}/>
+                    {isGiftCard ? 'SELECT TYPE' : t('common.selectSize')}
+                  </span>
+                )
                 : t('common.addToBag')}
             </button>
           </div>
