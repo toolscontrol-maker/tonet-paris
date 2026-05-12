@@ -226,11 +226,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
   const allSizes = useMemo(() => {
     if (!sizeOptionName) return sizeOptions;
+    if (product.handle === 'e-gift-card') return sizeOptions;
     const norm = sizeOptions.map(s => s.toUpperCase());
     if (norm.includes('XS') || norm.includes('X-SMALL')) return sizeOptions;
     return ['XS', ...sizeOptions];
   }, [sizeOptions, sizeOptionName]);
 
+  const isGiftCard = product.handle === 'e-gift-card';
   const hasMultipleVariants = product.variants.length > 1;
   const hasSizes = sizeOptions.length > 0;
   const needsSizeSelection = hasSizes && !selectedSize;
@@ -451,7 +453,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                 : !selectedVariant.availableForSale
                 ? t('common.soldOut')
                 : needsSizeSelection
-                ? t('common.selectSize')
+                ? (isGiftCard ? 'SELECT TYPE' : t('common.selectSize'))
                 : t('common.addToBag')}
             </button>
           </div>
