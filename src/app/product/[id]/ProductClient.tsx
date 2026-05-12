@@ -386,13 +386,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <span className="ss-price">{priceFormatted}</span>
           </div>
 
-          {/* Subtitle */}
-          {descriptionFirstLine && (
-            <p className="ss-subtitle">{descriptionFirstLine}</p>
+          {/* Subtitle: color variant name if available, else description first line */}
+          {(selectedColor || descriptionFirstLine) && (
+            <p className="ss-subtitle">{selectedColor || descriptionFirstLine}</p>
           )}
 
-          {/* Variant / image thumbnails — only when color variants exist */}
-          {colorOptions.length > 0 && (
+          {/* Variant / image thumbnails — only when >1 color variant */}
+          {colorOptions.length > 1 && (
             <div className="ss-thumbs-wrap">
               {colorOptions.length > 4 && (
                 <button className="ss-thumbs-arrow ss-thumbs-arrow-left" onClick={() => scrollThumbs(-1)} aria-label="Previous">
