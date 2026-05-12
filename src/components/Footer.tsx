@@ -21,7 +21,7 @@ export default function Footer() {
         
         {/* Column 1 */}
         <div className="footer-col">
-          <input type="checkbox" id="footer-col-1" className="accordion-toggle" />
+          <input type="checkbox" id="footer-col-1" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-1" className="col-title">{t('footer.contactUs')} <span className="chevron"></span></label>
           <ul className="col-links">
             <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
@@ -55,7 +55,7 @@ export default function Footer() {
 
         {/* Column 3 */}
         <div className="footer-col">
-          <input type="checkbox" id="footer-col-3" className="accordion-toggle" />
+          <input type="checkbox" id="footer-col-3" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-3" className="col-title">{t('footer.clientServices')} <span className="chevron"></span></label>
           <ul className="col-links">
             <li><Link href="#">{t('footer.services')}</Link></li>
@@ -68,7 +68,7 @@ export default function Footer() {
 
         {/* Column 4 */}
         <div className="footer-col">
-          <input type="checkbox" id="footer-col-4" className="accordion-toggle" />
+          <input type="checkbox" id="footer-col-4" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-4" className="col-title">{t('footer.company')} <span className="chevron"></span></label>
           <ul className="col-links">
             <li><Link href="#">{t('footer.about')}</Link></li>
