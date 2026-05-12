@@ -386,11 +386,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <span className="ss-price">{priceFormatted}</span>
           </div>
 
-          {/* Subtitle / description line */}
-          {descriptionFirstLine && (
-            <p className="ss-subtitle">{descriptionFirstLine}</p>
-          )}
-
           {/* Variant / image thumbnails — only when color variants exist */}
           {colorOptions.length > 0 && (
             <div className="ss-thumbs-wrap">
@@ -452,29 +447,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           {/* Accordion sections */}
           <div className="ss-accordions">
             <div className="ss-accordion-item">
-              <button className="ss-accordion-header" onClick={() => toggleAccordion('sizefit')}>
-                <span>{t('common.sizeAndFit')}</span>
-                <span className={`ss-accordion-icon${expandedAccordion === 'sizefit' ? ' open' : ''}`}>+</span>
+              <button className="ss-accordion-header" onClick={() => toggleAccordion('description')}>
+                <span>Description</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'description' ? ' open' : ''}`}>+</span>
               </button>
-              {expandedAccordion === 'sizefit' && (
+              {expandedAccordion === 'description' && (
                 <div className="ss-accordion-body">
-                  {hasSizes && (
-                    <div className="ss-inline-sizes">
-                      {sizeOptions.map((size) => {
-                        const available = isSizeAvailable(size);
-                        return (
-                          <button
-                            key={size}
-                            className={`ss-inline-size${selectedSize === size ? ' active' : ''}${!available ? ' sold-out' : ''}`}
-                            onClick={() => available && handleSizeSelect(size)}
-                          >
-                            {size}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <p className="ss-accordion-text">{t('common.deliveryEstimate')}</p>
+                  <TranslatedDesc text={product.description} className="ss-accordion-text" />
                 </div>
               )}
             </div>
@@ -486,7 +465,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               </button>
               {expandedAccordion === 'details' && (
                 <div className="ss-accordion-body">
-                  <TranslatedDesc text={product.description} className="ss-accordion-text" />
+                  <p className="ss-accordion-text">{t('common.deliveryEstimate')}</p>
                 </div>
               )}
             </div>
