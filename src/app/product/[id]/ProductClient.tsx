@@ -391,51 +391,28 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <p className="ss-subtitle">{descriptionFirstLine}</p>
           )}
 
-          {/* Variant / image thumbnails */}
-          <div className="ss-thumbs-wrap">
-            <div className="ss-thumbs" ref={thumbsRef}>
-              {colorOptions.length > 0
-                ? /* Priority 1: actual color variants — one swatch per color */
-                  colorOptions.map((co) => (
-                    <button
-                      key={co.value}
-                      className={`ss-thumb ${selectedColor === co.value ? 'active' : ''}`}
-                      onClick={() => handleColorChange(co.value)}
-                      title={co.value}
-                    >
-                      <img src={co.imageUrl} alt={co.value} />
-                    </button>
-                  ))
-                : (relatedProductsByTag && relatedProductsByTag.length > 0)
-                  ? /* Priority 2: related products by tag (cross-product colour navigation) */
-                    [product, ...relatedProductsByTag].map((vp) => (
-                      <button
-                        key={vp.handle}
-                        className={`ss-thumb ${vp.handle === product.handle ? 'active' : ''}`}
-                        onClick={() => { if (vp.handle !== product.handle) router.push(`/product/${vp.handle}`) }}
-                        title={vp.title}
-                      >
-                        <img src={vp.imageUrl} alt={vp.title} />
-                      </button>
-                    ))
-                  : /* Priority 3: plain image gallery (no variant confusion — active tracks image) */
-                    images.map((img, i) => (
-                      <button
-                        key={i}
-                        className={`ss-thumb ${activeImage === i ? 'active' : ''}`}
-                        onClick={() => goToSlide(i)}
-                      >
-                        <img src={img} alt={`View ${i + 1}`} />
-                      </button>
-                    ))
-              }
+          {/* Variant / image thumbnails — only when color variants exist */}
+          {colorOptions.length > 0 && (
+            <div className="ss-thumbs-wrap">
+              <div className="ss-thumbs" ref={thumbsRef}>
+                {colorOptions.map((co) => (
+                  <button
+                    key={co.value}
+                    className={`ss-thumb ${selectedColor === co.value ? 'active' : ''}`}
+                    onClick={() => handleColorChange(co.value)}
+                    title={co.value}
+                  >
+                    <img src={co.imageUrl} alt={co.value} />
+                  </button>
+                ))}
+              </div>
+              {colorOptions.length > 5 && (
+                <button className="ss-thumbs-arrow" onClick={() => scrollThumbs(1)} aria-label="More colors">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              )}
             </div>
-            {images.length > 5 && (
-              <button className="ss-thumbs-arrow" onClick={() => scrollThumbs(1)} aria-label="More images">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            )}
-          </div>
+          )}
 
           {/* Action row: bookmark + select size / add to bag */}
           <div className="ss-actions">
