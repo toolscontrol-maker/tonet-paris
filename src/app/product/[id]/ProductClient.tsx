@@ -225,9 +225,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   }, [sizeOptionName]);
 
   const priceNum = parseFloat(selectedVariant.price.amount);
+  const currencyCode = selectedVariant.price.currencyCode || 'EUR';
+  const currencySymbol = currencyCode === 'USD' ? '$' : '€';
   const priceFormatted = Number.isInteger(priceNum)
-    ? `€${priceNum}`
-    : `€${priceNum.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    ? `${currencySymbol}${priceNum} ${currencyCode}`
+    : `${currencySymbol}${priceNum.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyCode}`;
 
   const allSizes = useMemo(() => {
     if (!sizeOptionName) return sizeOptions;

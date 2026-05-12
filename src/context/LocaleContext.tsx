@@ -24,15 +24,17 @@ interface ProviderProps {
 
 export function LocaleProvider({ children }: ProviderProps) {
   const formatPrice = useCallback((amount: number, currencyCode: string): string => {
+    const code = currencyCode || 'EUR';
     try {
-      return new Intl.NumberFormat('en-US', {
+      const formatted = new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: currencyCode || 'EUR',
+        currency: code,
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(amount);
+      return `${formatted} ${code}`;
     } catch {
-      return `${amount.toFixed(2)} ${currencyCode}`;
+      return `${amount.toFixed(2)} ${code}`;
     }
   }, []);
 
