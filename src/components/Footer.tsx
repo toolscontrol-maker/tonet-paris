@@ -104,7 +104,7 @@ export default function Footer() {
           background-color: #fff;
           color: #000;
           font-family: var(--font-primary);
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 400;
           line-height: 1.6;
           letter-spacing: 0.02em;
@@ -198,7 +198,7 @@ export default function Footer() {
           gap: 12px;
         }
         .fnc-title {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
           text-transform: uppercase;
           margin: 0;
@@ -215,7 +215,7 @@ export default function Footer() {
           border: none !important;
           padding: 4px 0 !important;
           font-family: inherit;
-          font-size: 11px;
+          font-size: 13px;
           outline: none;
           color: #000 !important;
         }
@@ -226,7 +226,7 @@ export default function Footer() {
           background: transparent !important;
           border: none !important;
           font-family: inherit;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
           cursor: pointer;
           padding: 4px 0 4px 12px !important;
@@ -257,7 +257,7 @@ export default function Footer() {
         }
 
         .col-title {
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 400;
           text-transform: uppercase;
           margin-bottom: 24px;
@@ -363,7 +363,7 @@ export default function Footer() {
           .col-title {
             margin: 0;
             padding: 18px 16px;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 500;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -400,7 +400,7 @@ export default function Footer() {
           .col-links li a {
             display: block;
             padding: 9px 0;
-            font-size: 12px;
+            font-size: 13px;
             color: #444;
             border-bottom: 1px solid #f3f3f3;
           }
@@ -440,7 +440,7 @@ export default function Footer() {
           }
 
           .bottom-center.socials a {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 500;
             letter-spacing: 0.06em;
             color: #000;
@@ -455,13 +455,13 @@ export default function Footer() {
           }
 
           .copyright {
-            font-size: 11px;
+            font-size: 13px;
             color: #888;
             font-family: var(--font-primary);
           }
 
           .cookie-link {
-            font-size: 11px;
+            font-size: 13px;
             color: #888;
             text-decoration: underline;
             text-underline-offset: 2px;
