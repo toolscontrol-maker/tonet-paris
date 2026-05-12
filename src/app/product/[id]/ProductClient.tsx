@@ -68,6 +68,57 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const isDragging = useRef(false);
+  const recCarouselRef = useRef<HTMLDivElement>(null);
+  const recDragStart = useRef(0);
+  const recScrollStart = useRef(0);
+  const recIsDragging = useRef(false);
+
+  function recMouseDown(e: React.MouseEvent) {
+    recDragStart.current = e.clientX;
+    recScrollStart.current = recCarouselRef.current?.scrollLeft ?? 0;
+    recIsDragging.current = false;
+  }
+  function recMouseMove(e: React.MouseEvent) {
+    if (!(e.buttons & 1)) return;
+    const dx = e.clientX - recDragStart.current;
+    if (Math.abs(dx) > 4) {
+      recIsDragging.current = true;
+      if (recCarouselRef.current) recCarouselRef.current.scrollLeft = recScrollStart.current - dx;
+    }
+  }
+  function recMouseUp() { recIsDragging.current = false; }
+
+  useEffect(() => {
+    const el = recCarouselRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const pageY = window.scrollY;
+      el.style.transform = `translateX(${pageY * 0.04}px)`;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isPausedRef = useRef(false);
+
+  function startAutoPlay() {
+    if (images.length <= 1) return;
+    autoPlayRef.current = setInterval(() => {
+      if (!isPausedRef.current) {
+        setActiveImage(prev => {
+          const next = prev < images.length - 1 ? prev + 1 : 0;
+          setDisplayImageUrl(images[next]);
+          carouselRef.current?.scrollTo({ left: next * (carouselRef.current.offsetWidth || 0), behavior: 'smooth' });
+          return next;
+        });
+      }
+    }, 2000);
+  }
+
+  useEffect(() => {
+    startAutoPlay();
+    return () => { if (autoPlayRef.current) clearInterval(autoPlayRef.current); };
+  }, [images.length]);
 
   function goToSlide(idx: number) {
     const next = Math.max(0, Math.min(idx, images.length - 1));
@@ -239,6 +290,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             onMouseDown={handleCarouselMouseDown}
             onMouseMove={handleCarouselMouseMove}
             onMouseUp={handleCarouselMouseUp}
+            onMouseEnter={() => { isPausedRef.current = true; }}
+            onMouseLeave={() => { isPausedRef.current = false; }}
           >
             {images.map((img, i) => (
               <div key={i} className="ss-carousel-slide">
@@ -266,17 +319,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             </div>
           )}
 
-          {/* Arrow buttons (desktop) */}
-          {images.length > 1 && (
-            <>
-              <button className="ss-carousel-arrow prev" onClick={() => goToSlide(activeImage - 1)} aria-label="Previous" disabled={activeImage === 0}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <button className="ss-carousel-arrow next" onClick={() => goToSlide(activeImage + 1)} aria-label="Next" disabled={activeImage === images.length - 1}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </>
-          )}
+          {/* Arrow buttons removed — auto-scroll active */}
         </div>
 
         {/* ── INFO PANEL ── */}
@@ -292,29 +335,43 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <p className="ss-subtitle">{descriptionFirstLine}</p>
           )}
 
-          {/* Image thumbnails */}
+          {/* Variant / image thumbnails */}
           <div className="ss-thumbs-wrap">
             <div className="ss-thumbs" ref={thumbsRef}>
-              {(relatedProductsByTag && relatedProductsByTag.length > 0)
-                ? [product, ...relatedProductsByTag].map((vp) => (
+              {colorOptions.length > 0
+                ? /* Priority 1: actual color variants — one swatch per color */
+                  colorOptions.map((co) => (
                     <button
-                      key={vp.handle}
-                      className={`ss-thumb ${vp.handle === product.handle ? 'active' : ''}`}
-                      onClick={() => { if (vp.handle !== product.handle) router.push(`/product/${vp.handle}`) }}
-                      title={vp.title}
+                      key={co.value}
+                      className={`ss-thumb ${selectedColor === co.value ? 'active' : ''}`}
+                      onClick={() => handleColorChange(co.value)}
+                      title={co.value}
                     >
-                      <img src={vp.imageUrl} alt={vp.title} />
+                      <img src={co.imageUrl} alt={co.value} />
                     </button>
                   ))
-                : images.map((img, i) => (
-                    <button
-                      key={i}
-                      className={`ss-thumb ${activeImage === i ? 'active' : ''}`}
-                      onClick={() => { setActiveImage(i); setDisplayImageUrl(img); }}
-                    >
-                      <img src={img} alt={`View ${i + 1}`} />
-                    </button>
-                  ))
+                : (relatedProductsByTag && relatedProductsByTag.length > 0)
+                  ? /* Priority 2: related products by tag (cross-product colour navigation) */
+                    [product, ...relatedProductsByTag].map((vp) => (
+                      <button
+                        key={vp.handle}
+                        className={`ss-thumb ${vp.handle === product.handle ? 'active' : ''}`}
+                        onClick={() => { if (vp.handle !== product.handle) router.push(`/product/${vp.handle}`) }}
+                        title={vp.title}
+                      >
+                        <img src={vp.imageUrl} alt={vp.title} />
+                      </button>
+                    ))
+                  : /* Priority 3: plain image gallery (no variant confusion — active tracks image) */
+                    images.map((img, i) => (
+                      <button
+                        key={i}
+                        className={`ss-thumb ${activeImage === i ? 'active' : ''}`}
+                        onClick={() => goToSlide(i)}
+                      >
+                        <img src={img} alt={`View ${i + 1}`} />
+                      </button>
+                    ))
               }
             </div>
             {images.length > 5 && (
@@ -446,40 +503,26 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
       {/* ── RECOMMENDED ── */}
       {recommended.length > 0 && (
         <section className="rec-section">
-          <h2 className="rec-label">TAMBIÉN TE PUEDE GUSTAR</h2>
-          <div className="rec-grid">
-            {recommended.map((p) => (
-              <RecommendedCard key={p.handle} product={p} />
-            ))}
+          <h2 className="rec-label">YOU MAY ALSO LIKE</h2>
+          <div className="rec-carousel-wrap">
+            <div
+              className="rec-carousel"
+              ref={recCarouselRef}
+              onMouseDown={recMouseDown}
+              onMouseMove={recMouseMove}
+              onMouseUp={recMouseUp}
+              onMouseLeave={recMouseUp}
+            >
+              {recommended.map((p) => (
+                <div className="rec-carousel-item" key={p.handle}>
+                  <RecommendedCard key={p.handle} product={p} />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      {/* ── MOBILE STICKY BAR ── */}
-      <div className="ss-mobile-sticky">
-        <button
-          className="ss-mobile-bookmark"
-          aria-label="Add to wishlist"
-          onClick={() => toggle(wishlistItem)}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill={inWishlist ? '#111' : 'none'} stroke="#111" strokeWidth="1.5">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-          </svg>
-        </button>
-        <button
-          className="ss-mobile-cta"
-          onClick={handleAddToBag}
-          disabled={adding || !selectedVariant.availableForSale}
-        >
-          {adding
-            ? t('common.adding')
-            : !selectedVariant.availableForSale
-            ? t('common.soldOut')
-            : needsSizeSelection
-            ? t('common.selectSize')
-            : t('common.addToBag')}
-        </button>
-      </div>
 
       <style>{`
         /* ══════════════════════════════════════
@@ -568,26 +611,29 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           margin-bottom: 6px;
         }
         .ss-title {
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
           line-height: 1.3;
           margin: 0;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
         }
         .ss-price {
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
           white-space: nowrap;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.06em;
         }
 
         /* Subtitle */
         .ss-subtitle {
-          font-size: 13px;
+          font-size: 10px;
           font-weight: 400;
-          color: #666;
+          color: #888;
           margin: 0 0 20px 0;
-          line-height: 1.5;
+          line-height: 1.6;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
         }
 
         /* Thumbnails */
@@ -726,9 +772,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           align-items: center;
           gap: 8px;
           padding: 14px 0;
-          font-size: 12px;
-          font-weight: 400;
+          font-size: 10px;
+          font-weight: 500;
           color: #444;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
           border-bottom: 1px solid #e8e8e8;
           margin-bottom: 0;
         }
@@ -749,12 +797,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           background: none;
           border: none;
           font-family: inherit;
-          font-size: 14px;
-          font-weight: 400;
+          font-size: 11px;
+          font-weight: 500;
           color: #111;
           cursor: pointer;
           text-align: left;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
         }
         .ss-accordion-header:hover { opacity: 0.7; }
         .ss-accordion-icon {
@@ -799,7 +848,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .ss-inline-size.active { background: #111; color: #fff; border-color: #111; }
         .ss-inline-size.sold-out { color: #ccc; border-color: #eee; cursor: not-allowed; text-decoration: line-through; }
 
-        /* ── MOBILE STICKY BAR ── */
+        /* ── MOBILE STICKY BAR (removed) ── */
         .ss-mobile-sticky {
           position: fixed;
           bottom: 0; left: 0; right: 0;
@@ -912,26 +961,53 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         /* ── RECOMMENDED ── */
         .rec-section {
-          padding: 48px 24px 80px;
+          padding: 60px 0 80px;
           font-family: 'HK Grotesk', 'Inter', sans-serif;
+          overflow: hidden;
         }
         .rec-label {
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 500;
           text-transform: uppercase;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.1em;
           color: #111;
-          margin: 0 0 24px;
+          margin: 0 0 28px;
+          padding-left: 0;
+          text-align: center;
         }
-        .rec-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
+        .rec-carousel-wrap {
+          overflow: hidden;
+        }
+        .rec-carousel {
+          display: flex;
+          flex-direction: row;
           gap: 0;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          cursor: grab;
+          user-select: none;
+          padding-left: 16px;
+          padding-bottom: 4px;
+          will-change: transform;
+        }
+        .rec-carousel:active { cursor: grabbing; }
+        .rec-carousel::-webkit-scrollbar { display: none; }
+        .rec-carousel { scrollbar-width: none; }
+        .rec-carousel-item {
+          flex: 0 0 calc(25% - 18px);
+          min-width: calc(25% - 18px);
+          scroll-snap-align: start;
+          padding-right: 1px;
         }
         @media (max-width: 767px) {
-          .rec-section { padding: 32px 0 100px; }
-          .rec-label { padding-left: 16px; }
-          .rec-grid { grid-template-columns: repeat(2, 1fr); }
+          .rec-section { padding: 40px 0 60px; }
+          .rec-label { font-size: 14px; }
+          .rec-carousel { padding-left: 16px; }
+          .rec-carousel-item {
+            flex: 0 0 83.333vw;
+            min-width: 83.333vw;
+          }
         }
       `}</style>
     </>

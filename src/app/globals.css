@@ -21,23 +21,41 @@
   --font-brand: 'Twilight New Moon', serif;
   --font-primary: 'DM Sans', 'HK Grotesk', 'Inter', -apple-system, Helvetica, Arial, sans-serif;
 
-  /* Scale — 5 levels */
-  --t-xl:  18px;   /* brand / logo */
-  --t-lg:  14px;   /* product title / section header */
-  --t-md:  12px;   /* body / price */
-  --t-sm:  11px;   /* labels / nav / CTA / meta */
-  --t-xs:  10px;   /* microcopy / fine print */
+  /* Scale */
+  --t-hero:  60px;  /* hero display */
+  --t-h1:    32px;  /* page title */
+  --t-h2:    22px;  /* section title */
+  --t-h3:    14px;  /* section heading / label */
+  --t-prod:  13px;  /* product name / price */
+  --t-btn:   11px;  /* buttons / accordions */
+  --t-meta:  10px;  /* metadata / footer */
 
-  /* Weights — 3 only */
+  /* Weights */
   --w-regular:  400;
   --w-medium:   500;
-  --w-semibold: 600;
 
   /* Tracking */
-  --tk-tight:  0em;      /* body */
-  --tk-base:   0.015em;  /* price, subtitle */
-  --tk-wide:   0.05em;   /* labels, nav, meta */
-  --tk-wider:  0.08em;   /* CTA, structural uppercase */
+  --tk-hero:   -0.03em;
+  --tk-h1:     -0.02em;
+  --tk-h2:     -0.01em;
+  --tk-h3:      0.06em;
+  --tk-prod:    0.05em;
+  --tk-price:   0.04em;
+  --tk-meta:    0.04em;
+  --tk-btn:     0.06em;
+  --tk-footer:  0.03em;
+
+  /* Kept for back-compat */
+  --t-xl:  18px;
+  --t-lg:  14px;
+  --t-md:  12px;
+  --t-sm:  11px;
+  --t-xs:  10px;
+  --w-semibold: 600;
+  --tk-tight:  0em;
+  --tk-base:   0.015em;
+  --tk-wide:   0.05em;
+  --tk-wider:  0.08em;
 
   /* Line-height */
   --lh-tight:  1.2;
@@ -105,6 +123,43 @@ ul {
   list-style: none;
 }
 
+/* ── Typography scale ── */
+
+/* Hero: large display, no uppercase */
+h1 {
+  font-size: var(--t-h1);
+  font-weight: var(--w-medium);
+  letter-spacing: var(--tk-h1);
+  line-height: var(--lh-tight);
+  text-transform: none;
+}
+
+h2 {
+  font-size: var(--t-h2);
+  font-weight: var(--w-medium);
+  letter-spacing: var(--tk-h2);
+  line-height: var(--lh-tight);
+  text-transform: none;
+}
+
+/* Section heading — uppercase */
+h3 {
+  font-size: var(--t-h3);
+  font-weight: var(--w-medium);
+  letter-spacing: var(--tk-h3);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+}
+
+h4, h5, h6 {
+  font-size: var(--t-btn);
+  font-weight: var(--w-medium);
+  letter-spacing: var(--tk-h3);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+}
+
+/* Buttons */
 button {
   background: var(--text-color);
   color: var(--background-color);
@@ -112,9 +167,10 @@ button {
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--border-radius-sm);
   font-family: var(--font-primary);
-  font-size: var(--t-sm);
+  font-size: var(--t-btn);
   font-weight: var(--w-medium);
-  letter-spacing: var(--tk-wide);
+  letter-spacing: var(--tk-btn);
+  text-transform: uppercase;
   cursor: pointer;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }

@@ -136,26 +136,29 @@ export default function RecommendedCard({ product }: Props) {
 
         /* ── Meta ── */
         .rec-meta {
-          padding: 10px 10px 14px;
+          padding-top: 10px;
+          padding-right: 12px;
+          padding-bottom: 16px;
+          padding-left: 1px;
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 4px;
         }
         .rec-title {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.03em;
           line-height: 1.3;
-          color: #0000cc;
+          color: #111;
         }
         .rec-price {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 400;
           color: #111;
         }
         .rec-collection {
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 400;
           letter-spacing: 0.03em;
           color: #999;
