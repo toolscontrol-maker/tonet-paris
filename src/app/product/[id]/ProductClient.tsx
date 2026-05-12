@@ -22,9 +22,15 @@ function TranslatedDesc({ text, className }: { text?: string | null; className?:
   return <p className={className}>{translated}</p>;
 }
 
+const RECENTLY_VIEWED_KEY = 'rv_products';
+const MAX_RECENTLY_VIEWED = 10;
+
+type RecentProduct = Pick<RecommendedProduct, 'handle' | 'title' | 'imageUrl' | 'price' | 'currencyCode'>;
+
 export default function ProductClient({ product, relatedProductsByTag }: Props) {
   const router = useRouter();
   const [recommended, setRecommended] = useState<RecommendedProduct[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentProduct[]>([]);
 
   useEffect(() => {
     import('@/lib/shopify').then(({ getRecommendedProducts }) => {
@@ -32,6 +38,23 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .then(setRecommended)
         .catch(() => {});
     });
+  }, [product.handle]);
+
+  useEffect(() => {
+    try {
+      const stored: RecentProduct[] = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) ?? '[]');
+      const current: RecentProduct = {
+        handle: product.handle,
+        title: product.title,
+        imageUrl: product.imageUrl,
+        price: product.price,
+        currencyCode: product.currencyCode,
+      };
+      const filtered = stored.filter(p => p.handle !== product.handle);
+      const updated = [current, ...filtered].slice(0, MAX_RECENTLY_VIEWED);
+      localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(updated));
+      setRecentlyViewed(filtered.slice(0, 8));
+    } catch {}
   }, [product.handle]);
 
   const images = product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean);
@@ -577,6 +600,33 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               {recommended.map((p) => (
                 <div className="rec-carousel-item" key={p.handle}>
                   <RecommendedCard key={p.handle} product={p} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── RECENTLY VIEWED ── */}
+      {recentlyViewed.length > 0 && (
+        <section className="rec-section">
+          <h2 className="rec-label">RECENTLY VIEWED</h2>
+          <div className="rec-carousel-wrap">
+            <div className="rec-carousel">
+              <div style={{flexShrink: 0, width: 16, minWidth: 16}} />
+              {recentlyViewed.map((p) => (
+                <div className="rec-carousel-item" key={p.handle}>
+                  <a href={`/product/${p.handle}`} className="rec-card" style={{textDecoration:'none',color:'inherit'}}>
+                    <div className="rec-img-wrap">
+                      {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="rec-img" />}
+                    </div>
+                    <div className="rec-meta">
+                      <span className="rec-title">{p.title}</span>
+                      <span className="rec-price">
+                        {(() => { const sym = p.currencyCode === 'USD' ? '$' : '€'; const n = p.price; return Number.isInteger(n) ? `${sym}${n} ${p.currencyCode}` : `${sym}${n.toFixed(2)} ${p.currencyCode}`; })()}
+                      </span>
+                    </div>
+                  </a>
                 </div>
               ))}
             </div>
