@@ -677,6 +677,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .ss-price-row {
           display: flex;
           align-items: baseline;
+          justify-content: center;
           gap: 12px;
           margin-bottom: 16px;
         }
