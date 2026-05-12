@@ -161,12 +161,12 @@ export default function MenuDrawer() {
 
           {/* Bottom links */}
           <div className="md-bottom-links">
-            <Link href="/stores" className="md-bottom-link" onClick={closeMenu}>Tiendas</Link>
-            <Link href="/product/e-gift-card" className="md-bottom-link" onClick={closeMenu}>Tarjetas regalo</Link>
+            <Link href="/stores" className="md-bottom-link" onClick={closeMenu}>Stores</Link>
+            <Link href="/product/e-gift-card" className="md-bottom-link" onClick={closeMenu}>Gift cards</Link>
           </div>
 
           <div className="md-locale">
-            Spain | español
+            Spain | English
           </div>
         </div>
 
@@ -180,20 +180,20 @@ export default function MenuDrawer() {
                   <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
               </button>
-              <h3 className="md-sub-title">Buscar</h3>
+              <h3 className="md-sub-title">Search</h3>
               <form className="md-search-form" onSubmit={handleSearchSubmit}>
                 <input
                   ref={searchInputRef}
                   type="text"
                   className="md-search-input"
-                  placeholder="Buscar, trajes, abrigos, etc"
+                  placeholder="Search, suits, coats, etc"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
               </form>
-              <p className="md-search-popular-title">Lo más buscado</p>
+              <p className="md-search-popular-title">Trending searches</p>
               <nav className="md-sub-nav">
-                {['hoodie', 'camiseta', 'pantalón'].map(term => (
+                {['hoodie', 't-shirt', 'trousers'].map(term => (
                   <button key={term} className="md-sub-item md-search-tag" onClick={() => handleSearchTag(term)}>
                     {term}
                   </button>
