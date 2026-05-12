@@ -10,86 +10,63 @@ import NotifyMeModal from '@/components/NotifyMeModal';
 import { useTranslatedText } from '@/hooks/useTranslatedText';
 import { useWishlist } from '@/context/WishlistContext';
 
-const YmalCarousel = memo(function YmalCarousel({ recommended, toggle }: { recommended: RecommendedProduct[]; toggle: (item: any) => void }) {
+const YmalCarousel = memo(function YmalCarousel({ recommended }: { recommended: RecommendedProduct[]; toggle: (item: any) => void }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(true);
+  const dragStart = useRef(0);
+  const scrollStart = useRef(0);
+  const isDragging = useRef(false);
+  const dragMoved = useRef(false);
 
-  const checkScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 10);
-    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    checkScroll();
-    el.addEventListener('scroll', checkScroll, { passive: true });
-    return () => el.removeEventListener('scroll', checkScroll);
-  }, [checkScroll]);
-
-  const scroll = (dir: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const target = el.scrollLeft + dir * 500;
-    const start = el.scrollLeft;
-    const diff = target - start;
-    const duration = 600;
-    let startTime: number | null = null;
-    const step = (ts: number) => {
-      if (!startTime) startTime = ts;
-      const t = Math.min((ts - startTime) / duration, 1);
-      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      el.scrollLeft = start + diff * ease;
-      if (t < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  };
+  function onPointerDown(e: React.PointerEvent) {
+    dragStart.current = e.clientX;
+    scrollStart.current = scrollRef.current?.scrollLeft ?? 0;
+    isDragging.current = true;
+    dragMoved.current = false;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    if (!isDragging.current) return;
+    const dx = e.clientX - dragStart.current;
+    if (Math.abs(dx) > 5) {
+      dragMoved.current = true;
+      scrollRef.current?.classList.add('dragging');
+      if (scrollRef.current) scrollRef.current.scrollLeft = scrollStart.current - dx;
+    }
+  }
+  function onPointerUp() {
+    isDragging.current = false;
+    scrollRef.current?.classList.remove('dragging');
+  }
+  function onCarouselClick(e: React.MouseEvent) {
+    if (dragMoved.current) { e.preventDefault(); e.stopPropagation(); dragMoved.current = false; }
+  }
 
   return (
     <section className="ymal-section">
-      <h2 className="ymal-title">TAMBIÉN TE PUEDE GUSTAR</h2>
+      <h2 className="ymal-title">YOU MAY ALSO LIKE</h2>
       <div className="ymal-carousel-wrap">
-        <button className={`ymal-arrow ymal-arrow-left${canLeft ? '' : ' ymal-arrow-hidden'}`} onClick={() => scroll(-1)} aria-label="Previous">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div className="ymal-carousel" ref={scrollRef}>
-          {recommended.map((p) => {
-            const href = p.collectionHandle
-              ? `/collection/${p.collectionHandle}`
-              : `/product/${p.handle}`;
-            return (
-              <a key={p.handle} href={href} className="ymal-card">
-                <div className="ymal-img-wrap">
-                  <button
-                    className="ymal-wishlist"
-                    onClick={(e) => { e.preventDefault(); toggle({ handle: p.handle, title: p.title, imageUrl: p.imageUrl, price: p.price, currencyCode: p.currencyCode, collectionTitle: '' }); }}
-                    aria-label="Add to wishlist"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5">
-                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                    </svg>
-                  </button>
-                  {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="ymal-img" />}
-                </div>
-                <div className="ymal-meta">
-                  <div className="ymal-meta-row">
-                    <span className="ymal-name">{p.title}</span>
-                    <span className="ymal-price">&euro;{Number(p.price).toFixed(0)}</span>
-                  </div>
-                  {p.collectionHandle && (
-                    <span className="ymal-subtitle">{p.collectionHandle.replace(/-/g, ' ')}</span>
-                  )}
-                </div>
-              </a>
-            );
-          })}
+        <div
+          className="ymal-carousel"
+          ref={scrollRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onClick={onCarouselClick}
+        >
+          <div style={{flexShrink: 0, width: 16, minWidth: 16}} />
+          {recommended.map((p) => (
+            <a key={p.handle} href={`/product/${p.handle}`} className="ymal-card">
+              <div className="ymal-img-wrap">
+                {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="ymal-img" />}
+              </div>
+              <div className="ymal-meta">
+                <span className="ymal-name">{p.title}</span>
+                <span className="ymal-price">&euro;{Number(p.price).toFixed(0)}</span>
+              </div>
+            </a>
+          ))}
         </div>
-        <button className={`ymal-arrow ymal-arrow-right${canRight ? '' : ' ymal-arrow-hidden'}`} onClick={() => scroll(1)} aria-label="Next">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
       </div>
     </section>
   );
@@ -579,28 +556,31 @@ export default function CollectionClient({ collection }: { collection: Collectio
           margin-bottom: 6px;
         }
         .col-title {
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
           line-height: 1.3;
           margin: 0;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
           color: #111 !important;
         }
         .col-price {
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
           white-space: nowrap;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.06em;
           color: #111;
         }
 
         /* Subtitle */
         .col-subtitle {
-          font-size: 13px;
+          font-size: 10px;
           font-weight: 400;
-          color: #666;
+          color: #888;
           margin: 0 0 20px 0;
-          line-height: 1.5;
+          line-height: 1.6;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
         }
 
         /* Thumbnails — Suitsupply style: square, grey bg, rounded */
@@ -753,9 +733,11 @@ export default function CollectionClient({ collection }: { collection: Collectio
           align-items: center;
           gap: 8px;
           padding: 14px 0;
-          font-size: 12px;
-          font-weight: 400;
+          font-size: 10px;
+          font-weight: 500;
           color: #444;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
           border-bottom: 1px solid #e8e8e8;
         }
 
@@ -773,12 +755,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
           background: none;
           border: none;
           font-family: inherit;
-          font-size: 14px;
-          font-weight: 400;
+          font-size: 11px;
+          font-weight: 500;
           color: #111;
           cursor: pointer;
           text-align: left;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
         }
         .col-accordion-header:hover { opacity: 0.7; }
         .col-accordion-icon {
@@ -1011,160 +994,87 @@ export default function CollectionClient({ collection }: { collection: Collectio
           }
         }
 
-        /* ── YOU MAY ALSO LIKE — carousel ── */
+        /* ── YOU MAY ALSO LIKE ── */
         .ymal-section {
           padding: 60px 0 80px;
           overflow: hidden;
         }
         .ymal-title {
-          font-family: 'DM Sans', serif;
-          font-size: 26px;
-          font-weight: 400;
-          font-style: italic;
+          font-size: 14px;
+          font-weight: 500;
           color: #111;
-          margin: 0 0 32px;
-          padding-left: 60px;
-          padding-right: 60px;
+          margin: 0 0 28px;
           text-transform: uppercase;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.1em;
+          text-align: center;
         }
-        .ymal-carousel-wrap {
-          position: relative;
-          padding-left: 0;
-        }
+        .ymal-carousel-wrap { overflow: hidden; }
         .ymal-carousel {
           display: flex;
-          gap: 16px;
+          gap: 0;
           overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          cursor: grab;
+          user-select: none;
+          scroll-padding-left: 16px;
           scrollbar-width: none;
         }
+        .ymal-carousel:active { cursor: grabbing; }
+        .ymal-carousel.dragging { cursor: grabbing; }
+        .ymal-carousel.dragging * { pointer-events: none; user-select: none; }
         .ymal-carousel::-webkit-scrollbar { display: none; }
         .ymal-card {
-          flex: 0 0 46%;
+          flex: 0 0 calc(25% - 18px);
+          min-width: calc(25% - 18px);
+          scroll-snap-align: start;
           text-decoration: none;
           color: inherit;
           display: flex;
           flex-direction: column;
         }
-        .ymal-card:first-child {
-          margin-left: 60px;
-        }
         .ymal-img-wrap {
           position: relative;
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: #e8e4df;
+          background: #f5f5f5;
           overflow: hidden;
         }
         .ymal-img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          display: block;
+          width: 100%; height: 100%;
+          object-fit: contain; display: block;
         }
-        .ymal-wishlist {
-          position: absolute;
-          top: 12px;
-          left: 12px;
-          width: 32px;
-          height: 32px;
-          border-radius: 50% !important;
-          border: 1px solid rgba(0,0,0,0.12) !important;
-          background: #fff !important;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          z-index: 2;
-          transition: box-shadow 0.15s !important;
-          padding: 0 !important;
-          color: #111 !important;
-          letter-spacing: 0 !important;
-          transform: none !important;
-        }
-        .ymal-wishlist:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 1 !important; }
-        .ymal-wishlist:active { transform: none !important; }
         .ymal-meta {
-          padding: 14px 0 0;
-        }
-        .ymal-meta-row {
+          padding-top: 10px;
+          padding-left: 18px;
+          padding-right: 12px;
+          padding-bottom: 16px;
           display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 12px;
+          flex-direction: column;
+          gap: 4px;
         }
         .ymal-name {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 500;
           color: #111;
           line-height: 1.3;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
         }
         .ymal-price {
-          font-size: 14px;
-          font-weight: 500;
-          color: #111;
-          white-space: nowrap;
-        }
-        .ymal-subtitle {
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 400;
-          color: #666;
-          margin-top: 2px;
-          display: block;
-          text-transform: capitalize;
-        }
-        .ymal-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%) !important;
-          width: 40px;
-          height: 40px;
-          background: none !important;
-          border: none !important;
-          border-radius: 0 !important;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          box-shadow: none !important;
-          z-index: 3;
           color: #111;
-          padding: 0 !important;
-          -webkit-tap-highlight-color: transparent;
-          outline: none;
-          opacity: 1;
-          transition: opacity 0.3s ease !important;
-        }
-        .ymal-arrow:hover { opacity: 1 !important; }
-        .ymal-arrow:active,
-        .ymal-arrow:focus { outline: none; transform: translateY(-50%) !important; }
-        .ymal-arrow-left { left: 16px; }
-        .ymal-arrow-right { right: 16px; }
-        .ymal-arrow-hidden {
-          opacity: 0;
-          pointer-events: none;
+          letter-spacing: 0.04em;
         }
 
         @media (max-width: 767px) {
-          .ymal-section { padding: 40px 0 100px; }
-          .ymal-title {
-            font-size: 20px;
-            padding: 0 16px;
-            margin-bottom: 20px;
-          }
-          .ymal-carousel-wrap {
-            padding-left: 0;
-          }
-          .ymal-carousel {
-            gap: 12px;
-          }
+          .ymal-section { padding: 40px 0 60px; }
+          .ymal-title { font-size: 14px; }
           .ymal-card {
-            flex: 0 0 80%;
+            flex: 0 0 83.333vw;
+            min-width: 83.333vw;
           }
-          .ymal-card:first-child {
-            margin-left: 16px;
-          }
-          .ymal-arrow { display: none !important; }
         }
       `}</style>
     </>

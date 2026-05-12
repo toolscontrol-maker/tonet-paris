@@ -83,6 +83,26 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Re-enable text selection in form fields */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Prevent image and link native drag */
+img, video {
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* Re-enable pointer events on interactive elements */
+a img, button img, [role="button"] img {
+  pointer-events: auto;
 }
 
 /* Hide scrollbar globally */

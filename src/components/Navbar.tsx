@@ -45,9 +45,12 @@ export default function Navbar() {
   // Pages with fullbleed gallery (transparent header overlay)
   const isFullbleed = isProduct || isCollection;
 
+  const BANNER_H = 22;
+
   // Smart header: hide on scroll down, show solid on scroll up
   const [headerVisible, setHeaderVisible] = useState(true);
   const [scrolledPast, setScrolledPast] = useState(false);
+  const [navTop, setNavTop] = useState(BANNER_H);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -65,16 +68,10 @@ export default function Navbar() {
       setScrolledPast(y > 80);
       // Past the video hero section (~one viewport)
       setPastVideo(y > window.innerHeight * 0.5);
-      if (window.location.pathname === '/') {
-        // Home: always show header, never hide
-        setHeaderVisible(true);
-      } else if (delta > 4 && y > 80) {
-        // Scrolling down — hide
-        setHeaderVisible(false);
-      } else if (delta < -4) {
-        // Scrolling up — show
-        setHeaderVisible(true);
-      }
+      // Always visible — never hide on scroll
+      setHeaderVisible(true);
+      // Slide navbar up as banner scrolls out
+      setNavTop(Math.max(0, BANNER_H - y));
 
       // Check for dark sections
       const header = document.querySelector('.acne-header');
@@ -119,7 +116,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`acne-header ${solid ? "solid" : "transparent"} ${isHome && !pastVideo ? "home-top" : ""} ${isHome && pastVideo ? "home-dark" : ""} ${!headerVisible ? "header-hidden" : ""} ${overDark ? "over-dark" : ""}`}>
+      <header className={`acne-header ${solid ? "solid" : "transparent"} ${isHome && !pastVideo ? "home-top" : ""} ${isHome && pastVideo ? "home-dark" : ""} ${!headerVisible ? "header-hidden" : ""} ${overDark ? "over-dark" : ""}`} style={{top: `${navTop}px`}}>
         <div className="acne-header-inner">
           {/* LEFT: Hamburger + Search */}
           <div className="acne-nav-left">
@@ -202,7 +199,7 @@ export default function Navbar() {
       <style>{`
         .acne-header {
           position: fixed;
-          top: 22px;
+          top: 0;
           left: 0; right: 0;
           z-index: 500;
           transition: transform 0.3s ease, background-color 0.25s ease, border-bottom-color 0.25s ease;

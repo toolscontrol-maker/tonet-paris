@@ -46,11 +46,6 @@ export default function RootLayout({
                   fontWeight: 400,
                   letterSpacing: '0.06em',
                   color: '#fff',
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 600,
                 }}>
                   Free shipping to Spain on all orders
                 </div>

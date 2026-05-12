@@ -28,7 +28,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
   useEffect(() => {
     import('@/lib/shopify').then(({ getRecommendedProducts }) => {
-      getRecommendedProducts(product.handle, 4)
+      getRecommendedProducts(product.handle, 5)
         .then(setRecommended)
         .catch(() => {});
     });
@@ -72,21 +72,31 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const recDragStart = useRef(0);
   const recScrollStart = useRef(0);
   const recIsDragging = useRef(false);
+  const recDragMoved = useRef(false);
 
-  function recMouseDown(e: React.MouseEvent) {
+  function recPointerDown(e: React.PointerEvent) {
     recDragStart.current = e.clientX;
     recScrollStart.current = recCarouselRef.current?.scrollLeft ?? 0;
-    recIsDragging.current = false;
+    recIsDragging.current = true;
+    recDragMoved.current = false;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
-  function recMouseMove(e: React.MouseEvent) {
-    if (!(e.buttons & 1)) return;
+  function recPointerMove(e: React.PointerEvent) {
+    if (!recIsDragging.current) return;
     const dx = e.clientX - recDragStart.current;
-    if (Math.abs(dx) > 4) {
-      recIsDragging.current = true;
+    if (Math.abs(dx) > 5) {
+      recDragMoved.current = true;
+      recCarouselRef.current?.classList.add('dragging');
       if (recCarouselRef.current) recCarouselRef.current.scrollLeft = recScrollStart.current - dx;
     }
   }
-  function recMouseUp() { recIsDragging.current = false; }
+  function recPointerUp() {
+    recIsDragging.current = false;
+    recCarouselRef.current?.classList.remove('dragging');
+  }
+  function recCarouselClick(e: React.MouseEvent) {
+    if (recDragMoved.current) { e.preventDefault(); e.stopPropagation(); recDragMoved.current = false; }
+  }
 
   useEffect(() => {
     const el = recCarouselRef.current;
@@ -508,11 +518,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div
               className="rec-carousel"
               ref={recCarouselRef}
-              onMouseDown={recMouseDown}
-              onMouseMove={recMouseMove}
-              onMouseUp={recMouseUp}
-              onMouseLeave={recMouseUp}
+              onPointerDown={recPointerDown}
+              onPointerMove={recPointerMove}
+              onPointerUp={recPointerUp}
+              onPointerCancel={recPointerUp}
+              onClick={recCarouselClick}
             >
+              <div style={{flexShrink: 0, width: 16, minWidth: 16}} />
               {recommended.map((p) => (
                 <div className="rec-carousel-item" key={p.handle}>
                   <RecommendedCard key={p.handle} product={p} />
@@ -544,7 +556,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .ss-carousel {
           width: 100%;
-          aspect-ratio: 2 / 3;
+          aspect-ratio: 3 / 4;
           display: flex;
           overflow: hidden;
           user-select: none;
@@ -554,7 +566,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .ss-carousel-slide {
           width: 100%;
           flex-shrink: 0;
-          aspect-ratio: 2 / 3;
+          aspect-ratio: 3 / 4;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -987,11 +999,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           -webkit-overflow-scrolling: touch;
           cursor: grab;
           user-select: none;
-          padding-left: 16px;
+          padding-left: 0;
           padding-bottom: 4px;
+          scroll-padding-left: 16px;
           will-change: transform;
         }
         .rec-carousel:active { cursor: grabbing; }
+        .rec-carousel.dragging { cursor: grabbing; }
+        .rec-carousel.dragging * { pointer-events: none; user-select: none; }
         .rec-carousel::-webkit-scrollbar { display: none; }
         .rec-carousel { scrollbar-width: none; }
         .rec-carousel-item {
@@ -1003,7 +1018,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         @media (max-width: 767px) {
           .rec-section { padding: 40px 0 60px; }
           .rec-label { font-size: 14px; }
-          .rec-carousel { padding-left: 16px; }
+          .rec-carousel { padding-left: 0; }
           .rec-carousel-item {
             flex: 0 0 83.333vw;
             min-width: 83.333vw;
