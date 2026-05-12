@@ -162,7 +162,7 @@ export default function MenuDrawer() {
           {/* Bottom links */}
           <div className="md-bottom-links">
             <Link href="/stores" className="md-bottom-link" onClick={closeMenu}>Tiendas</Link>
-            <Link href="/gift-cards" className="md-bottom-link" onClick={closeMenu}>Tarjetas regalo</Link>
+            <Link href="/product/e-gift-card" className="md-bottom-link" onClick={closeMenu}>Tarjetas regalo</Link>
           </div>
 
           <div className="md-locale">
