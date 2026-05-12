@@ -386,9 +386,19 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <span className="ss-price">{priceFormatted}</span>
           </div>
 
+          {/* Subtitle */}
+          {descriptionFirstLine && (
+            <p className="ss-subtitle">{descriptionFirstLine}</p>
+          )}
+
           {/* Variant / image thumbnails — only when color variants exist */}
           {colorOptions.length > 0 && (
             <div className="ss-thumbs-wrap">
+              {colorOptions.length > 4 && (
+                <button className="ss-thumbs-arrow ss-thumbs-arrow-left" onClick={() => scrollThumbs(-1)} aria-label="Previous">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+              )}
               <div className="ss-thumbs" ref={thumbsRef}>
                 {colorOptions.map((co) => (
                   <button
@@ -401,9 +411,9 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   </button>
                 ))}
               </div>
-              {colorOptions.length > 5 && (
-                <button className="ss-thumbs-arrow" onClick={() => scrollThumbs(1)} aria-label="More colors">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+              {colorOptions.length > 4 && (
+                <button className="ss-thumbs-arrow ss-thumbs-arrow-right" onClick={() => scrollThumbs(1)} aria-label="Next">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               )}
             </div>
@@ -659,29 +669,28 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           margin-bottom: 6px;
         }
         .ss-title {
-          font-size: 13px;
-          font-weight: 500;
-          line-height: 1.3;
+          font-size: 18px;
+          font-weight: 700;
+          line-height: 1.2;
           margin: 0;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
+          letter-spacing: 0;
+          text-transform: none;
         }
         .ss-price {
-          font-size: 13px;
-          font-weight: 500;
+          font-size: 18px;
+          font-weight: 400;
           white-space: nowrap;
-          letter-spacing: 0.06em;
+          letter-spacing: 0;
         }
 
         /* Subtitle */
         .ss-subtitle {
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 400;
-          color: #888;
-          margin: 0 0 20px 0;
-          line-height: 1.6;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
+          color: #555;
+          margin: 4px 0 16px 0;
+          line-height: 1.5;
+          letter-spacing: 0;
         }
 
         /* Thumbnails */
@@ -725,7 +734,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .ss-thumbs-arrow {
           position: absolute;
-          right: -4px;
           top: 50%;
           transform: translateY(-50%);
           width: 28px;
@@ -740,6 +748,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           box-shadow: 0 1px 4px rgba(0,0,0,0.08);
           z-index: 2;
         }
+        .ss-thumbs-arrow-left { left: -14px; }
+        .ss-thumbs-arrow-right { right: -14px; }
         .ss-thumbs-arrow:hover { background: #f5f5f5; }
 
         /* Action row */
