@@ -260,9 +260,7 @@ export default function MenuDrawer() {
         /* ── Left column ── */
         .md-col-left {
           width: 300px;
-          background: rgba(255,255,255,0.8);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: #fff;
           display: flex;
           flex-direction: column;
           overflow-y: auto;
@@ -361,9 +359,7 @@ export default function MenuDrawer() {
         .md-col-right {
           width: 0;
           overflow: hidden;
-          background: rgba(255,255,255,0.8);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: #fff;
           transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           display: flex;
           flex-direction: column;
