@@ -191,6 +191,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     for (const v of product.variants)
       for (const o of v.selectedOptions)
         if (o.name.toLowerCase() === 'size') return o.name;
+    // Gift card: use first option (e.g. Denomination, Amount) as the "type" selector
+    if (product.handle === 'e-gift-card') {
+      const first = product.variants[0]?.selectedOptions[0];
+      return first?.name ?? null;
+    }
     return null;
   }, []);
 
