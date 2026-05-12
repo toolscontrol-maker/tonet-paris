@@ -380,16 +380,16 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         {/* ── INFO PANEL ── */}
         <div className="ss-info" ref={infoRef}>
-          {/* Title + Price */}
-          <div className="ss-header">
-            <h1 className="ss-title">{product.title}</h1>
-            <span className="ss-price">{priceFormatted}</span>
-          </div>
+          {/* Title */}
+          <h1 className="ss-title">{product.title}</h1>
 
-          {/* Subtitle: color variant name if available, else description first line */}
-          {(selectedColor || descriptionFirstLine) && (
-            <p className="ss-subtitle">{selectedColor || descriptionFirstLine}</p>
-          )}
+          {/* Price + variant name on second line */}
+          <div className="ss-price-row">
+            <span className="ss-price">{priceFormatted}</span>
+            {(selectedColor || descriptionFirstLine) && (
+              <span className="ss-subtitle">{selectedColor || descriptionFirstLine}</span>
+            )}
+          </div>
 
           {/* Variant / image thumbnails — only when >1 color variant */}
           {colorOptions.length > 1 && (
@@ -665,35 +665,31 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           background: #EEEDED;
         }
 
-        /* Header: title + price */
-        .ss-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 20px;
-          margin-bottom: 6px;
-        }
         .ss-title {
           font-size: 18px;
           font-weight: 700;
           line-height: 1.2;
-          margin: 0;
+          margin: 0 0 8px 0;
           letter-spacing: 0;
           text-transform: none;
+          text-align: center;
+        }
+        .ss-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          margin-bottom: 16px;
         }
         .ss-price {
-          font-size: 18px;
-          font-weight: 400;
+          font-size: 16px;
+          font-weight: 500;
           white-space: nowrap;
           letter-spacing: 0;
         }
-
-        /* Subtitle */
         .ss-subtitle {
           font-size: 13px;
           font-weight: 400;
           color: #555;
-          margin: 4px 0 16px 0;
           line-height: 1.5;
           letter-spacing: 0;
         }
