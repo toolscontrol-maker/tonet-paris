@@ -251,7 +251,7 @@ export default function MenuDrawer() {
           flex-direction: row;
           z-index: 1001;
           transform: translateX(-100%);
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .md-drawer.open {
           transform: translateX(0);

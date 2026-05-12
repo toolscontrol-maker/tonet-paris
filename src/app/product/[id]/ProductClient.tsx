@@ -65,6 +65,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const { addToCart } = useCart();
   const thumbsRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const isDragging = useRef(false);
@@ -107,6 +108,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const el = infoRef.current;
+    if (!el) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      window.scrollBy({ top: e.deltaY, left: 0 });
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
   }, []);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isPausedRef = useRef(false);
@@ -212,13 +224,27 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     ? `€${priceNum}`
     : `€${priceNum.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const allSizes = useMemo(() => {
+    if (!sizeOptionName) return sizeOptions;
+    const norm = sizeOptions.map(s => s.toUpperCase());
+    if (norm.includes('XS') || norm.includes('X-SMALL')) return sizeOptions;
+    return ['XS', ...sizeOptions];
+  }, [sizeOptions, sizeOptionName]);
+
   const hasMultipleVariants = product.variants.length > 1;
   const hasSizes = sizeOptions.length > 0;
   const needsSizeSelection = hasSizes && !selectedSize;
 
+  function handleSizeSelectInDrawer(sizeValue: string) {
+    setSelectedSize(sizeValue);
+    const next = findVariant(selectedColor, sizeValue);
+    if (next) setSelectedVariant(next);
+  }
+
   async function handleAddToBag() {
     if (!selectedVariant.id || adding) return;
     if (needsSizeSelection) { setSizeOpen(true); return; }
+    setSizeOpen(false);
     setAdding(true);
     try {
       await addToCart(selectedVariant.id, 1);
@@ -290,21 +316,50 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   return (
     <>
       <div className="ss-pdp-layout">
-        {/* ── CAROUSEL ── */}
+        {/* ── GALLERY ── */}
         <div className="ss-gallery">
-          <div
-            className="ss-carousel"
-            ref={carouselRef}
-            onTouchStart={handleCarouselTouchStart}
-            onTouchEnd={handleCarouselTouchEnd}
-            onMouseDown={handleCarouselMouseDown}
-            onMouseMove={handleCarouselMouseMove}
-            onMouseUp={handleCarouselMouseUp}
-            onMouseEnter={() => { isPausedRef.current = true; }}
-            onMouseLeave={() => { isPausedRef.current = false; }}
-          >
+          {/* Mobile: horizontal carousel */}
+          <div className="ss-mobile-gallery">
+            <div
+              className="ss-carousel"
+              ref={carouselRef}
+              onTouchStart={handleCarouselTouchStart}
+              onTouchEnd={handleCarouselTouchEnd}
+              onMouseDown={handleCarouselMouseDown}
+              onMouseMove={handleCarouselMouseMove}
+              onMouseUp={handleCarouselMouseUp}
+              onMouseEnter={() => { isPausedRef.current = true; }}
+              onMouseLeave={() => { isPausedRef.current = false; }}
+            >
+              {images.map((img, i) => (
+                <div key={i} className="ss-carousel-slide">
+                  <img
+                    src={img}
+                    alt={`${product.title} – ${i + 1}`}
+                    className="ss-gallery-img"
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+            {images.length > 1 && (
+              <div className="ss-carousel-dots">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`ss-carousel-dot${activeImage === i ? ' active' : ''}`}
+                    onClick={() => goToSlide(i)}
+                    aria-label={`Image ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: vertically stacked images */}
+          <div className="ss-desktop-gallery">
             {images.map((img, i) => (
-              <div key={i} className="ss-carousel-slide">
+              <div key={i} className="ss-desktop-img-block">
                 <img
                   src={img}
                   alt={`${product.title} – ${i + 1}`}
@@ -314,26 +369,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               </div>
             ))}
           </div>
-
-          {/* Dot indicators */}
-          {images.length > 1 && (
-            <div className="ss-carousel-dots">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  className={`ss-carousel-dot${activeImage === i ? ' active' : ''}`}
-                  onClick={() => goToSlide(i)}
-                  aria-label={`Image ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Arrow buttons removed — auto-scroll active */}
         </div>
 
         {/* ── INFO PANEL ── */}
-        <div className="ss-info">
+        <div className="ss-info" ref={infoRef}>
           {/* Title + Price */}
           <div className="ss-header">
             <h1 className="ss-title">{product.title}</h1>
@@ -417,25 +456,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             </button>
           </div>
 
-          {/* Size selector dropdown */}
-          {sizeOpen && hasSizes && (
-            <div className="ss-size-dropdown">
-              {sizeOptions.map((size) => {
-                const available = isSizeAvailable(size);
-                return (
-                  <button
-                    key={size}
-                    className={`ss-size-option${selectedSize === size ? ' active' : ''}${!available ? ' unavailable' : ''}`}
-                    onClick={() => available && handleSizeSelect(size)}
-                    disabled={!available}
-                  >
-                    <span>{size}</span>
-                    {!available && <span className="ss-size-oos">—</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
 
           {/* Delivery info */}
           <div className="ss-delivery">
@@ -510,6 +530,55 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         </div>
       </div>
 
+      {/* ── SIZE DRAWER ── */}
+      <div className={`ss-size-drawer${sizeOpen && hasSizes ? ' open' : ''}`}>
+        <div className="ss-size-drawer-header">
+          <span className="ss-size-drawer-title">{product.title}</span>
+          <div className="ss-size-header-right">
+            <span className="ss-size-guide">SIZE GUIDE</span>
+            <button className="ss-size-close" onClick={() => setSizeOpen(false)} aria-label="Close">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <line x1="1" y1="1" x2="13" y2="13" stroke="currentColor" strokeWidth="1.2"/>
+                <line x1="13" y1="1" x2="1" y2="13" stroke="currentColor" strokeWidth="1.2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className="ss-size-drawer-list">
+          {allSizes.map((size) => {
+            const available = isSizeAvailable(size);
+            const isSelected = selectedSize === size;
+            return (
+              <button
+                key={size}
+                className={`ss-size-row${isSelected ? ' selected' : ''}${!available ? ' oos' : ''}`}
+                onClick={() => handleSizeSelectInDrawer(size)}
+              >
+                <span className="ss-size-row-name">
+                  {isSelected && <span className="ss-size-bullet">•&nbsp;</span>}
+                  {size}
+                </span>
+                {!available && (
+                  <div className="ss-size-oos-wrap">
+                    <span className="ss-sold-out">SOLD OUT</span>
+                    <span className="ss-get-notified">GET NOTIFIED</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <div className="ss-size-drawer-footer">
+          <button
+            className="ss-size-add-btn"
+            onClick={handleAddToBag}
+            disabled={!selectedSize || adding || !isSizeAvailable(selectedSize)}
+          >
+            {adding ? 'ADDING...' : 'ADD TO BAG'}
+          </button>
+        </div>
+      </div>
+
       {/* ── RECOMMENDED ── */}
       {recommended.length > 0 && (
         <section className="rec-section">
@@ -548,12 +617,15 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           color: #111;
         }
 
-        /* ── CAROUSEL ── */
+        /* ── GALLERY ── */
         .ss-gallery {
           position: relative;
           background: #e8e4df;
           overflow: hidden;
         }
+        /* Mobile: show carousel, hide desktop stack */
+        .ss-mobile-gallery { display: block; }
+        .ss-desktop-gallery { display: none; }
         .ss-carousel {
           width: 100%;
           aspect-ratio: 3 / 4;
@@ -587,7 +659,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           left: 0; right: 0;
           display: flex;
           justify-content: center;
-          gap: 6px;
+          gap: 14px;
           z-index: 5;
         }
         .ss-carousel-dot {
@@ -746,37 +818,135 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .ss-cta-btn:hover:not(:disabled) { background: #333; }
         .ss-cta-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Size dropdown */
-        .ss-size-dropdown {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-          gap: 0;
-          border: 1px solid #e0e0e0;
-          margin-bottom: 16px;
+        /* ── SIZE DRAWER ── */
+        .ss-size-drawer {
+          position: fixed;
+          top: 0; right: 0; bottom: 0;
+          width: min(100vw, 400px);
           background: #fff;
+          border-left: 1px solid #e0e0e0;
+          z-index: 1002;
+          display: flex;
+          flex-direction: column;
+          transform: translateX(100%);
+          transition: transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
+          font-family: var(--font-primary, 'HK Grotesk', 'Inter', sans-serif);
         }
-        .ss-size-option {
-          padding: 12px 8px;
-          font-family: inherit;
-          font-size: 12px;
-          font-weight: 400;
-          text-align: center;
-          border: none;
-          border-right: 1px solid #e0e0e0;
-          border-bottom: 1px solid #e0e0e0;
-          background: #fff;
-          cursor: pointer;
-          color: #111;
-          transition: background 0.12s;
+        .ss-size-drawer.open { transform: translateX(0); }
+
+        .ss-size-drawer-header {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 4px;
+          justify-content: space-between;
+          padding: 16px 20px;
+          border-bottom: 1px solid #e8e8e8;
+          flex-shrink: 0;
+          gap: 12px;
         }
-        .ss-size-option:hover:not(.unavailable):not(.active) { background: #f5f5f5; }
-        .ss-size-option.active { background: #111; color: #fff; }
-        .ss-size-option.unavailable { color: #ccc; cursor: not-allowed; }
-        .ss-size-oos { color: #ccc; }
+        .ss-size-drawer-title {
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ss-size-header-right {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-shrink: 0;
+        }
+        .ss-size-guide {
+          font-size: 9px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #888;
+          cursor: pointer;
+        }
+        .ss-size-close {
+          background: none; border: none;
+          cursor: pointer; color: #000;
+          display: flex; align-items: center; justify-content: center;
+          width: 28px; height: 28px; padding: 4px;
+        }
+
+        .ss-size-drawer-list {
+          flex: 1;
+          overflow-y: auto;
+          scrollbar-width: none;
+        }
+        .ss-size-drawer-list::-webkit-scrollbar { display: none; }
+
+        .ss-size-row {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 20px;
+          border: none;
+          border-bottom: 1px solid #f0f0f0;
+          background: none;
+          cursor: pointer;
+          font-family: inherit;
+          text-align: left;
+        }
+        .ss-size-row.oos { cursor: default; }
+        .ss-size-row-name {
+          font-size: 11px;
+          font-weight: 400;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #111;
+          display: flex;
+          align-items: center;
+        }
+        .ss-size-row.oos .ss-size-row-name { color: #bbb; }
+        .ss-size-bullet { color: #111; }
+        .ss-size-oos-wrap {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 2px;
+        }
+        .ss-sold-out {
+          font-size: 9px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #bbb;
+        }
+        .ss-get-notified {
+          font-size: 9px;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #111;
+          text-decoration: underline;
+        }
+
+        .ss-size-drawer-footer {
+          flex-shrink: 0;
+          padding: 16px 20px 20px;
+          border-top: 1px solid #e8e8e8;
+        }
+        .ss-size-add-btn {
+          display: block;
+          width: 100%;
+          background: #111;
+          color: #fff;
+          border: none;
+          padding: 15px;
+          font-size: 10px;
+          font-family: inherit;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.14em;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .ss-size-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .ss-size-add-btn:not(:disabled):hover { background: #333; }
 
         /* Delivery line */
         .ss-delivery {
@@ -908,45 +1078,33 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             min-height: 100vh;
           }
 
-          /* Gallery: 4/6 width, scrollable vertically */
+          /* Desktop: hide mobile carousel, show stacked images */
+          .ss-mobile-gallery { display: none; }
+          .ss-desktop-gallery { display: block; }
+
+          /* Gallery column */
           .ss-gallery {
             width: 66.666%;
             flex-shrink: 0;
+            background: transparent;
+            overflow: visible;
           }
-          .ss-carousel {
-            aspect-ratio: 2 / 3;
-            height: auto;
-          }
-          .ss-carousel-slide {
-            aspect-ratio: 2 / 3;
-          }
-          /* Show arrows on desktop */
-          .ss-carousel-arrow {
+
+          /* Each image block: full width, 3:4 */
+          .ss-desktop-img-block {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            background: #e8e4df;
+            overflow: hidden;
             display: flex;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 36px;
-            height: 36px;
-            background: rgba(255,255,255,0.85);
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            z-index: 5;
-            color: #111;
-            transition: background 0.15s, opacity 0.15s;
           }
-          .ss-carousel-arrow:disabled { opacity: 0.25; cursor: default; }
-          .ss-carousel-arrow:hover:not(:disabled) { background: #fff; }
-          .ss-carousel-arrow.prev { left: 14px; }
-          .ss-carousel-arrow.next { right: 14px; }
-          .ss-gallery-desc {
-            min-height: 50vh;
-            display: flex;
-            align-items: center;
-            padding: 60px 48px;
+          .ss-desktop-img-block .ss-gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
           }
 
           /* Info panel: sticky on the right, full viewport height */
