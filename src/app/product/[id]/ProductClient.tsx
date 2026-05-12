@@ -456,7 +456,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span>{t('common.freeDeliveryShort')}</span>
+            <span>Free delivery for orders over 1k</span>
           </div>
 
           {/* Accordion sections */}
@@ -928,6 +928,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .ss-delivery {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 8px;
           padding: 14px 0;
           font-size: 10px;
