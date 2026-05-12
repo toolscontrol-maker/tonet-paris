@@ -1093,7 +1093,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             top: 0;
             height: 100vh;
             overflow-y: auto;
-            padding: 100px 40px 80px 40px;
+            padding: 100px 70px 80px 70px;
             scrollbar-width: none;
             box-sizing: border-box;
           }
@@ -1104,7 +1104,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         @media (min-width: 1200px) {
           .ss-info {
-            padding: 100px 48px 80px 48px;
+            padding: 100px 80px 80px 80px;
           }
         }
 
