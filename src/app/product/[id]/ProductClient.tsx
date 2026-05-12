@@ -1044,7 +1044,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         /* ══════════════════════════════════════
            DESKTOP: side-by-side layout
-           Gallery = 4/6 (66.66%), Info = 2/6
+           Gallery = 58%, Info = 42%
         ══════════════════════════════════════ */
         @media (min-width: 768px) {
           .ss-pdp-layout {
@@ -1058,7 +1058,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
           /* Gallery column */
           .ss-gallery {
-            width: 66.666%;
+            width: 58%;
             flex-shrink: 0;
             background: transparent;
             overflow: visible;
@@ -1083,7 +1083,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
           /* Info panel: sticky on the right, full viewport height */
           .ss-info {
-            width: 33.334%;
+            width: 42%;
             position: sticky;
             top: 0;
             height: 100vh;
