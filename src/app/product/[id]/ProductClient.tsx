@@ -604,7 +604,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         /* ── GALLERY ── */
         .ss-gallery {
           position: relative;
-          background: #e8e4df;
+          background: #EEEDED;
           overflow: hidden;
         }
         /* Mobile: show carousel, hide desktop stack */
@@ -626,7 +626,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #e8e4df;
+          background: #EEEDED;
           overflow: hidden;
         }
         .ss-gallery-img {
@@ -668,6 +668,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         /* ── INFO PANEL ── */
         .ss-info {
           padding: 24px 20px 140px 20px;
+          background: #EEEDED;
         }
 
         /* Header: title + price */
@@ -1078,7 +1079,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           .ss-desktop-img-block {
             width: 100%;
             aspect-ratio: 3 / 4;
-            background: #e8e4df;
+            background: #EEEDED;
             overflow: hidden;
             display: flex;
             align-items: center;
