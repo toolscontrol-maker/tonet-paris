@@ -350,6 +350,9 @@ export default function Footer() {
             flex-direction: column;
             padding: 0;
             border-bottom: 1px solid #ededed;
+            margin: 0;
+            max-width: 100%;
+            text-align: left;
           }
 
           .footer-col {
@@ -359,7 +362,7 @@ export default function Footer() {
 
           .col-title {
             margin: 0;
-            padding: 18px 20px;
+            padding: 18px 16px;
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.08em;
@@ -368,6 +371,7 @@ export default function Footer() {
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            text-align: left;
           }
 
           .chevron {
@@ -389,7 +393,8 @@ export default function Footer() {
             display: none;
             flex-direction: column;
             gap: 0;
-            padding: 0 20px 16px;
+            padding: 0 16px 16px;
+            text-align: left;
           }
 
           .col-links li a {
@@ -414,7 +419,9 @@ export default function Footer() {
             flex-direction: column;
             align-items: flex-start;
             gap: 0;
-            padding: 24px 20px 32px;
+            padding: 24px 16px 32px;
+            margin: 0;
+            max-width: 100%;
           }
 
           .bottom-center.socials {
