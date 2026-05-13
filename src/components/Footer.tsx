@@ -116,10 +116,9 @@ export default function Footer() {
           font-weight: 400;
           line-height: 1.6;
           letter-spacing: 0.02em;
-          border-top: none;
+          border-top: 1px solid #555;
           scroll-snap-align: start;
-          min-height: 80vh;
-          min-height: 80dvh;
+          min-height: unset;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -251,7 +250,6 @@ export default function Footer() {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
           padding: 40px 20px 40px 20px;
-          border-top: 1px solid #e0e0e0;
           border-bottom: none;
           max-width: 1400px;
           margin: 0 auto;
