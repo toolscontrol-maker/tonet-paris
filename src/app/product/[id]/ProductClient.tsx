@@ -1146,9 +1146,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             top: 0;
             height: 100vh;
             overflow-y: auto;
-            padding: 130px 70px 80px 70px;
+            padding: 80px 70px;
             scrollbar-width: none;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
           }
           .ss-info::-webkit-scrollbar { display: none; }
 
@@ -1157,7 +1160,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         @media (min-width: 1200px) {
           .ss-info {
-            padding: 130px 80px 80px 80px;
+            padding: 80px 80px;
           }
         }
 
