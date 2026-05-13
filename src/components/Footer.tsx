@@ -30,10 +30,10 @@ export default function Footer() {
             {!isMinimalPage && (
               <li className="fnc-wrapper">
                 <div className="footer-newsletter-compact">
-                  <h4 className="fnc-title">Lo último en productos y diseño</h4>
+                  <h4 className="fnc-title">Be the first to access Tonet Paris Giftings and presales</h4>
                   <div className="fnc-form">
-                    <input type="email" placeholder="Ingresa tu correo electrónico" className="fnc-input" />
-                    <button type="submit" className="fnc-submit">Suscribirse</button>
+                    <input type="email" placeholder="Enter your email address" className="fnc-input" />
+                    <button type="submit" className="fnc-submit">Subscribe</button>
                   </div>
                 </div>
               </li>
