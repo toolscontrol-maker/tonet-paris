@@ -467,6 +467,9 @@ export default function Navbar() {
           .acne-nav-right {
             gap: 0;
           }
+          .acne-nav-right .acne-right-icon:first-child {
+            display: none;
+          }
           .acne-right-icon {
             width: 28px;
             height: 48px;
