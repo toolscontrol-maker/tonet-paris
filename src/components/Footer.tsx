@@ -42,22 +42,16 @@ export default function Footer() {
 
       <div className="footer-links-container">
 
-        {/* Column 1: Contact Us */}
+        {/* Column 1: Contact Us + Client Services stacked */}
         <div className="footer-col">
-          <input type="checkbox" id="footer-col-1" className="accordion-toggle" defaultChecked />
-          <label htmlFor="footer-col-1" className="col-title">{t('footer.contactUs')} <span className="chevron"></span></label>
-          <ul className="col-links">
+          <p className="col-title" style={{marginBottom:'16px'}}>{t('footer.contactUs')}</p>
+          <ul className="col-links" style={{display:'flex'}}>
             <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.emailLabel')}</Link></li>
           </ul>
-        </div>
-
-        {/* Column 2: Client Services */}
-        <div className="footer-col">
-          <input type="checkbox" id="footer-col-3" className="accordion-toggle" defaultChecked />
-          <label htmlFor="footer-col-3" className="col-title">{t('footer.clientServices')} <span className="chevron"></span></label>
-          <ul className="col-links">
+          <p className="col-title" style={{marginTop:'32px', marginBottom:'16px'}}>{t('footer.clientServices')}</p>
+          <ul className="col-links" style={{display:'flex'}}>
             <li><Link href="#">{t('footer.services')}</Link></li>
             <li><Link href="#">{t('footer.accountLabel')}</Link></li>
             <li><Link href="#">{t('footer.findStore')}</Link></li>
@@ -66,7 +60,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Column 3: Help */}
+        {/* Column 2: Help */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-2" className="accordion-toggle" />
           <label htmlFor="footer-col-2" className="col-title">{t('footer.helpTitle')} <span className="chevron"></span></label>
@@ -265,7 +259,7 @@ export default function Footer() {
         /* Columns Desktop */
         .footer-links-container {
           display: grid;
-          grid-template-columns: repeat(5, 1fr) 1.8fr;
+          grid-template-columns: repeat(4, 1fr) 1.8fr;
           padding: 60px 20px 80px 20px;
           border-bottom: none;
           max-width: 1400px;
