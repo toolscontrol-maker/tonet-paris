@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import FindStoreConditional from '@/components/FindStoreConditional';
 
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
@@ -53,7 +52,6 @@ export default function RootLayout({
                 <CartDrawer />
                 <MenuDrawer />
                 <main>{children}</main>
-                <FindStoreConditional />
                 <Footer />
               </WishlistProvider>
               </AuthProvider>
