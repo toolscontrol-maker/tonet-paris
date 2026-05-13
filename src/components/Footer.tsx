@@ -294,13 +294,7 @@ export default function Footer() {
 
         /* Bottom Bar */
         .footer-bottom {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 24px 20px 40px 20px;
-          max-width: 1400px;
-          margin: 0 auto;
-          border-top: none;
+          display: none;
         }
 
         .bottom-left {
