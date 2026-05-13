@@ -225,6 +225,8 @@ export default function Footer() {
           display: flex;
           border: 1px solid #ccc;
           border-radius: 0;
+          min-height: 80px;
+          align-items: stretch;
         }
         .fnc-input {
           flex: 1;
@@ -235,6 +237,7 @@ export default function Footer() {
           font-size: 11px;
           outline: none;
           color: #000 !important;
+          align-self: stretch;
         }
         .fnc-input::placeholder {
           color: #666;
@@ -441,6 +444,8 @@ export default function Footer() {
             display: flex;
             border: 1px solid #ccc;
             border-radius: 0;
+            min-height: 80px;
+            align-items: stretch;
           }
           .fnm-input {
             flex: 1;
@@ -451,6 +456,7 @@ export default function Footer() {
             font-family: inherit;
             font-size: 10px;
             color: #111;
+            align-self: stretch;
           }
           .fnm-submit {
             padding: 12px 18px;
