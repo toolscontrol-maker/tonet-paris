@@ -284,7 +284,7 @@ export default function Footer() {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 4px;
         }
 
         .chevron {
