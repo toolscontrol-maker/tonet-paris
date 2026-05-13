@@ -276,6 +276,9 @@ export default function HeroSection() {
           transition: background 0.3s ease, border-color 0.3s ease;
           z-index: 2;
         }
+        .hero-single-panel:hover {
+          opacity: 1 !important;
+        }
         .hero-single-panel:hover .hero-single-cta {
           background: rgba(0, 0, 0, 0.8);
           border-color: rgba(255,255,255,0.9);
