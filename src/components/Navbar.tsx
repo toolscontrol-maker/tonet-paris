@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Menu, Search, User, ShoppingBag, ArrowLeft, ChevronDown, ChevronUp, Bookmark } from "lucide-react";
+import { Menu, Search, User, ShoppingBag, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUI } from "@/context/UIContext";
@@ -140,7 +140,9 @@ export default function Navbar() {
             </Link>
 
             <Link href="/wishlist" className="acne-right-icon" aria-label="Wishlist">
-              <Bookmark size={18} strokeWidth={1.4} fill="currentColor" />
+              <svg width="18" height="18" viewBox="0 0 12 12" fill="none">
+                <polygon fill="#1D1D1B" points="1.5,0 1.5,12 6,9.8181763 10.5,12 10.5,0 "/>
+              </svg>
             </Link>
 
             <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
