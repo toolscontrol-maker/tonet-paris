@@ -96,12 +96,10 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="bottom-left">
-          <span className="copyright desktop-only">{t('footer.copyright')}</span>
+          <span className="copyright">{t('footer.copyright')}</span>
           <Link href="#" className="cookie-link">{t('footer.cookieSettings')}</Link>
         </div>
-        
-        <div className="bottom-center socials">
-          <span className="copyright mobile-only" style={{ marginRight: '8px', color: '#000' }}>{t('footer.copyright')}</span>
+        <div className="bottom-right socials">
           <Link href="#">IG</Link>
           <Link href="#">FB</Link>
           <Link href="#">TW</Link>
@@ -109,7 +107,6 @@ export default function Footer() {
           <Link href="#">PT</Link>
           <Link href="#">WB</Link>
         </div>
-        
       </div>
 
       <style>{`
@@ -305,27 +302,19 @@ export default function Footer() {
           padding: 24px 20px 40px 20px;
           max-width: 1400px;
           margin: 0 auto;
-        }
-
-        .bottom-left, .bottom-right {
-          flex: 1;
-        }
-        
-        .bottom-right {
-          text-align: right;
-        }
-        
-        .bottom-center {
-          flex: 2;
-          display: flex;
-          justify-content: center;
-          gap: 16px;
+          border-top: none;
         }
 
         .bottom-left {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
+        }
+
+        .bottom-right.socials {
+          display: flex;
+          align-items: center;
+          gap: 16px;
         }
 
         .copyright {
@@ -435,42 +424,20 @@ export default function Footer() {
 
           /* Bottom bar */
           .footer-bottom {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
             padding: 24px 16px 32px;
             margin: 0;
             max-width: 100%;
           }
 
-          .bottom-center.socials {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            gap: 20px;
-            flex-wrap: nowrap;
-            width: 100%;
-            margin-bottom: 20px;
-            order: 1;
+          .bottom-right.socials {
+            gap: 12px;
           }
 
           .bottom-left {
-            order: 2;
-          }
-
-          .bottom-center.socials a {
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.06em;
-            color: #000;
-            text-transform: uppercase;
-          }
-
-          .bottom-left {
-            width: 100%;
-            gap: 6px;
-            display: flex;
-            flex-direction: column;
+            gap: 4px;
           }
 
           .copyright {
