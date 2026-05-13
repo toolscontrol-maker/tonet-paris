@@ -727,7 +727,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           line-height: 1.2;
           margin: 0 0 8px 0;
           letter-spacing: 0;
-          text-transform: none;
+          text-transform: uppercase;
           text-align: center;
         }
         .ss-price-row {
