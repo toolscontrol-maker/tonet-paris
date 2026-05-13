@@ -4,6 +4,7 @@ import { useUI } from "@/context/UIContext";
 import { useCart, CartLine } from "@/context/CartContext";
 import { useEffect } from "react";
 import { useLocale } from "@/context/LocaleContext";
+import { X, Plus, Minus } from "lucide-react";
 
 interface CartItem {
   id: string;
@@ -75,10 +76,7 @@ export default function CartDrawer() {
           <div className="cd-header-spacer" />
           <span className="cd-title">SHOPPING BAG</span>
           <button className="cd-close" onClick={closeCart} aria-label="Close">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <line x1="1" y1="1" x2="13" y2="13" stroke="currentColor" strokeWidth="1.2"/>
-              <line x1="13" y1="1" x2="1" y2="13" stroke="currentColor" strokeWidth="1.2"/>
-            </svg>
+            <X size={18} strokeWidth={1.4} />
           </button>
         </div>
 
@@ -103,9 +101,9 @@ export default function CartDrawer() {
                     {[item.colour, item.size].filter(Boolean).join(' / ').toUpperCase() || 'ONE SIZE'}
                   </span>
                   <div className="cd-qty-row">
-                    <button className="cd-qty-btn" onClick={() => changeQty(item.id, -1)} aria-label="Decrease">−</button>
+                    <button className="cd-qty-btn" onClick={() => changeQty(item.id, -1)} aria-label="Decrease"><Minus size={12} strokeWidth={1.5} /></button>
                     <span className="cd-qty-val">{item.qty}</span>
-                    <button className="cd-qty-btn" onClick={() => changeQty(item.id, 1)} aria-label="Increase">+</button>
+                    <button className="cd-qty-btn" onClick={() => changeQty(item.id, 1)} aria-label="Increase"><Plus size={12} strokeWidth={1.5} /></button>
                   </div>
                   <span className="cd-item-price">
                     {formatPrice(item.price * item.qty, 'EUR')}

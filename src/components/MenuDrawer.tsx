@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUI } from "@/context/UIContext";
@@ -176,9 +177,7 @@ export default function MenuDrawer() {
           {searchOpen && (
             <>
               <button className="md-back-btn" onClick={closeRightPanel}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
+                <ArrowLeft size={18} strokeWidth={1.4} />
               </button>
               <h3 className="md-sub-title">Search</h3>
               <form className="md-search-form" onSubmit={handleSearchSubmit}>
@@ -205,9 +204,7 @@ export default function MenuDrawer() {
           {activeCol && !searchOpen && (
             <>
               <button className="md-back-btn" onClick={closeRightPanel}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
+                <ArrowLeft size={18} strokeWidth={1.4} />
               </button>
               <h3 className="md-sub-title">{activeCol.title}</h3>
               <nav className="md-sub-nav">

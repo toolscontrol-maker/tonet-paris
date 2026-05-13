@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { CollectionSummary } from "@/lib/shopify";
 import { useUI } from "@/context/UIContext";
@@ -66,9 +67,7 @@ export default function SearchDrawer() {
         {/* SEARCH INPUT */}
         <div className="sd-input-sec">
           <div className="sd-input-box">
-            <svg className="sd-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-            </svg>
+            <Search size={14} strokeWidth={1.5} className="sd-search-icon" />
             <input type="text" placeholder={t('search.placeholder')} className="sd-input" autoFocus={isSearchOpen} />
           </div>
         </div>

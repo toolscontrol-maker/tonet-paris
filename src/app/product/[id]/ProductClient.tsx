@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { Bookmark, ChevronLeft, ChevronRight, Check, X, Plus, Minus } from 'lucide-react';
 import { useUI } from '@/context/UIContext';
 import { useCart } from '@/context/CartContext';
 import { useTranslation } from '@/lib/i18n';
@@ -420,7 +421,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div className="ss-thumbs-wrap">
               {colorOptions.length > 4 && (
                 <button className="ss-thumbs-arrow ss-thumbs-arrow-left" onClick={() => scrollThumbs(-1)} aria-label="Previous">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+                  <ChevronLeft size={14} strokeWidth={1.4} color="#111" />
                 </button>
               )}
               <div className="ss-thumbs" ref={thumbsRef}>
@@ -437,7 +438,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               </div>
               {colorOptions.length > 4 && (
                 <button className="ss-thumbs-arrow ss-thumbs-arrow-right" onClick={() => scrollThumbs(1)} aria-label="Next">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+                  <ChevronRight size={14} strokeWidth={1.4} color="#111" />
                 </button>
               )}
             </div>
@@ -450,9 +451,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               aria-label="Add to wishlist"
               onClick={() => toggle(wishlistItem)}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill={inWishlist ? '#111' : 'none'} stroke="#111" strokeWidth="1.5">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-              </svg>
+              <Bookmark size={18} strokeWidth={1.4} fill={inWishlist ? '#111' : 'none'} color="#111" />
             </button>
             <button
               className="ss-cta-btn"
@@ -477,9 +476,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
           {/* Delivery info */}
           <div className="ss-delivery">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+            <Check size={13} strokeWidth={1.5} color="#111" />
             <span>{t('common.freeDeliveryShort')}</span>
           </div>
 
@@ -488,7 +485,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div className="ss-accordion-item">
               <button className="ss-accordion-header" onClick={() => toggleAccordion('description')}>
                 <span>Description</span>
-                <span className={`ss-accordion-icon${expandedAccordion === 'description' ? ' open' : ''}`}>+</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'description' ? ' open' : ''}`}><Plus size={12} strokeWidth={1.4} /></span>
               </button>
               {expandedAccordion === 'description' && (
                 <div className="ss-accordion-body">
@@ -500,7 +497,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div className="ss-accordion-item">
               <button className="ss-accordion-header" onClick={() => toggleAccordion('details')}>
                 <span>{t('common.detailsAndCare')}</span>
-                <span className={`ss-accordion-icon${expandedAccordion === 'details' ? ' open' : ''}`}>+</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'details' ? ' open' : ''}`}><Plus size={12} strokeWidth={1.4} /></span>
               </button>
               {expandedAccordion === 'details' && (
                 <div className="ss-accordion-body">
@@ -512,7 +509,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div className="ss-accordion-item">
               <button className="ss-accordion-header" onClick={() => toggleAccordion('delivery')}>
                 <span>{t('common.deliveryAndReturns')}</span>
-                <span className={`ss-accordion-icon${expandedAccordion === 'delivery' ? ' open' : ''}`}>+</span>
+                <span className={`ss-accordion-icon${expandedAccordion === 'delivery' ? ' open' : ''}`}><Plus size={12} strokeWidth={1.4} /></span>
               </button>
               {expandedAccordion === 'delivery' && (
                 <div className="ss-accordion-body">
@@ -539,10 +536,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           <div className="ss-size-header-right">
             <span className="ss-size-guide">SIZE GUIDE</span>
             <button className="ss-size-close" onClick={() => setSizeOpen(false)} aria-label="Close">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <line x1="1" y1="1" x2="13" y2="13" stroke="currentColor" strokeWidth="1.2"/>
-                <line x1="13" y1="1" x2="1" y2="13" stroke="currentColor" strokeWidth="1.2"/>
-              </svg>
+              <X size={16} strokeWidth={1.4} />
             </button>
           </div>
         </div>

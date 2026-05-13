@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback, memo } from 'react';
+import { Plus, Check } from 'lucide-react';
 import type { CollectionDetail, Product, RecommendedProduct } from '@/lib/shopify';
 import { useCart } from '@/context/CartContext';
 import { useUI } from '@/context/UIContext';
@@ -332,9 +333,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
           {/* Delivery line */}
           <div className="col-delivery">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+            <Check size={13} strokeWidth={1.5} color="#111" />
             <span>{t('common.freeDeliveryShort')}</span>
           </div>
 
@@ -343,7 +342,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
             <div className="col-accordion-item">
               <button className="col-accordion-header" onClick={() => setActiveDrawer(activeDrawer === 'sizefit' ? null : 'sizefit')}>
                 <span>{t('common.sizeAndFit')}</span>
-                <span className={`col-accordion-icon${activeDrawer === 'sizefit' ? ' open' : ''}`}>+</span>
+                <span className={`col-accordion-icon${activeDrawer === 'sizefit' ? ' open' : ''}`}><Plus size={12} strokeWidth={1.4} /></span>
               </button>
               {activeDrawer === 'sizefit' && (
                 <div className="col-accordion-body">
@@ -371,7 +370,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
             <div className="col-accordion-item">
               <button className="col-accordion-header" onClick={() => setActiveDrawer(activeDrawer === 'details' ? null : 'details')}>
                 <span>{t('common.detailsAndCare')}</span>
-                <span className={`col-accordion-icon${activeDrawer === 'details' ? ' open' : ''}`}>+</span>
+                <span className={`col-accordion-icon${activeDrawer === 'details' ? ' open' : ''}`}><Plus size={12} strokeWidth={1.4} /></span>
               </button>
               {activeDrawer === 'details' && (
                 <div className="col-accordion-body">
@@ -383,7 +382,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
             <div className="col-accordion-item">
               <button className="col-accordion-header" onClick={() => setActiveDrawer(activeDrawer === 'delivery' ? null : 'delivery')}>
                 <span>{t('common.deliveryAndReturns')}</span>
-                <span className={`col-accordion-icon${activeDrawer === 'delivery' ? ' open' : ''}`}>+</span>
+                <span className={`col-accordion-icon${activeDrawer === 'delivery' ? ' open' : ''}`}><Plus size={12} strokeWidth={1.4} /></span>
               </button>
               {activeDrawer === 'delivery' && (
                 <div className="col-accordion-body">

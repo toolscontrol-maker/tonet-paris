@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { Menu, Search, User, ShoppingBag, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUI } from "@/context/UIContext";
@@ -121,16 +122,10 @@ export default function Navbar() {
           {/* LEFT: Hamburger + Search */}
           <div className="acne-nav-left">
             <button className="acne-mob-icon" aria-label="Menu" onClick={openMenu}>
-              <svg width="14" height="10" viewBox="0 0 20 14" fill="none">
-                <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="1.4"/>
-                <line x1="0" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="1.4"/>
-                <line x1="0" y1="13" x2="20" y2="13" stroke="currentColor" strokeWidth="1.4"/>
-              </svg>
+              <Menu size={18} strokeWidth={1.4} />
             </button>
             <button className="acne-mob-icon" aria-label="Search" onClick={openMenuWithSearch}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              </svg>
+              <Search size={18} strokeWidth={1.4} />
             </button>
           </div>
 
@@ -141,18 +136,11 @@ export default function Navbar() {
           {/* RIGHT: 3 icon buttons — Account, Wishlist, Cart */}
           <div className="acne-nav-right">
             <Link href={accountHref} className="acne-right-icon" aria-label="Account">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
+              <User size={18} strokeWidth={1.4} />
             </Link>
 
             <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <path d="M16 10a4 4 0 0 1-8 0"/>
-              </svg>
+              <ShoppingBag size={18} strokeWidth={1.4} />
             </button>
           </div>
         </div>
@@ -162,9 +150,7 @@ export default function Navbar() {
           <div className="acne-subnav">
             <div className="acne-subnav-inner">
               <Link href="/" className="back-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
+                <ArrowLeft size={16} strokeWidth={1.4} />
                 <span>{t('nav.gallery')}</span>
               </Link>
               <div className="subnav-right">
@@ -172,9 +158,7 @@ export default function Navbar() {
                   <span className="subnav-current">{currentCollection?.title}</span>
                 )}
                 <button className="subnav-toggle" onClick={() => setSubnavOpen(!subnavOpen)} aria-label="All collections">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d={subnavOpen ? "M1 7L5 3L9 7" : "M1 3L5 7L9 3"} />
-                  </svg>
+                  {subnavOpen ? <ChevronUp size={14} strokeWidth={1.4} /> : <ChevronDown size={14} strokeWidth={1.4} />}
                 </button>
               </div>
               {subnavOpen && (
