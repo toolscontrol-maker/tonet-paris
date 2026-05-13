@@ -421,7 +421,7 @@ export default function Footer() {
             border-bottom: 1px solid #ddd;
           }
           .fnm-title {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -439,7 +439,7 @@ export default function Footer() {
             outline: none;
             background: transparent;
             font-family: inherit;
-            font-size: 11px;
+            font-size: 13px;
             color: #111;
           }
           .fnm-submit {
@@ -448,7 +448,7 @@ export default function Footer() {
             border: none;
             border-left: 1px solid #ccc;
             font-family: inherit;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
