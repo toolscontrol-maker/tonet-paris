@@ -117,7 +117,7 @@ export default function Footer() {
           background-color: #fff;
           color: #000;
           font-family: var(--font-primary);
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 400;
           line-height: 1.6;
           letter-spacing: 0.02em;
@@ -270,10 +270,11 @@ export default function Footer() {
         }
 
         .col-title {
-          font-size: 13px;
-          font-weight: 400;
+          font-size: 11px;
+          font-weight: 500;
           text-transform: uppercase;
-          margin-bottom: 24px;
+          letter-spacing: 0.08em;
+          margin-bottom: 16px;
           cursor: default;
           color: #000;
         }
@@ -285,6 +286,10 @@ export default function Footer() {
           display: flex;
           flex-direction: column;
           gap: 4px;
+          font-size: 11px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
         }
 
         .chevron {
