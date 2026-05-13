@@ -79,6 +79,19 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* Column 5 */}
+        <div className="footer-col">
+          <input type="checkbox" id="footer-col-5" className="accordion-toggle" defaultChecked />
+          <label htmlFor="footer-col-5" className="col-title">World of Tonet Paris <span className="chevron"></span></label>
+          <ul className="col-links">
+            <li><Link href="#">Founder</Link></li>
+            <li><Link href="#">Heritage</Link></li>
+            <li><Link href="#">Savoir-Faire</Link></li>
+            <li><Link href="#">Timeline</Link></li>
+            <li><Link href="#">Careers</Link></li>
+          </ul>
+        </div>
+
       </div>
 
       <div className="footer-bottom">
@@ -240,7 +253,7 @@ export default function Footer() {
         /* Columns Desktop */
         .footer-links-container {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(5, 1fr);
           padding: 40px 20px 80px 20px;
           border-bottom: 1px solid #ededed;
           max-width: 1400px;
