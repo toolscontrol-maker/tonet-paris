@@ -14,8 +14,21 @@ export default function Footer() {
 
   return (
     <footer className="footer">
-      
 
+      <div className="footer-bottom">
+        <div className="bottom-left">
+          <span className="copyright">{t('footer.copyright')}</span>
+          <Link href="#" className="cookie-link">{t('footer.cookieSettings')}</Link>
+        </div>
+        <div className="bottom-right socials">
+          <Link href="#">IG</Link>
+          <Link href="#">FB</Link>
+          <Link href="#">TW</Link>
+          <Link href="#">YT</Link>
+          <Link href="#">PT</Link>
+          <Link href="#">WB</Link>
+        </div>
+      </div>
 
       <div className="footer-links-container">
         
@@ -92,21 +105,6 @@ export default function Footer() {
           </ul>
         </div>
 
-      </div>
-
-      <div className="footer-bottom">
-        <div className="bottom-left">
-          <span className="copyright">{t('footer.copyright')}</span>
-          <Link href="#" className="cookie-link">{t('footer.cookieSettings')}</Link>
-        </div>
-        <div className="bottom-right socials">
-          <Link href="#">IG</Link>
-          <Link href="#">FB</Link>
-          <Link href="#">TW</Link>
-          <Link href="#">YT</Link>
-          <Link href="#">PT</Link>
-          <Link href="#">WB</Link>
-        </div>
       </div>
 
       <style>{`
@@ -253,7 +251,7 @@ export default function Footer() {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
           padding: 40px 20px 80px 20px;
-          border-bottom: 1px solid #ededed;
+          border-bottom: none;
           max-width: 1400px;
           margin: 0 auto;
         }
