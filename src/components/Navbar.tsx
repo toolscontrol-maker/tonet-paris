@@ -147,7 +147,7 @@ export default function Navbar() {
 
             <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
               <div className="cart-icon-wrap">
-                <ShoppingBag size={18} strokeWidth={1.4} fill="currentColor" />
+                <ShoppingBag size={18} strokeWidth={1.4} />
                 {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
               </div>
             </button>
