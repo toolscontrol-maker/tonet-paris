@@ -333,18 +333,14 @@ export default function Navbar() {
         .acne-right-icon:hover { opacity: 0.6; }
 
         .cart-icon-wrap {
-          position: relative;
           display: flex;
           align-items: center;
-          justify-content: center;
+          gap: 2px;
         }
         .cart-badge {
-          position: absolute;
-          top: -2px;
-          right: -2px;
           background: #1D1D1B;
           color: #fff;
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 600;
           min-width: 14px;
           height: 14px;
