@@ -249,7 +249,7 @@ export default function Footer() {
         .footer-links-container {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          padding: 40px 20px 40px 20px;
+          padding: 60px 20px 60px 20px;
           border-bottom: none;
           max-width: 1400px;
           margin: 0 auto;
