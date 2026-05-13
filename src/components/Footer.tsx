@@ -50,6 +50,17 @@ export default function Footer() {
             <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.emailLabel')}</Link></li>
+            {!isMinimalPage && (
+              <li className="fnc-wrapper">
+                <div className="footer-newsletter-compact">
+                  <h4 className="fnc-title">Be the first to access Tonet Paris Giftings and presales</h4>
+                  <div className="fnc-form">
+                    <input type="email" placeholder="Enter your email address" className="fnc-input" />
+                    <button type="submit" className="fnc-submit">Subscribe</button>
+                  </div>
+                </div>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -253,7 +264,7 @@ export default function Footer() {
         .footer-links-container {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          padding: 180px 20px 180px 20px;
+          padding: 60px 20px 80px 20px;
           border-bottom: none;
           max-width: 1400px;
           margin: 0 auto;
