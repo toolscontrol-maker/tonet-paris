@@ -645,6 +645,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           flex-direction: column;
           font-family: 'HK Grotesk', 'Inter', sans-serif;
           color: #111;
+          background: #EEEDED;
+        }
+        @media (min-width: 768px) {
+          .ss-pdp-layout { background: unset; }
         }
 
         /* ── GALLERY ── */
@@ -1202,7 +1206,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           padding-right: 1px;
         }
         @media (max-width: 767px) {
-          .rec-section { padding: 40px 0 60px; }
+          .rec-section { padding: 40px 0 60px; background: #EEEDED; }
           .rec-label { font-size: 14px; }
           .rec-carousel { padding-left: 0; }
           .rec-carousel-item {
