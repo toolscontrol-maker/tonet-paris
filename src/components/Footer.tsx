@@ -366,7 +366,7 @@ export default function Footer() {
           .col-title {
             margin: 0;
             padding: 18px 16px;
-            font-size: 13px;
+            font-size: 10px;
             font-weight: 500;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -403,7 +403,7 @@ export default function Footer() {
           .col-links li a {
             display: block;
             padding: 9px 0;
-            font-size: 13px;
+            font-size: 10px;
             color: #444;
             border-bottom: 1px solid #f3f3f3;
           }
@@ -421,7 +421,7 @@ export default function Footer() {
             border-bottom: 1px solid #ddd;
           }
           .fnm-title {
-            font-size: 13px;
+            font-size: 10px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -439,7 +439,7 @@ export default function Footer() {
             outline: none;
             background: transparent;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 10px;
             color: #111;
           }
           .fnm-submit {
@@ -448,7 +448,7 @@ export default function Footer() {
             border: none;
             border-left: 1px solid #ccc;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 10px;
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
