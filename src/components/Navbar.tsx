@@ -146,7 +146,10 @@ export default function Navbar() {
             </Link>
 
             <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
-              <ShoppingBag size={18} strokeWidth={1.4} fill="currentColor" />
+              <div className="cart-icon-wrap">
+                <ShoppingBag size={18} strokeWidth={1.4} fill="currentColor" />
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              </div>
             </button>
           </div>
         </div>
@@ -328,6 +331,30 @@ export default function Navbar() {
           transition: opacity 0.15s;
         }
         .acne-right-icon:hover { opacity: 0.6; }
+
+        .cart-icon-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cart-badge {
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          background: #1D1D1B;
+          color: #fff;
+          font-size: 9px;
+          font-weight: 600;
+          min-width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 3px;
+          line-height: 1;
+        }
 
         .acne-mob-icon {
           display: flex; align-items: center; justify-content: center;
