@@ -56,7 +56,7 @@ export default function Footer() {
                   <h4 className="fnc-title">Be the first to access Tonet Paris Giftings and presales</h4>
                   <div className="fnc-form">
                     <input type="email" placeholder="Enter your email address" className="fnc-input" />
-                    <button type="submit" className="fnc-submit">Subscribe</button>
+                    <button type="submit" className="fnc-submit">SIGN UP</button>
                   </div>
                 </div>
               </li>
@@ -229,16 +229,15 @@ export default function Footer() {
         }
         .fnc-form {
           display: flex;
-          border-bottom: 1px solid #000;
-          padding-bottom: 4px;
+          border: 1px solid #ccc;
         }
         .fnc-input {
           flex: 1;
           background: transparent !important;
           border: none !important;
-          padding: 4px 0 !important;
+          padding: 10px 12px !important;
           font-family: inherit;
-          font-size: 13px;
+          font-size: 11px;
           outline: none;
           color: #000 !important;
         }
@@ -248,13 +247,16 @@ export default function Footer() {
         .fnc-submit {
           background: transparent !important;
           border: none !important;
+          border-left: 1px solid #ccc !important;
           font-family: inherit;
-          font-size: 13px;
-          font-weight: 500;
+          font-size: 11px;
+          font-weight: 600;
           cursor: pointer;
-          padding: 4px 0 4px 12px !important;
+          padding: 10px 16px !important;
           color: #000 !important;
           text-transform: uppercase;
+          white-space: nowrap;
+          letter-spacing: 0.08em;
         }
         .fnc-submit:hover {
           color: #666 !important;
