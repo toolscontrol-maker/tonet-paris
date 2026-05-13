@@ -136,7 +136,7 @@ export default function Navbar() {
           {/* RIGHT: Account, Wishlist, Cart */}
           <div className="acne-nav-right">
             <Link href={accountHref} className="acne-right-icon" aria-label="Account">
-              <User size={18} strokeWidth={1.4} />
+              <User size={18} strokeWidth={1.4} fill="currentColor" />
             </Link>
 
             <Link href="/wishlist" className="acne-right-icon" aria-label="Wishlist">
