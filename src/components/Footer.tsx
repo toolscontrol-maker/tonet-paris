@@ -225,7 +225,7 @@ export default function Footer() {
           display: flex;
           border: 1px solid #ccc;
           border-radius: 0;
-          min-height: 80px;
+          min-height: 60px;
           align-items: stretch;
         }
         .fnc-input {
@@ -444,7 +444,7 @@ export default function Footer() {
             display: flex;
             border: 1px solid #ccc;
             border-radius: 0;
-            min-height: 80px;
+            min-height: 60px;
             align-items: stretch;
           }
           .fnm-input {
