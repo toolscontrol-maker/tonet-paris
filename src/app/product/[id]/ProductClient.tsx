@@ -103,12 +103,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     recScrollStart.current = recCarouselRef.current?.scrollLeft ?? 0;
     recIsDragging.current = true;
     recDragMoved.current = false;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
   function recPointerMove(e: React.PointerEvent) {
     if (!recIsDragging.current) return;
     const dx = e.clientX - recDragStart.current;
-    if (Math.abs(dx) > 5) {
+    if (Math.abs(dx) > 10) {
       recDragMoved.current = true;
       recCarouselRef.current?.classList.add('dragging');
       if (recCarouselRef.current) recCarouselRef.current.scrollLeft = recScrollStart.current - dx;
