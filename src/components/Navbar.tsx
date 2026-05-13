@@ -146,7 +146,7 @@ export default function Navbar() {
             </Link>
 
             <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
-              <ShoppingBag size={18} strokeWidth={1.4} />
+              <ShoppingBag size={18} strokeWidth={1.4} fill="currentColor" />
             </button>
           </div>
         </div>
