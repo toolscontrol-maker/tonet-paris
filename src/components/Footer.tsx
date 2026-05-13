@@ -276,7 +276,7 @@ export default function Footer() {
           letter-spacing: 0.08em;
           margin-bottom: 16px;
           cursor: default;
-          color: #000;
+          color: #555;
         }
 
         .col-links {
