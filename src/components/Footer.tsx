@@ -41,8 +41,8 @@ export default function Footer() {
       )}
 
       <div className="footer-links-container">
-        
-        {/* Column 1 */}
+
+        {/* Column 1: Contact Us */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-1" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-1" className="col-title">{t('footer.contactUs')} <span className="chevron"></span></label>
@@ -50,33 +50,10 @@ export default function Footer() {
             <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.emailLabel')}</Link></li>
-            {!isMinimalPage && (
-              <li className="fnc-wrapper">
-                <div className="footer-newsletter-compact">
-                  <h4 className="fnc-title">Be the first to access Tonet Paris Giftings and presales</h4>
-                  <div className="fnc-form">
-                    <input type="email" placeholder="Enter your email address" className="fnc-input" />
-                    <button type="submit" className="fnc-submit">SIGN UP</button>
-                  </div>
-                </div>
-              </li>
-            )}
           </ul>
         </div>
 
-        {/* Column 2 */}
-        <div className="footer-col">
-          <input type="checkbox" id="footer-col-2" className="accordion-toggle" />
-          <label htmlFor="footer-col-2" className="col-title">{t('footer.helpTitle')} <span className="chevron"></span></label>
-          <ul className="col-links">
-            <li><Link href="/contact">{t('footer.contactUsLink')}</Link></li>
-            <li><Link href="/contact/order-status">{t('footer.orderStatus')}</Link></li>
-            <li><Link href="/contact/returns">{t('footer.registerReturn')}</Link></li>
-            <li><Link href="/contact/faqs">{t('footer.faqs')}</Link></li>
-          </ul>
-        </div>
-
-        {/* Column 3 */}
+        {/* Column 2: Client Services */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-3" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-3" className="col-title">{t('footer.clientServices')} <span className="chevron"></span></label>
@@ -89,7 +66,19 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Column 4 */}
+        {/* Column 3: Help */}
+        <div className="footer-col">
+          <input type="checkbox" id="footer-col-2" className="accordion-toggle" />
+          <label htmlFor="footer-col-2" className="col-title">{t('footer.helpTitle')} <span className="chevron"></span></label>
+          <ul className="col-links">
+            <li><Link href="/contact">{t('footer.contactUsLink')}</Link></li>
+            <li><Link href="/contact/order-status">{t('footer.orderStatus')}</Link></li>
+            <li><Link href="/contact/returns">{t('footer.registerReturn')}</Link></li>
+            <li><Link href="/contact/faqs">{t('footer.faqs')}</Link></li>
+          </ul>
+        </div>
+
+        {/* Column 4: Company */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-4" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-4" className="col-title">{t('footer.company')} <span className="chevron"></span></label>
@@ -102,7 +91,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Column 5 */}
+        {/* Column 5: World of Tonet Paris */}
         <div className="footer-col">
           <input type="checkbox" id="footer-col-5" className="accordion-toggle" defaultChecked />
           <label htmlFor="footer-col-5" className="col-title">World of Tonet Paris <span className="chevron"></span></label>
@@ -114,6 +103,17 @@ export default function Footer() {
             <li><Link href="#">Careers</Link></li>
           </ul>
         </div>
+
+        {/* Column 6: Newsletter */}
+        {!isMinimalPage && (
+          <div className="footer-col footer-col-newsletter">
+            <p className="fnc-title">Be the first to access Tonet Paris Giftings and presales</p>
+            <div className="fnc-form">
+              <input type="email" placeholder="Enter your email address" className="fnc-input" />
+              <button type="submit" className="fnc-submit">SIGN UP</button>
+            </div>
+          </div>
+        )}
 
       </div>
 
@@ -265,7 +265,7 @@ export default function Footer() {
         /* Columns Desktop */
         .footer-links-container {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          grid-template-columns: repeat(5, 1fr) 1.8fr;
           padding: 60px 20px 80px 20px;
           border-bottom: none;
           max-width: 1400px;
