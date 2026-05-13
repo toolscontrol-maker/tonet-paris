@@ -50,7 +50,7 @@ export default function Footer() {
             <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.emailLabel')}</Link></li>
           </ul>
-          <p className="col-title" style={{marginTop:'32px', marginBottom:'16px'}}>{t('footer.clientServices')}</p>
+          <p className="col-title" style={{marginTop:'56px', marginBottom:'16px'}}>{t('footer.clientServices')}</p>
           <ul className="col-links" style={{display:'flex'}}>
             <li><Link href="#">{t('footer.services')}</Link></li>
             <li><Link href="#">{t('footer.accountLabel')}</Link></li>
