@@ -211,11 +211,12 @@ export default function Footer() {
           gap: 12px;
         }
         .fnc-title {
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 500;
           text-transform: uppercase;
+          letter-spacing: 0.08em;
           margin: 0;
-          color: #000;
+          color: #555;
         }
         .fnc-form {
           display: flex;
