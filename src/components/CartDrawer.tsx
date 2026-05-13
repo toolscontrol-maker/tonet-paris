@@ -152,7 +152,7 @@ export default function CartDrawer() {
           flex-direction: column;
           transform: translateX(100%);
           transition: transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
-          font-family: var(--font-primary, 'HK Grotesk', 'Inter', sans-serif);
+          font-family: var(--font-primary, 'Creato Display', sans-serif);
           color: #000;
           overflow: hidden;
         }

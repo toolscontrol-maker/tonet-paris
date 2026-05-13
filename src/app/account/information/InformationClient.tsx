@@ -102,7 +102,7 @@ export default function InformationClient() {
           max-width: 480px;
           margin: 0 auto;
           padding: 24px 24px 80px;
-          font-family: 'HK Grotesk', 'Inter', sans-serif;
+          font-family: 'Creato Display', sans-serif;
           color: #111;
         }
         .info-tabs {
