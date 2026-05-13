@@ -30,6 +30,16 @@ export default function Footer() {
         </div>
       </div>
 
+      {!isMinimalPage && (
+        <div className="footer-newsletter-mobile">
+          <p className="fnm-title">Be the first to access Tonet Paris Giftings and presales</p>
+          <div className="fnm-form">
+            <input type="email" placeholder="Your Email*" className="fnm-input" />
+            <button type="submit" className="fnm-submit">SIGN UP</button>
+          </div>
+        </div>
+      )}
+
       <div className="footer-links-container">
         
         {/* Column 1 */}
@@ -40,17 +50,6 @@ export default function Footer() {
             <li><Link href="#">{t('footer.liveChat')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.callLabel')} <span className="text-muted">{t('footer.offline')}</span></Link></li>
             <li><Link href="#">{t('footer.emailLabel')}</Link></li>
-            {!isMinimalPage && (
-              <li className="fnc-wrapper">
-                <div className="footer-newsletter-compact">
-                  <h4 className="fnc-title">Be the first to access Tonet Paris Giftings and presales</h4>
-                  <div className="fnc-form">
-                    <input type="email" placeholder="Enter your email address" className="fnc-input" />
-                    <button type="submit" className="fnc-submit">Subscribe</button>
-                  </div>
-                </div>
-              </li>
-            )}
           </ul>
         </div>
 
@@ -197,7 +196,12 @@ export default function Footer() {
           margin: 0;
         }
 
-        /* Newsletter Compact */
+        /* Newsletter Mobile Standalone */
+        .footer-newsletter-mobile {
+          display: none;
+        }
+
+        /* Newsletter Compact (desktop column) */
         .footer-newsletter-compact {
           margin-top: 24px;
           display: flex;
@@ -409,9 +413,49 @@ export default function Footer() {
             display: flex;
           }
 
-          /* Newsletter inside accordion */
-          .fnc-wrapper { padding-top: 8px; }
-          .footer-newsletter-compact { margin-top: 8px; }
+          /* Newsletter standalone mobile */
+          .footer-newsletter-mobile {
+            display: block;
+            padding: 24px 16px;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+          }
+          .fnm-title {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #555;
+            margin: 0 0 16px;
+          }
+          .fnm-form {
+            display: flex;
+            border: 1px solid #ccc;
+          }
+          .fnm-input {
+            flex: 1;
+            padding: 12px 14px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 11px;
+            color: #111;
+          }
+          .fnm-submit {
+            padding: 12px 18px;
+            background: transparent;
+            border: none;
+            border-left: 1px solid #ccc;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: #111;
+            white-space: nowrap;
+          }
 
           /* Bottom bar */
           .footer-bottom {
