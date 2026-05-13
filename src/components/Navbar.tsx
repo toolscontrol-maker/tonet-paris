@@ -333,23 +333,22 @@ export default function Navbar() {
         .acne-right-icon:hover { opacity: 0.6; }
 
         .cart-icon-wrap {
-          display: flex;
-          align-items: center;
-          gap: 2px;
-        }
-        .cart-badge {
-          background: #1D1D1B;
-          color: #fff;
-          font-size: 10px;
-          font-weight: 600;
-          min-width: 14px;
-          height: 14px;
-          border-radius: 50%;
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 0 3px;
+        }
+        .cart-badge {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: transparent;
+          color: #1D1D1B;
+          font-size: 8px;
+          font-weight: 600;
           line-height: 1;
+          pointer-events: none;
         }
 
         .acne-mob-icon {
