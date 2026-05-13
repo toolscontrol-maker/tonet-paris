@@ -116,7 +116,7 @@ export default function Footer() {
           font-weight: 400;
           line-height: 1.6;
           letter-spacing: 0.02em;
-          border-top: 1px solid #555;
+          border-top: 1px solid #ddd;
           scroll-snap-align: start;
           min-height: unset;
           display: flex;
