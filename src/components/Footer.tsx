@@ -224,6 +224,7 @@ export default function Footer() {
         .fnc-form {
           display: flex;
           border: 1px solid #ccc;
+          border-radius: 0;
         }
         .fnc-input {
           flex: 1;
@@ -242,6 +243,7 @@ export default function Footer() {
           background: transparent !important;
           border: none !important;
           border-left: 1px solid #ccc !important;
+          border-radius: 0 !important;
           font-family: inherit;
           font-size: 11px;
           font-weight: 600;
@@ -438,6 +440,7 @@ export default function Footer() {
           .fnm-form {
             display: flex;
             border: 1px solid #ccc;
+            border-radius: 0;
           }
           .fnm-input {
             flex: 1;
@@ -454,6 +457,7 @@ export default function Footer() {
             background: transparent;
             border: none;
             border-left: 1px solid #ccc;
+            border-radius: 0;
             font-family: inherit;
             font-size: 10px;
             font-weight: 600;
