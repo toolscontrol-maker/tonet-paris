@@ -1,6 +1,8 @@
 import { getCollection, getNewArrivals } from '@/lib/shopify';
 import CollectionClient from './CollectionClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CollectionPage({
   params,
 }: {

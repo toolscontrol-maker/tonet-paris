@@ -19,16 +19,7 @@ export default async function Home() {
       {/* 1. HERO CAMPAIGN BANNER: PRE-FALL 2026 */}
       <section className="am-hero">
         <div className="am-hero-media">
-          <img 
-            src="/qu_eel_logo_este_como_202606301722.jpg" 
-            alt="Hero Background" 
-            className="am-hero-img" 
-          />
-        </div>
-        <div className="am-hero-overlay">
-          <Link href="/collection/summer" className="am-hero-feeling-block">
-            different collection
-          </Link>
+          {/* Background is solid black. The main white logo starts in the middle of the screen (rendered by the Navbar at scroll=0) and slides up to the top. */}
         </div>
       </section>
 
@@ -149,7 +140,7 @@ export default async function Home() {
           width: 100%;
           height: 100vh;
           overflow: hidden;
-          background: #ffffff;
+          background: #000000;
           scroll-snap-align: start;
           scroll-snap-stop: always;
         }
@@ -160,7 +151,44 @@ export default async function Home() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #e3e7ec;
+          background: #000000;
+        }
+        .am-hero-center-logo {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          color: #ffffff;
+          font-family: 'Saint Carell', sans-serif;
+          text-transform: uppercase;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .am-hero-logo-line-1 {
+          font-size: 80px;
+          line-height: 0.95;
+          letter-spacing: 0.18em;
+        }
+        .am-hero-logo-line-2 {
+          font-size: 28px;
+          line-height: 1;
+          letter-spacing: 0.35em;
+          margin-top: 12px;
+          opacity: 0.9;
+          text-indent: 0.35em;
+        }
+        @media (max-width: 767px) {
+          .am-hero-logo-line-1 {
+            font-size: 48px;
+            letter-spacing: 0.15em;
+          }
+          .am-hero-logo-line-2 {
+            font-size: 18px;
+            letter-spacing: 0.3em;
+            margin-top: 8px;
+            text-indent: 0.3em;
+          }
         }
         .am-hero-logo-wrap {
           background: #000000;
@@ -200,9 +228,9 @@ export default async function Home() {
         }
         .am-hero-feeling-block {
           display: inline-block;
-          border: 1px solid #000000;
+          border: 1px solid #ffffff;
           background-color: transparent;
-          color: #000000;
+          color: #ffffff;
           padding: 18px 44px;
           font-family: var(--font-primary), sans-serif;
           font-size: 11.5px;
@@ -214,8 +242,8 @@ export default async function Home() {
           transition: background-color 0.3s, color 0.3s, opacity 0.3s;
         }
         .am-hero-feeling-block:hover {
-          background-color: #000000;
-          color: #ffffff;
+          background-color: #ffffff;
+          color: #000000;
         }
         .am-hero-content {
           display: flex;

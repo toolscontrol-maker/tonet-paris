@@ -2,14 +2,7 @@ import { getProducts, getProduct } from '@/lib/shopify';
 import ProductClient from './ProductClient';
 import { Suspense } from 'react';
 
-export async function generateStaticParams() {
-  if (!process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || !process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_PUBLIC_TOKEN) {
-    return [];
-  }
-  const products = await getProducts();
-  const baseHandles = Array.from(new Set(products.map((p) => p.handle.split('?')[0])));
-  return baseHandles.map((h) => ({ id: h }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
