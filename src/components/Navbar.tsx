@@ -504,29 +504,8 @@ export default function Navbar() {
         }
         .acne-header.header-hidden { transform: translateY(-100%); }
         .acne-header.home-at-top {
-          transform: translateY(calc(50vh - 50% - var(--nav-top, 0px))) !important;
-          pointer-events: none;
           background: transparent !important;
           border-bottom-color: transparent !important;
-        }
-        
-        .acne-header.home-at-top .acne-nav-left {
-          opacity: 0 !important;
-          pointer-events: none !important;
-          transform: translateY(40px) !important;
-          transition: transform 0.4s ease, opacity 0.4s ease !important;
-          transition-delay: 0s !important;
-        }
-        .acne-header.home-at-top .acne-logo {
-          pointer-events: auto !important;
-          transform: scale(2.6) !important;
-        }
-        .acne-header.home-at-top .acne-nav-right {
-          opacity: 0 !important;
-          pointer-events: none !important;
-          transform: translateY(40px) !important;
-          transition: transform 0.4s ease, opacity 0.4s ease !important;
-          transition-delay: 0s !important;
         }
 
         /* Make elements white when at the top of homepage */
@@ -540,28 +519,6 @@ export default function Navbar() {
         .acne-header.home-at-top .acne-mob-icon,
         .acne-header.home-at-top .acne-nav-links a {
           color: #ffffff !important;
-        }
-
-        /* ══ STAGGERED STAR RISING ANIMATION ══ */
-        .acne-nav-left,
-        .acne-logo,
-        .acne-nav-right {
-          transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s ease;
-        }
-        .acne-logo {
-          transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s ease;
-        }
-        .acne-nav-left {
-          transition-delay: 0.15s;
-        }
-        .acne-nav-right {
-          transition-delay: 0.3s;
-        }
-
-        @media (max-width: 767px) {
-          .acne-header.home-at-top .acne-logo {
-            transform: scale(1.8) !important;
-          }
         }
 
         @media (min-width: 768px) {
@@ -664,12 +621,12 @@ export default function Navbar() {
           transform: translateY(-2px); /* Baseline adjustment for Saint Carell font */
         }
         .acne-logo-line-1 {
-          font-size: 25px;
+          font-size: 38px;
           line-height: 0.95;
           letter-spacing: 0.18em;
         }
         .acne-logo-line-2 {
-          font-size: 9px;
+          font-size: 13px;
           letter-spacing: 0.35em;
           margin-top: 2px;
           opacity: 0.85;
@@ -997,8 +954,8 @@ export default function Navbar() {
             align-items: stretch; 
           }
           .acne-logo-text { font-size: 14px; }
-          .acne-logo-line-1 { font-size: 20px; }
-          .acne-logo-line-2 { font-size: 8px; margin-top: 1px; }
+          .acne-logo-line-1 { font-size: 28px; }
+          .acne-logo-line-2 { font-size: 10px; margin-top: 1px; }
           .acne-mob-icon { width: 32px; height: 54px; }
           .acne-right-icon { width: 32px; height: 54px; }
           .acne-wishlist-icon { display: none !important; }

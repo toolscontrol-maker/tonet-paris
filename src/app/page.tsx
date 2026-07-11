@@ -1,6 +1,5 @@
 import Link from "next/link";
 import HomeSnapInitializer from "@/components/HomeSnapInitializer";
-import { getCollections } from "@/lib/shopify";
 
 export const dynamic = "force-dynamic";
 
@@ -10,8 +9,6 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const collections = await getCollections();
-
   return (
     <div className="am-home">
       <HomeSnapInitializer />
@@ -19,50 +16,9 @@ export default async function Home() {
       {/* 1. HERO CAMPAIGN BANNER: PRE-FALL 2026 */}
       <section className="am-hero">
         <div className="am-hero-media">
-          {/* Background is solid black. The main white logo starts in the middle of the screen (rendered by the Navbar at scroll=0) and slides up to the top. */}
-        </div>
-      </section>
-
-      {/* 2. SHOP COLLECTIONS */}
-      <section className="am-split-grid" style={{ "--cols": collections.length || 2 } as React.CSSProperties}>
-        {collections.map((col, cIdx) => {
-          const isPrivateCapsule = col.title.toLowerCase().includes("private capsule") || col.handle.includes("private-capsule");
-          const imageUrl = isPrivateCapsule ? "/photo_2026-07-01_20-52-47.jpg" : col.imageUrl;
-          return (
-            <div key={col.id} className="am-split-col">
-              <div className="am-split-media">
-                {imageUrl && (
-                  <img 
-                    src={imageUrl} 
-                    alt={col.title} 
-                    className="am-split-img" 
-                  />
-                )}
-              </div>
-              <div className="am-split-content">
-                <h3 className="am-split-title">{col.title}</h3>
-                <Link href={`/collection/${col.handle}`} className="am-split-cta">
-                  Shop Now
-                </Link>
-              </div>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* 4. LANDSCAPE HIGHLIGHT: SNEAKER MA-94 */}
-      <section className="am-landscape">
-        <div className="am-landscape-media">
-          <img 
-            src="/Shot_-_👁️_extreme_detail_202607032250.jpg" 
-            alt="New Arrivals Highlight" 
-            className="am-landscape-img" 
-          />
-        </div>
-        <div className="am-landscape-overlay">
-          <div className="am-landscape-content">
-            <h2 className="am-landscape-title">NEW ARRIVALS</h2>
-            <Link href="/collection/new-arrivals" className="am-landscape-cta">SHOP NEW PIECES</Link>
+          <div className="am-hero-center-logo">
+            <span className="am-hero-logo-line-1">tonet</span>
+            <span className="am-hero-logo-line-2">torrentinni</span>
           </div>
         </div>
       </section>
@@ -91,7 +47,7 @@ export default async function Home() {
               <div className="am-world-tonet-hover-content">
                 <span className="am-world-tonet-label">COLLECTIONS</span>
                 <div className="am-world-tonet-sublinks">
-                  <Link href="/collection/runways" className="am-world-tonet-sublink">RUNWAYS</Link>
+                  <Link href="/collection/all" className="am-world-tonet-sublink">VIEW ALL</Link>
                   <Link href="/collection/campaigns" className="am-world-tonet-sublink">CAMPAIGNS</Link>
                 </div>
               </div>

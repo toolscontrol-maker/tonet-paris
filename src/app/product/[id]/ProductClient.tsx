@@ -538,14 +538,60 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   }, [sizeOptionName]);
 
   const allImages = product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean);
-  const activeColorIndex = colorOptionName && colorOptions.length > 0
-    ? colorOptions.findIndex(c => c.value === selectedColor)
-    : -1;
-  const activeIndex = activeColorIndex >= 0 ? activeColorIndex : 0;
-  const startIndex = activeIndex * 2;
-  const images = allImages.length >= (startIndex + 2)
-    ? allImages.slice(startIndex, startIndex + 2)
-    : (allImages.length >= (startIndex + 1) ? allImages.slice(startIndex, startIndex + 1) : allImages.slice(0, 2));
+
+  const images = useMemo(() => {
+    if (!selectedColor || !colorOptionName) {
+      return allImages.slice(0, 2);
+    }
+
+    // Find all variants for the selected color
+    const colorVariants = product.variants.filter(v =>
+      v.selectedOptions.some(
+        o => o.name === colorOptionName && o.value === selectedColor
+      )
+    );
+
+    const variantImages = colorVariants
+      .map(v => v.image?.url)
+      .filter((url): url is string => !!url);
+    const uniqueVariantImages = Array.from(new Set(variantImages));
+
+    // Gather images of variants for other colors to prevent displaying them
+    const otherColorsVariants = product.variants.filter(v =>
+      v.selectedOptions.some(
+        o => o.name === colorOptionName && o.value !== selectedColor
+      )
+    );
+    const otherColorsImages = new Set(
+      otherColorsVariants.map(v => v.image?.url).filter((url): url is string => !!url)
+    );
+
+    if (uniqueVariantImages.length > 0) {
+      // Find the first index of our selected color's variant images in allImages
+      const firstIndex = allImages.findIndex(img => uniqueVariantImages.includes(img));
+      if (firstIndex !== -1) {
+        // Collect all images starting from firstIndex until we hit an image of another color's variant
+        const result: string[] = [];
+        for (let i = firstIndex; i < allImages.length; i++) {
+          const img = allImages[i];
+          if (otherColorsImages.has(img)) {
+            break;
+          }
+          result.push(img);
+        }
+        if (result.length > 0) return result;
+      }
+      return uniqueVariantImages;
+    }
+
+    // Fallback to activeIndex * 2 if no variant images are found
+    const activeColorIndex = colorOptions.findIndex(c => c.value === selectedColor);
+    const activeIndex = activeColorIndex >= 0 ? activeColorIndex : 0;
+    const startIndex = activeIndex * 2;
+    return allImages.length >= (startIndex + 2)
+      ? allImages.slice(startIndex, startIndex + 2)
+      : (allImages.length >= (startIndex + 1) ? allImages.slice(startIndex, startIndex + 1) : allImages.slice(0, 2));
+  }, [allImages, selectedColor, colorOptionName, product.variants, colorOptions]);
 
   const priceNum = parseFloat(selectedVariant.price.amount);
   const currencyCode = selectedVariant.price.currencyCode || 'EUR';
@@ -667,8 +713,29 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     if (colorOptionName) {
       const updated = { ...selectedOptionsState, [colorOptionName]: colorValue };
       setSelectedOptionsState(updated);
-      const next = findVariantByOptions(updated);
-      if (next) setSelectedVariant(next);
+      
+      // Try to find a variant with the new color and the current size
+      let next = findVariantByOptions(updated);
+      
+      if (!next) {
+        // If not found, reset the size selection and find the first variant of this color
+        setSelectedSize('');
+        const updatedNoSize = { ...updated };
+        if (sizeOptionName) {
+          delete updatedNoSize[sizeOptionName];
+        }
+        setSelectedOptionsState(updatedNoSize);
+        next = findVariantByOptions(updatedNoSize);
+      }
+      
+      if (next) {
+        setSelectedVariant(next);
+      }
+      
+      // Update URL query parameter
+      const params = new URLSearchParams(window.location.search);
+      params.set('color', colorValue);
+      router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
     }
   }
 
@@ -961,7 +1028,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           <section className="amiri-ctl-section">
             <div className="amiri-ctl-header">
               <span className="amiri-ctl-logo">TONET TORRENTINNI</span>
-              <h2 className="amiri-ctl-title">YOU MIGHT ALSO LIKE</h2>
+              <h2 className="amiri-ctl-title">THIS WILL FIT PERFECT WITH YOU</h2>
             </div>
             
             <div className="amiri-ctl-carousel-wrapper">
@@ -1664,6 +1731,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-product-description p {
           margin: 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         /* Minimal Accordions */

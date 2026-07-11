@@ -52,13 +52,10 @@ export default function AnnouncementBar() {
     window.dispatchEvent(new Event("announcement-dismissed"));
   };
 
-  const isHome = pathname === "/";
-  const shouldHide = isHome && isAtTop;
-
   if (!visible) return null;
 
   return (
-    <div className={`ann-bar ${shouldHide ? "ann-hidden" : ""}`}>
+    <div className="ann-bar">
       <div className={`ann-content ann-fade-${fadeState}`}>
         {ANNOUNCEMENTS[index]}
       </div>
@@ -78,13 +75,6 @@ export default function AnnouncementBar() {
           top: 0;
           left: 0;
           right: 0;
-          transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
-        }
-        .ann-bar.ann-hidden {
-          transform: translateY(-100%);
-          opacity: 0;
-          pointer-events: none;
-        }
           z-index: 600;
           font-family: var(--font-primary), sans-serif;
           font-size: 8px;

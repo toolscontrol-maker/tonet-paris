@@ -216,23 +216,11 @@ export default function CollectionClient({ collection }: { collection: Collectio
     } else if (selectedSort === 'price-desc') {
       result.sort((a, b) => b.price - a.price);
     } else {
-      // Default: sort by black color first, then shirts/camisetas first, then pants/pantalones, then others
+      // Default: sort by newest first (createdAt descending)
       result.sort((a, b) => {
-        if (collection.handle === 'new-arrivals') {
-          const hasColA = (a.collectionHandles && a.collectionHandles.length > 0) ? 1 : 0;
-          const hasColB = (b.collectionHandles && b.collectionHandles.length > 0) ? 1 : 0;
-          if (hasColA !== hasColB) {
-            return hasColA - hasColB; // 0 (no collections) comes before 1 (has collections)
-          }
-        }
-
-        const blackA = hasBlackColor(a) ? 0 : 1;
-        const blackB = hasBlackColor(b) ? 0 : 1;
-        if (blackA !== blackB) return blackA - blackB;
-
-        const scoreA = getProductScore(a);
-        const scoreB = getProductScore(b);
-        return scoreA - scoreB;
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
       });
     }
 

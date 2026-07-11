@@ -1,4 +1,4 @@
-import { getCollection, getNewArrivals } from '@/lib/shopify';
+import { getCollection, getNewArrivals, getProducts } from '@/lib/shopify';
 import CollectionClient from './CollectionClient';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +9,19 @@ export default async function CollectionPage({
   params: Promise<{ handle: string }>;
 }) {
   const { handle } = await params;
+
+  if (handle === 'all' || handle === 'all-garments') {
+    const products = await getProducts();
+    const collection = {
+      id: 'all-garments',
+      handle: 'all-garments',
+      title: 'ALL GARMENTS',
+      description: 'Explore all garments in our archive',
+      imageUrl: '',
+      products,
+    };
+    return <CollectionClient collection={collection} />;
+  }
 
   if (handle === 'new-arrivals') {
     const products = await getNewArrivals(50);

@@ -27,6 +27,7 @@ export interface Product {
   title: string;
   description: string;
   tags: string[];
+  createdAt: string;
   price: number;
   currencyCode: string;
   imageUrl: string;
@@ -79,6 +80,7 @@ const PRODUCT_FIELDS = `
   title
   description
   tags
+  createdAt
   priceRange { minVariantPrice { amount currencyCode } }
   featuredImage { url }
   images(first: 10) { edges { node { url } } }
@@ -103,6 +105,7 @@ const COLLECTION_PRODUCT_FIELDS = `
   title
   description
   tags
+  createdAt
   priceRange { minVariantPrice { amount currencyCode } }
   featuredImage { url }
   images(first: 10) { edges { node { url } } }
@@ -128,6 +131,7 @@ function normalizeProduct(node: Record<string, any>): Product {
     title: node.title as string,
     description: (node.description as string) ?? '',
     tags: (node.tags as string[]) ?? [],
+    createdAt: (node.createdAt as string) ?? '',
     price: parseFloat(node.priceRange?.minVariantPrice?.amount ?? '0'),
     currencyCode: (node.priceRange?.minVariantPrice?.currencyCode as string) ?? 'EUR',
     imageUrl: (node.featuredImage?.url as string) ?? '',
@@ -142,6 +146,17 @@ function normalizeProduct(node: Record<string, any>): Product {
     })),
     collectionHandles: ((node.collections?.edges ?? []) as { node: { handle: string } }[]).map(e => e.node.handle),
   };
+}
+
+export function deduplicateProductsByTitle(products: Product[]): Product[] {
+  // Sort the products from newest to oldest (by createdAt descending)
+  const result = [...products];
+  result.sort((a, b) => {
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return timeB - timeA;
+  });
+  return result;
 }
 
 export function splitProductsByColor(products: Product[]): Product[] {
@@ -197,9 +212,9 @@ export function splitProductsByColor(products: Product[]): Product[] {
 
 export async function getProducts(): Promise<Product[]> {
   const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
-    `query GetProducts { products(first: 250, query: "available_for_sale:true") { edges { node { ${PRODUCT_FIELDS} } } } }`
+    `query GetProducts { products(first: 250, query: "available_for_sale:true", sortKey: CREATED_AT, reverse: true) { edges { node { ${PRODUCT_FIELDS} } } } }`
   );
-  return splitProductsByColor(data.products.edges.map(e => normalizeProduct(e.node)));
+  return deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
 }
 
 export async function getNewArrivals(first = 50): Promise<Product[]> {
@@ -215,7 +230,7 @@ export async function getNewArrivals(first = 50): Promise<Product[]> {
     }`,
     { first }
   );
-  return splitProductsByColor(data.products.edges.map(e => normalizeProduct(e.node)));
+  return deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
 }
 
 export interface CollectionSummary {
@@ -309,7 +324,7 @@ export async function getCollection(handle: string): Promise<CollectionDetail | 
     title: node.title as string,
     description: (node.description as string) ?? '',
     imageUrl: (node.image?.url as string) ?? '',
-    products: splitProductsByColor(products),
+    products: deduplicateProductsByTitle(products),
   };
 }
 
@@ -393,9 +408,9 @@ export async function getRecommendedProducts(
   }
 
   const normalizedProducts = productsData.products.edges.map(e => normalizeProduct(e.node));
-  const splitProducts = splitProductsByColor(normalizedProducts);
+  const deduplicatedProducts = deduplicateProductsByTitle(normalizedProducts);
 
-  const mapped = splitProducts
+  const mapped = deduplicatedProducts
     .map(p => {
       const baseHandle = p.handle.split('?')[0];
       return {
@@ -430,7 +445,7 @@ export async function searchProducts(query: string, count = 8): Promise<Product[
     }`,
     { query: query.trim(), first: count }
   );
-  return splitProductsByColor(data.products.edges.map(e => normalizeProduct(e.node)));
+  return deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
 }
 
 export async function getProduct(handle: string): Promise<Product | null> {

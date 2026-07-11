@@ -101,10 +101,10 @@ export default function Footer() {
 
       <style>{`
         .ft {
-          background: #ffffff;
-          color: #000000;
+          background: #000000;
+          color: #ffffff;
           font-family: var(--font-primary), sans-serif;
-          border-top: 1px solid rgba(0, 0, 0, 0.08);
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
           text-transform: lowercase;
         }
         .ft a { text-decoration: none; }
@@ -113,7 +113,7 @@ export default function Footer() {
         .ft-body {
           display: flex;
           padding: 80px 40px 60px;
-          border-bottom: 1px solid #eaeaea;
+          border-bottom: 1px solid #1a1a1a;
         }
 
         /* ── LEFT ── */
@@ -127,7 +127,7 @@ export default function Footer() {
           font-size: 11px;
           font-weight: 400;
           letter-spacing: 0.15em;
-          color: #000000;
+          color: #ffffff;
           margin: 0 0 32px;
           text-transform: lowercase;
         }
@@ -135,7 +135,7 @@ export default function Footer() {
         .ft-nl-row {
           display: flex;
           align-items: center;
-          border-bottom: 1px solid #000000;
+          border-bottom: 1px solid #ffffff;
           padding-bottom: 8px;
           margin-bottom: 12px;
         }
@@ -147,7 +147,7 @@ export default function Footer() {
           font-family: inherit;
           font-size: 12px;
           font-weight: 300;
-          color: #000000;
+          color: #ffffff;
           padding: 0;
           letter-spacing: 0.02em;
         }
@@ -155,7 +155,7 @@ export default function Footer() {
         .ft-nl-btn {
           background: transparent;
           border: none;
-          color: #000000;
+          color: #ffffff;
           font-size: 16px;
           cursor: pointer;
           padding: 0 0 0 8px;
@@ -179,13 +179,13 @@ export default function Footer() {
           margin-top: auto;
         }
         .ft-socials-text a {
-          color: rgba(0, 0, 0, 0.55);
+          color: rgba(255, 255, 255, 0.55);
           font-size: 11px;
           font-weight: 300;
           letter-spacing: 0.02em;
           transition: color 0.3s ease;
         }
-        .ft-socials-text a:hover { color: #000000; }
+        .ft-socials-text a:hover { color: #ffffff; }
 
         /* ── NAV ── */
         .ft-nav {
@@ -199,7 +199,7 @@ export default function Footer() {
           font-size: 11px;
           font-weight: 400;
           letter-spacing: 0.1em;
-          color: #000000;
+          color: #ffffff;
           margin: 0 0 24px;
           text-transform: lowercase;
         }
@@ -214,11 +214,11 @@ export default function Footer() {
         .ft-links li a {
           font-size: 11px;
           font-weight: 300;
-          color: rgba(0, 0, 0, 0.55);
+          color: rgba(255, 255, 255, 0.55);
           letter-spacing: 0.02em;
           transition: color 0.3s ease;
         }
-        .ft-links li a:hover { color: #000000; }
+        .ft-links li a:hover { color: #ffffff; }
 
         /* ── BOTTOM ── */
         .ft-bottom {
@@ -230,19 +230,19 @@ export default function Footer() {
         .ft-copy {
           font-size: 11px;
           font-weight: 300;
-          color: rgba(0, 0, 0, 0.55) !important;
+          color: rgba(255, 255, 255, 0.55) !important;
           letter-spacing: 0.05em;
           font-family: var(--font-primary), sans-serif !important;
         }
         .ft-locale {
           font-size: 10px;
           font-weight: 300;
-          color: rgba(0, 0, 0, 0.55);
+          color: rgba(255, 255, 255, 0.55);
           letter-spacing: 0.08em;
           cursor: pointer;
           transition: color 0.3s ease;
         }
-        .ft-locale:hover { color: #000000; }
+        .ft-locale:hover { color: #ffffff; }
         
         .ft-col-toggle {
           display: none;
@@ -258,7 +258,7 @@ export default function Footer() {
           .ft-left {
             flex: none;
             padding-right: 0;
-            border-bottom: 1px solid #eaeaea;
+            border-bottom: 1px solid #1a1a1a;
             padding-bottom: 40px;
             margin-bottom: 40px;
           }
@@ -281,7 +281,7 @@ export default function Footer() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #eaeaea;
+            border-bottom: 1px solid #1a1a1a;
             padding: 14px 0; /* Ensures >= 44px tap target */
           }
           .ft-col-toggle {
@@ -306,7 +306,7 @@ export default function Footer() {
             font-size: 16px; /* Prevents auto-zoom on iOS */
           }
           .ft-col-head:active {
-            background-color: #f9f9f9;
+            background-color: #111111;
           }
           .ft-links li a:active,
           .ft-socials-text a:active,
