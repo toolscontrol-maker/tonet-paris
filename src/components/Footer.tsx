@@ -101,7 +101,7 @@ export default function Footer() {
 
       <style>{`
         .ft {
-          background: #000000;
+          background: #333333;
           color: #ffffff;
           font-family: var(--font-primary), sans-serif;
           border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -113,7 +113,7 @@ export default function Footer() {
         .ft-body {
           display: flex;
           padding: 80px 40px 60px;
-          border-bottom: 1px solid #1a1a1a;
+          border-bottom: 1px solid #2d2d2d;
         }
 
         /* ── LEFT ── */
@@ -258,7 +258,7 @@ export default function Footer() {
           .ft-left {
             flex: none;
             padding-right: 0;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #2d2d2d;
             padding-bottom: 40px;
             margin-bottom: 40px;
           }
@@ -281,7 +281,7 @@ export default function Footer() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #2d2d2d;
             padding: 14px 0; /* Ensures >= 44px tap target */
           }
           .ft-col-toggle {
@@ -306,7 +306,7 @@ export default function Footer() {
             font-size: 16px; /* Prevents auto-zoom on iOS */
           }
           .ft-col-head:active {
-            background-color: #111111;
+            background-color: #262626;
           }
           .ft-links li a:active,
           .ft-socials-text a:active,

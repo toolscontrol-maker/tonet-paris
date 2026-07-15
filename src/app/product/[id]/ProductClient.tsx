@@ -1680,7 +1680,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           }
         }
         .tonet-select-size-btn {
-          background-color: #000000;
+          background-color: #555555;
           color: #ffffff;
           border: none;
           padding: 14px 24px;
@@ -1992,7 +1992,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-size-modal-cta {
           width: 100%;
-          background: #000000;
+          background: #555555;
           color: #ffffff;
           border: none;
           padding: 14px 0;
