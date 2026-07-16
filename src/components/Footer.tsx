@@ -12,7 +12,9 @@ export default function Footer() {
   return (
     <footer className="ft">
       <div className="ft-inner">
-        <span className="ft-copy">© 2026 TONET</span>
+        <span className="ft-copy">
+          © 2026 <span className="ft-logo-text">TONET</span>
+        </span>
         <span className="ft-locale" onClick={openSelector}>
           {`${regionLabel} / ${languageLabel} / ${currency}`.toLowerCase()}
         </span>
@@ -21,7 +23,7 @@ export default function Footer() {
       <style>{`
         .ft {
           background: #ffffff;
-          color: #888888;
+          color: #000000;
           font-family: var(--font-primary), sans-serif;
           border-top: 1px solid #e5e5e5;
           text-transform: lowercase;
@@ -38,19 +40,25 @@ export default function Footer() {
         .ft-copy {
           font-size: 11px;
           font-weight: 300;
-          color: #888888;
+          color: #000000;
           letter-spacing: 0.05em;
+        }
+        .ft-logo-text {
+          font-family: 'Saint Carell', sans-serif;
+          font-weight: normal;
+          text-transform: uppercase;
+          margin-left: 2px;
         }
         .ft-locale {
           font-size: 10px;
           font-weight: 300;
-          color: #888888;
+          color: #000000;
           letter-spacing: 0.08em;
           cursor: pointer;
-          transition: color 0.3s ease;
+          transition: opacity 0.3s ease;
         }
         .ft-locale:hover {
-          color: #000000;
+          opacity: 0.6;
         }
         @media (max-width: 767px) {
           .ft-inner {
