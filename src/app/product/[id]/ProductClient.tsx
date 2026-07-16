@@ -2393,20 +2393,20 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         /* ── Optical image scaling classes ── */
         .amiri-ctl-image--top {
-          max-width: 75%;
-          max-height: 60%;
+          max-width: 88%;
+          max-height: 80%;
         }
         .amiri-ctl-image--pants {
-          max-width: 70%;
-          max-height: 52%;
+          max-width: 85%;
+          max-height: 78%;
         }
         .amiri-ctl-image--footwear {
-          max-width: 80%;
-          max-height: 48%;
+          max-width: 90%;
+          max-height: 75%;
         }
         .amiri-ctl-image--accessory {
-          max-width: 60%;
-          max-height: 35%;
+          max-width: 80%;
+          max-height: 70%;
         }
 
         .amiri-ctl-meta {
