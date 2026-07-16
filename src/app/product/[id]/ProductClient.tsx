@@ -275,9 +275,41 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   }, [product.handle]);
 
   useEffect(() => {
-    import('@/lib/shopify').then(({ getRecommendedProducts }) => {
-      getRecommendedProducts(product.handle, 8)
-        .then(prods => setCompleteOutfit(prods.slice(0, 6)))
+    import('@/lib/shopify').then(({ getProducts }) => {
+      getProducts()
+        .then(allProds => {
+          // Filter out the current product
+          const filtered = allProds.filter(p => p.handle !== product.handle);
+          if (filtered.length === 0) return;
+          
+          // First 5 (newest)
+          const newest = filtered.slice(0, 5);
+          
+          // Last 1 (oldest)
+          const oldest = filtered[filtered.length - 1];
+          
+          // Combine them
+          const combined = [...newest];
+          if (oldest && !newest.some(p => p.handle === oldest.handle)) {
+            combined.push(oldest);
+          } else if (filtered.length > 5) {
+            combined.push(filtered[filtered.length - 1]);
+          }
+
+          // Map to RecommendedProduct structure
+          const mapped = combined.map(p => ({
+            handle: p.handle,
+            title: p.title,
+            imageUrl: p.imageUrl,
+            price: p.price,
+            currencyCode: p.currencyCode,
+            collectionTitle: '',
+            collectionHandle: '',
+            siblings: []
+          }));
+
+          setCompleteOutfit(mapped);
+        })
         .catch(() => {});
     });
   }, [product.handle]);
@@ -321,6 +353,29 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
   }, [completeOutfit]);
+
+  useEffect(() => {
+    const el = recCarouselRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+
+      const canScrollLeft = el.scrollLeft > 0;
+      const canScrollRight = el.scrollLeft < el.scrollWidth - el.clientWidth - 1;
+
+      if ((e.deltaY > 0 && canScrollRight) || (e.deltaY < 0 && canScrollLeft)) {
+        e.preventDefault();
+        el.scrollBy({
+          left: e.deltaY,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [arrangedRecommended]);
 
   const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant>(
     product.variants[0] ?? { id: '', title: '', availableForSale: true, price: { amount: String(product.price), currencyCode: product.currencyCode }, selectedOptions: [] }
