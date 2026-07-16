@@ -82,7 +82,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useWishlist() {
+export function useWishlist(): WishlistContextValue {
   const ctx = useContext(WishlistContext);
   if (!ctx) {
     return {

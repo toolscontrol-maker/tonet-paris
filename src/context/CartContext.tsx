@@ -254,11 +254,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useCart() {
+export function useCart(): CartContextType {
   const ctx = useContext(CartContext);
   if (!ctx) {
     return {
-      cart: null,
+      cart: EMPTY_CART,
       cartCount: 0,
       isLoading: false,
       addToCart: async () => {},

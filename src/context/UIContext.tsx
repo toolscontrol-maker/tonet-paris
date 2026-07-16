@@ -86,7 +86,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useUI() {
+export function useUI(): UIContextType {
   const context = useContext(UIContext);
   if (context === undefined) {
     return {

@@ -242,17 +242,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 // ── Hooks ──────────────────────────────────────────────────────────
 
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     return {
       user: null,
       isLoading: false,
-      login: async () => false,
-      logout: async () => {},
-      register: async () => false,
+      login: async () => null,
+      loginWithGoogle: async () => null,
+      logout: () => {},
+      register: async () => null,
       emailExists: async () => false,
       setRedirectAfterLogin: () => {},
+      updateProfile: async () => {},
     };
   }
   return ctx;

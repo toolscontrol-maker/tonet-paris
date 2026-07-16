@@ -152,7 +152,7 @@ export function LocaleProvider({ children }: ProviderProps) {
   );
 }
 
-export function useLocale() {
+export function useLocale(): LocaleContextType {
   const context = useContext(LocaleContext);
   if (!context) {
     return {
