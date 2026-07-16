@@ -1408,7 +1408,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         @media (min-width: 1024px) {
           .tonet-gallery-column {
-            background-color: #f6f6f6;
+            background-color: #faf8f5;
             padding-top: 100px;
           }
         }
@@ -1436,7 +1436,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           justify-content: center;
           align-items: center;
-          background: #f6f6f6;
+          background: #faf8f5;
           padding: 24px 20px;
           box-sizing: border-box;
           aspect-ratio: 3 / 4;
@@ -1493,7 +1493,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-grid-item {
           aspect-ratio: 3 / 4;
-          background-color: #f6f6f6;
+          background-color: #faf8f5;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1515,7 +1515,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-stack-item {
           aspect-ratio: 3 / 4;
-          background-color: #f6f6f6;
+          background-color: #faf8f5;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1543,7 +1543,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-desktop-img-wrapper {
           width: 100%;
-          background: #f6f6f6;
+          background: #faf8f5;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -2277,7 +2277,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .amiri-ctl-image-panel {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background-color: #f6f6f6;
+          background-color: #faf8f5;
           display: flex;
           align-items: center;
           justify-content: center;

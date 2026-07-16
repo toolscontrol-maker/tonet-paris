@@ -821,7 +821,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         /* GRID ITEMS */
         .amiri-grid-item {
-          background-color: #f6f6f6;
+          background-color: #faf8f5;
           position: relative;
           box-sizing: border-box;
           overflow: hidden;
@@ -877,7 +877,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           height: 100%;
           position: relative;
           isolation: isolate;
-          background-color: #f6f6f6;
+          background-color: #faf8f5;
         }
         @media (max-width: 767px) {
           .amiri-product-img-wrap {
@@ -944,7 +944,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-info {
           padding: 20px 24px;
-          background-color: #f6f6f6;
+          background-color: #faf8f5;
           display: flex;
           flex-direction: column;
           gap: 6px;

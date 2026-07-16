@@ -190,7 +190,7 @@ export default function Navbar() {
               className="acne-logo-text"
               style={{ fontFamily: "'Saint Carell', sans-serif", fontWeight: 'normal' }}
             >
-              <span className="acne-logo-line-1">T</span>
+              <span className="acne-logo-line-1">TONET</span>
             </span>
           </Link>
 
@@ -620,9 +620,9 @@ export default function Navbar() {
           transform: translateY(-2px); /* Baseline adjustment for Saint Carell font */
         }
         .acne-logo-line-1 {
-          font-size: 48px;
+          font-size: 42px;
           line-height: 1;
-          letter-spacing: 0;
+          letter-spacing: 0 !important;
         }
         .acne-logo:hover .acne-logo-text { opacity: 0.6; }
 
@@ -946,7 +946,7 @@ export default function Navbar() {
             align-items: stretch; 
           }
           .acne-logo-text { font-size: 14px; }
-          .acne-logo-line-1 { font-size: 36px; }
+          .acne-logo-line-1 { font-size: 30px; }
           .acne-mob-icon { width: 32px; height: 54px; }
           .acne-right-icon { width: 32px; height: 54px; }
           .acne-wishlist-icon { display: none !important; }
