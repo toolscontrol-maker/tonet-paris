@@ -402,6 +402,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     }
   };
 
+  const [recScrollProgress, setRecScrollProgress] = useState(0);
+  const recCarouselRef = useRef<HTMLDivElement>(null);
+
+  const handleRecScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0) {
+      setRecScrollProgress(el.scrollLeft / maxScroll);
+    }
+  };
+
 
   const handleMobileScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
@@ -1032,7 +1043,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             </div>
             
             <div className="amiri-ctl-carousel-wrapper">
-              <div className="amiri-ctl-carousel">
+              <div 
+                className="amiri-ctl-carousel"
+                ref={recCarouselRef}
+                onScroll={handleRecScroll}
+              >
                 {arrangedRecommended.map((p) => {
                   const pType = getProductType(p);
                   const symbol = p.currencyCode === 'USD' ? '$' : '€';
@@ -1067,6 +1082,19 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   );
                 })}
               </div>
+
+              {/* Discreet pill indicator */}
+              {arrangedRecommended.length > 1 && (
+                <div className="amiri-ctl-indicator-track">
+                  <div 
+                    className="amiri-ctl-indicator-pill" 
+                    style={{
+                      width: `${100 / arrangedRecommended.length}%`,
+                      transform: `translateX(${recScrollProgress * (arrangedRecommended.length - 1) * 100}%)`
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </section>
         )}
