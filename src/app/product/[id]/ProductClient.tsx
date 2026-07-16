@@ -1521,7 +1521,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           justify-content: center;
           align-items: center;
           background: #f4f3f1;
-          padding: 8px;
+          padding: 2px;
           box-sizing: border-box;
           aspect-ratio: 3 / 4;
         }
@@ -2369,12 +2369,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 4px;
+          padding: 2px;
           box-sizing: border-box;
         }
         @media (min-width: 1024px) {
           .amiri-ctl-image-panel {
-            padding: 8px;
+            padding: 4px;
           }
         }
 
@@ -2388,25 +2388,25 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         
         .amiri-ctl-card:hover .amiri-ctl-image {
-          transform: scale(1.02);
+          transform: scale(1.04);
         }
 
         /* ── Optical image scaling classes ── */
         .amiri-ctl-image--top {
-          max-width: 88%;
-          max-height: 80%;
+          max-width: 95%;
+          max-height: 87%;
         }
         .amiri-ctl-image--pants {
-          max-width: 85%;
-          max-height: 78%;
+          max-width: 92%;
+          max-height: 85%;
         }
         .amiri-ctl-image--footwear {
-          max-width: 90%;
-          max-height: 75%;
+          max-width: 96%;
+          max-height: 82%;
         }
         .amiri-ctl-image--accessory {
-          max-width: 80%;
-          max-height: 70%;
+          max-width: 88%;
+          max-height: 78%;
         }
 
         .amiri-ctl-meta {
