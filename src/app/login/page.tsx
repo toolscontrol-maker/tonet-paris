@@ -104,8 +104,8 @@ export default function LoginPage() {
       <header className="auth-header">
         <Link href="/" className="auth-logo">
           <img 
-            src="/icon.png" 
-            alt="TONET TORRENTINNI" 
+            src="/logo-red.png" 
+            alt="TONET" 
             className="auth-logo-img"
           />
         </Link>
@@ -278,8 +278,6 @@ export default function LoginPage() {
           height: 38px;
           width: auto;
           object-fit: contain;
-          filter: invert(1);
-          mix-blend-mode: multiply;
         }
 
         /* Portal grid layout */

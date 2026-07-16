@@ -9,9 +9,9 @@ import Link from 'next/link';
 
 // Predefined set of ComfyUI fashion lifestyle images
 const LIFESTYLE_IMAGES = [
-  '/hero/summer_lifestyle_1.jpg',
-  '/hero/summer_lifestyle_2.jpg',
-  '/hero/summer_lifestyle_3.jpg'
+  '/hero/black_lifestyle_1.png',
+  '/hero/black_lifestyle_2.png',
+  '/hero/ComfyUI-main_reference_00028_.png'
 ];
 
 interface GridItem {
@@ -821,7 +821,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         /* GRID ITEMS */
         .amiri-grid-item {
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
           position: relative;
           box-sizing: border-box;
           overflow: hidden;
@@ -877,7 +877,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           height: 100%;
           position: relative;
           isolation: isolate;
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
         }
         @media (max-width: 767px) {
           .amiri-product-img-wrap {
@@ -944,7 +944,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-info {
           padding: 20px 24px;
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
           display: flex;
           flex-direction: column;
           gap: 6px;

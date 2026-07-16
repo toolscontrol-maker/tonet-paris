@@ -960,7 +960,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         {completeOutfit.length > 0 && (
           <section className="amiri-ctl-section">
             <div className="amiri-ctl-header">
-              <span className="amiri-ctl-logo">TONET TORRENTINNI</span>
+              <span className="amiri-ctl-logo">TONET</span>
               <h2 className="amiri-ctl-title">COMPLETE THE LOOK</h2>
             </div>
             
@@ -1027,7 +1027,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         {arrangedRecommended.length > 0 && (
           <section className="amiri-ctl-section">
             <div className="amiri-ctl-header">
-              <span className="amiri-ctl-logo">TONET TORRENTINNI</span>
+              <span className="amiri-ctl-logo">TONET</span>
               <h2 className="amiri-ctl-title">THIS WILL FIT PERFECT WITH YOU</h2>
             </div>
             
@@ -1408,7 +1408,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         @media (min-width: 1024px) {
           .tonet-gallery-column {
-            background-color: #faf8f5;
+            background-color: #f4f3f1;
             padding-top: 100px;
           }
         }
@@ -1436,7 +1436,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           justify-content: center;
           align-items: center;
-          background: #faf8f5;
+          background: #f4f3f1;
           padding: 24px 20px;
           box-sizing: border-box;
           aspect-ratio: 3 / 4;
@@ -1493,7 +1493,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-grid-item {
           aspect-ratio: 3 / 4;
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1515,7 +1515,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-stack-item {
           aspect-ratio: 3 / 4;
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1543,7 +1543,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-desktop-img-wrapper {
           width: 100%;
-          background: #faf8f5;
+          background: #f4f3f1;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -2181,10 +2181,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
 
         .amiri-ctl-logo {
-          font-family: 'Big Noodle Titling', sans-serif;
-          font-size: 26px;
-          font-weight: 500;
-          letter-spacing: 0.1em;
+          font-family: var(--font-brand), 'Saint Carell', sans-serif;
+          font-size: 18px;
+          font-weight: normal;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
           color: #000000;
           margin-bottom: 8px;
@@ -2192,7 +2192,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         @media (min-width: 1024px) {
           .amiri-ctl-logo {
-            font-size: 30px;
+            font-size: 22px;
             margin-bottom: 12px;
           }
         }
@@ -2277,7 +2277,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .amiri-ctl-image-panel {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
           display: flex;
           align-items: center;
           justify-content: center;

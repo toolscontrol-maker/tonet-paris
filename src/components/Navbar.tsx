@@ -185,13 +185,8 @@ export default function Navbar() {
           </div>
 
           {/* CENTER: Logo */}
-          <Link href="/" className="acne-logo">
-            <span 
-              className="acne-logo-text"
-              style={{ fontFamily: "'Saint Carell', sans-serif", fontWeight: 'normal' }}
-            >
-              <span className="acne-logo-line-1">TONET</span>
-            </span>
+          <Link href="/" className="acne-logo" aria-label="TONET">
+            <img src="/logo-red.png" alt="TONET" className="acne-logo-img" />
           </Link>
 
           {/* RIGHT: Utility Icons (Account, Wishlist, Cart) */}
@@ -602,29 +597,16 @@ export default function Navbar() {
           align-items: center;
           justify-content: center;
         }
-        .acne-logo-text {
-          font-family: 'Saint Carell', sans-serif;
-          font-size: 18px;
-          font-weight: normal;
-          letter-spacing: 0.15em;
-          padding-right: 0;
-          color: rgba(0, 0, 0, 0.95);
-          text-transform: uppercase;
-          line-height: 1.1;
+        .acne-logo-img {
+          height: 36px;
+          width: auto;
+          display: block;
+          object-fit: contain;
           transition: opacity 0.3s ease;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          transform: translateY(-2px); /* Baseline adjustment for Saint Carell font */
         }
-        .acne-logo-line-1 {
-          font-size: 42px;
-          line-height: 1;
-          letter-spacing: 0 !important;
+        .acne-logo:hover .acne-logo-img {
+          opacity: 0.7;
         }
-        .acne-logo:hover .acne-logo-text { opacity: 0.6; }
 
         /* ══ LEFT NAV ══ */
         .acne-nav-left {
@@ -945,8 +927,7 @@ export default function Navbar() {
             grid-template-columns: 1fr auto 1fr; 
             align-items: stretch; 
           }
-          .acne-logo-text { font-size: 14px; }
-          .acne-logo-line-1 { font-size: 30px; }
+          .acne-logo-img { height: 28px; }
           .acne-mob-icon { width: 32px; height: 54px; }
           .acne-right-icon { width: 32px; height: 54px; }
           .acne-wishlist-icon { display: none !important; }

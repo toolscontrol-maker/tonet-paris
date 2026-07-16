@@ -474,7 +474,7 @@ export default function SearchDrawer() {
         .sd-suggested-img-wrap {
           width: 100%;
           aspect-ratio: 16 / 19;
-          background-color: #faf8f5;
+          background-color: #f4f3f1;
           margin-bottom: 4px;
           overflow: hidden;
           display: flex;

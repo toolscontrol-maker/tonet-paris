@@ -17,8 +17,7 @@ export default async function Home() {
       <section className="am-hero">
         <div className="am-hero-media">
           <div className="am-hero-center-logo">
-            <span className="am-hero-logo-line-1">tonet</span>
-            <span className="am-hero-logo-line-2">torrentinni</span>
+            <img src="/logo-red.png" alt="TONET" className="am-hero-logo-img" />
           </div>
         </div>
       </section>
@@ -111,40 +110,18 @@ export default async function Home() {
         }
         .am-hero-center-logo {
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          text-align: center;
-          color: #ffffff;
-          font-family: 'Saint Carell', sans-serif;
-          text-transform: uppercase;
-          pointer-events: none;
           z-index: 2;
+          pointer-events: none;
         }
-        .am-hero-logo-line-1 {
-          font-size: 80px;
-          line-height: 0.95;
-          letter-spacing: 0.18em;
-        }
-        .am-hero-logo-line-2 {
-          font-size: 28px;
-          line-height: 1;
-          letter-spacing: 0.35em;
-          margin-top: 12px;
-          opacity: 0.9;
-          text-indent: 0.35em;
-        }
-        @media (max-width: 767px) {
-          .am-hero-logo-line-1 {
-            font-size: 48px;
-            letter-spacing: 0.15em;
-          }
-          .am-hero-logo-line-2 {
-            font-size: 18px;
-            letter-spacing: 0.3em;
-            margin-top: 8px;
-            text-indent: 0.3em;
-          }
+        .am-hero-logo-img {
+          width: 320px;
+          max-width: 80vw;
+          height: auto;
+          display: block;
+          object-fit: contain;
+          filter: none;
         }
         .am-hero-logo-wrap {
           background: #000000;

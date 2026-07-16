@@ -349,7 +349,7 @@ export default function OrdersClient() {
           width: 100px;
           aspect-ratio: 3 / 4;
           object-fit: contain;
-          background: rgba(0, 0, 0, 0.015);
+          background: #f4f3f1;
           padding: 8px;
           box-sizing: border-box;
           filter: grayscale(0.1);
@@ -436,7 +436,7 @@ export default function OrdersClient() {
           width: 52px;
           height: 68px;
           object-fit: contain;
-          background: rgba(0, 0, 0, 0.015);
+          background: #f4f3f1;
           padding: 6px;
           box-sizing: border-box;
         }
