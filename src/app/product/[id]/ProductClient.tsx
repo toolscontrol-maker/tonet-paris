@@ -1418,6 +1418,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: block;
           width: 100%;
           overflow: hidden;
+          position: relative;
         }
         .tonet-mobile-carousel {
           display: flex;
@@ -1437,13 +1438,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           justify-content: center;
           align-items: center;
           background: #f4f3f1;
-          padding: 24px 20px;
+          padding: 8px;
           box-sizing: border-box;
           aspect-ratio: 3 / 4;
         }
         .tonet-mobile-slide img {
           width: 100%;
-          max-width: 380px;
+          max-width: 100%;
           height: auto;
           display: block;
           object-fit: contain;
@@ -1454,8 +1455,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           justify-content: center;
           gap: 8px;
-          margin-top: 8px;
-          margin-bottom: 12px;
+          position: absolute;
+          bottom: 16px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10;
+          margin: 0;
         }
         .tonet-mobile-dot {
           width: 5px;
