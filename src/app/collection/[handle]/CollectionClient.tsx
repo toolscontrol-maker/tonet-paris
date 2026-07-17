@@ -1255,13 +1255,11 @@ export default function CollectionClient({ collection }: { collection: Collectio
         }
 
         .amiri-product-info {
-          padding: 20px 24px;
-          background-color: #f4f3f1;
+          padding: 12px 16px 20px 16px;
+          background-color: transparent;
           display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: baseline;
-          gap: 12px;
+          flex-direction: column;
+          gap: 8px;
           box-sizing: border-box;
           z-index: 5;
           width: 100%;
@@ -1277,7 +1275,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           color: #000000;
           margin: 0;
           line-height: 1.3;
-          flex: 1;
+          width: 100%;
           text-align: left;
         }
 
@@ -1285,11 +1283,32 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-family: var(--font-primary), sans-serif;
           font-size: 11px;
           font-weight: 400;
-          color: #000000;
+          color: #555555;
           letter-spacing: 0.05em;
           margin: 0;
-          text-align: right;
-          flex-shrink: 0;
+          text-align: left;
+          width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+          .amiri-product-info {
+            padding: 20px 24px;
+            background-color: #f4f3f1;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+          }
+          .amiri-product-name {
+            flex: 1;
+            text-align: left;
+          }
+          .amiri-product-price {
+            color: #000000;
+            text-align: right;
+            width: auto;
+            flex-shrink: 0;
+          }
         }
 
         /* LIFESTYLE CELLS INTERIOR */
