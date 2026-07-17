@@ -740,10 +740,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
         </div>
       </div>
 
-      {/* FLOATING MONOGRAM BADGE */}
-      <div className="amiri-monogram-badge">
-        <span>T</span>
-      </div>
+
 
       {/* REFINE DRAWER OVERLAY */}
       <div 

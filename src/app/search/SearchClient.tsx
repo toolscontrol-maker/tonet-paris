@@ -176,10 +176,7 @@ export default function SearchClient({ query, products, collections }: Props) {
         </div>
       )}
 
-      {/* FLOATING MONOGRAM BADGE */}
-      <div className="amiri-monogram-badge">
-        <span>T</span>
-      </div>
+
 
       <style>{`
         /* AMIRI LUXURY EDITORIAL SEARCH RESULTS PAGE STYLE REPLICA */
