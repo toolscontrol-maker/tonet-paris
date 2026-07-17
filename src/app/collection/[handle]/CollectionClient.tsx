@@ -1154,14 +1154,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .v-product-carousel-counter {
           position: absolute;
-          bottom: 12px;
+          bottom: 8px;
           right: 12px;
           font-family: var(--font-primary), sans-serif;
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 300;
-          color: rgba(0, 0, 0, 0.5);
-          background-color: rgba(255, 255, 255, 0.7);
-          padding: 2px 6px;
+          color: rgba(0, 0, 0, 0.4);
+          background-color: transparent;
           letter-spacing: 0.05em;
           z-index: 5;
         }
@@ -1172,7 +1171,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           left: 0;
           width: 100%;
           height: 2px;
-          background-color: #ffffff;
+          background-color: transparent;
           z-index: 5;
         }
 
