@@ -550,178 +550,181 @@ export default function CollectionClient({ collection }: { collection: Collectio
     <>
       <div className="amiri-collection-container">
         
-        {/* TOP BAR: Breadcrumbs & Filters/Sort triggers */}
-        <div className="v-plp-header-row">
-          <div className="v-plp-header-left">
-            {getBreadcrumbs()}
+        {/* STICKY HEADER BLOCK */}
+        <div className="v-plp-sticky-header">
+          {/* TOP BAR: Breadcrumbs & Filters/Sort triggers */}
+          <div className="v-plp-header-row">
+            <div className="v-plp-header-left">
+              {getBreadcrumbs()}
+            </div>
+            <div className="v-plp-header-right">
+              <button 
+                type="button" 
+                className={`v-plp-trigger ${filtersOpen ? 'active' : ''}`}
+                onClick={() => {
+                  setFiltersOpen(!filtersOpen);
+                  setSortOpen(false);
+                }}
+              >
+                Filtra por {filtersOpen ? '−' : '+'}
+              </button>
+              <button 
+                type="button" 
+                className={`v-plp-trigger ${sortOpen ? 'active' : ''}`}
+                onClick={() => {
+                  setSortOpen(!sortOpen);
+                  setFiltersOpen(false);
+                }}
+              >
+                Ordenar por {sortOpen ? '−' : '+'}
+              </button>
+            </div>
           </div>
-          <div className="v-plp-header-right">
-            <button 
-              type="button" 
-              className={`v-plp-trigger ${filtersOpen ? 'active' : ''}`}
-              onClick={() => {
-                setFiltersOpen(!filtersOpen);
-                setSortOpen(false);
-              }}
-            >
-              Filtra por {filtersOpen ? '−' : '+'}
-            </button>
-            <button 
-              type="button" 
-              className={`v-plp-trigger ${sortOpen ? 'active' : ''}`}
-              onClick={() => {
-                setSortOpen(!sortOpen);
-                setFiltersOpen(false);
-              }}
-            >
-              Ordenar por {sortOpen ? '−' : '+'}
-            </button>
-          </div>
-        </div>
 
-        {/* EXPANDED INLINE FILTERS PANEL */}
-        {filtersOpen && (
-          <div className="v-filters-panel">
-            <div className="v-filters-grid">
-              
-              {/* Column 1: Color */}
-              {filterOptions.colors.length > 0 && (
+          {/* EXPANDED INLINE FILTERS PANEL */}
+          {filtersOpen && (
+            <div className="v-filters-panel">
+              <div className="v-filters-grid">
+                
+                {/* Column 1: Color */}
+                {filterOptions.colors.length > 0 && (
+                  <div className="v-filter-col">
+                    <span className="v-filter-col-title">Color</span>
+                    <div className="v-filter-options">
+                      {filterOptions.colors.map(col => (
+                        <button
+                          key={col}
+                          type="button"
+                          className={`v-filter-option ${tempColors.includes(col) ? 'active' : ''}`}
+                          onClick={() => toggleTempFilter(tempColors, setTempColors, col)}
+                        >
+                          <span className="v-filter-dot" style={{ backgroundColor: getHexColor(col) }} />
+                          <span>{col}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Column 2: Talla (Sizes) */}
+                {filterOptions.sizes.length > 0 && (
+                  <div className="v-filter-col">
+                    <span className="v-filter-col-title">Talla</span>
+                    <div className="v-filter-options grid-sizes">
+                      {filterOptions.sizes.map(sz => (
+                        <button
+                          key={sz}
+                          type="button"
+                          className={`v-filter-option size-box ${tempSizes.includes(sz) ? 'active' : ''}`}
+                          onClick={() => toggleTempFilter(tempSizes, setTempSizes, sz)}
+                        >
+                          <span>{sz}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Column 3: Material */}
+                {filterOptions.materials.length > 0 && (
+                  <div className="v-filter-col">
+                    <span className="v-filter-col-title">Material</span>
+                    <div className="v-filter-options">
+                      {filterOptions.materials.map(mat => (
+                        <button
+                          key={mat}
+                          type="button"
+                          className={`v-filter-option ${tempMaterials.includes(mat) ? 'active' : ''}`}
+                          onClick={() => toggleTempFilter(tempMaterials, setTempMaterials, mat)}
+                        >
+                          <span>{mat}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Column 4: Disponibilidad */}
                 <div className="v-filter-col">
-                  <span className="v-filter-col-title">Color</span>
+                  <span className="v-filter-col-title">Disponibilidad</span>
                   <div className="v-filter-options">
-                    {filterOptions.colors.map(col => (
-                      <button
-                        key={col}
-                        type="button"
-                        className={`v-filter-option ${tempColors.includes(col) ? 'active' : ''}`}
-                        onClick={() => toggleTempFilter(tempColors, setTempColors, col)}
-                      >
-                        <span className="v-filter-dot" style={{ backgroundColor: getHexColor(col) }} />
-                        <span>{col}</span>
-                      </button>
-                    ))}
+                    <button
+                      type="button"
+                      className={`v-filter-option ${tempAvailability.includes('in-stock') ? 'active' : ''}`}
+                      onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'in-stock')}
+                    >
+                      <span>En Stock</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`v-filter-option ${tempAvailability.includes('out-of-stock') ? 'active' : ''}`}
+                      onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'out-of-stock')}
+                    >
+                      <span>Agotado</span>
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Column 2: Talla (Sizes) */}
-              {filterOptions.sizes.length > 0 && (
-                <div className="v-filter-col">
-                  <span className="v-filter-col-title">Talla</span>
-                  <div className="v-filter-options grid-sizes">
-                    {filterOptions.sizes.map(sz => (
-                      <button
-                        key={sz}
-                        type="button"
-                        className={`v-filter-option size-box ${tempSizes.includes(sz) ? 'active' : ''}`}
-                        onClick={() => toggleTempFilter(tempSizes, setTempSizes, sz)}
-                      >
-                        <span>{sz}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Column 3: Material */}
-              {filterOptions.materials.length > 0 && (
-                <div className="v-filter-col">
-                  <span className="v-filter-col-title">Material</span>
-                  <div className="v-filter-options">
-                    {filterOptions.materials.map(mat => (
-                      <button
-                        key={mat}
-                        type="button"
-                        className={`v-filter-option ${tempMaterials.includes(mat) ? 'active' : ''}`}
-                        onClick={() => toggleTempFilter(tempMaterials, setTempMaterials, mat)}
-                      >
-                        <span>{mat}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Column 4: Disponibilidad */}
-              <div className="v-filter-col">
-                <span className="v-filter-col-title">Disponibilidad</span>
-                <div className="v-filter-options">
-                  <button
-                    type="button"
-                    className={`v-filter-option ${tempAvailability.includes('in-stock') ? 'active' : ''}`}
-                    onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'in-stock')}
-                  >
-                    <span>En Stock</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`v-filter-option ${tempAvailability.includes('out-of-stock') ? 'active' : ''}`}
-                    onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'out-of-stock')}
-                  >
-                    <span>Agotado</span>
-                  </button>
-                </div>
               </div>
 
+              {/* Footer buttons */}
+              <div className="v-filters-footer">
+                <button type="button" className="v-btn-reset" onClick={clearFilters}>
+                  Restablecer todo
+                </button>
+                <button type="button" className="v-btn-apply" onClick={applyFilters}>
+                  Aplicar cambios
+                </button>
+              </div>
             </div>
+          )}
 
-            {/* Footer buttons */}
-            <div className="v-filters-footer">
-              <button type="button" className="v-btn-reset" onClick={clearFilters}>
-                Restablecer todo
+          {/* EXPANDED INLINE SORT PANEL */}
+          {sortOpen && (
+            <div className="v-sort-dropdown">
+              <button
+                type="button"
+                className={`v-sort-option ${selectedSort === 'featured' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSort('featured');
+                  setSortOpen(false);
+                }}
+              >
+                Recomendado
               </button>
-              <button type="button" className="v-btn-apply" onClick={applyFilters}>
-                Aplicar cambios
+              <button
+                type="button"
+                className={`v-sort-option ${selectedSort === 'price-asc' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSort('price-asc');
+                  setSortOpen(false);
+                }}
+              >
+                Precio: de menor a mayor
+              </button>
+              <button
+                type="button"
+                className={`v-sort-option ${selectedSort === 'price-desc' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSort('price-desc');
+                  setSortOpen(false);
+                }}
+              >
+                Precio: de mayor a menor
+              </button>
+              <button
+                type="button"
+                className={`v-sort-option ${selectedSort === 'newest' ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedSort('price-desc'); // uses newest/price-desc logic
+                  setSortOpen(false);
+                }}
+              >
+                Novedades
               </button>
             </div>
-          </div>
-        )}
-
-        {/* EXPANDED INLINE SORT PANEL */}
-        {sortOpen && (
-          <div className="v-sort-dropdown">
-            <button
-              type="button"
-              className={`v-sort-option ${selectedSort === 'featured' ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedSort('featured');
-                setSortOpen(false);
-              }}
-            >
-              Recomendado
-            </button>
-            <button
-              type="button"
-              className={`v-sort-option ${selectedSort === 'price-asc' ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedSort('price-asc');
-                setSortOpen(false);
-              }}
-            >
-              Precio: de menor a mayor
-            </button>
-            <button
-              type="button"
-              className={`v-sort-option ${selectedSort === 'price-desc' ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedSort('price-desc');
-                setSortOpen(false);
-              }}
-            >
-              Precio: de mayor a menor
-            </button>
-            <button
-              type="button"
-              className={`v-sort-option ${selectedSort === 'newest' ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedSort('price-desc'); // uses newest/price-desc logic
-                setSortOpen(false);
-              }}
-            >
-              Novedades
-            </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* MAIN MODULAR GRID */}
         <div className="amiri-grid-wrapper">
@@ -982,6 +985,19 @@ export default function CollectionClient({ collection }: { collection: Collectio
           padding-top: 56px;
           padding-bottom: 120px;
           background-color: #ffffff;
+        }
+
+        .v-plp-sticky-header {
+          position: sticky;
+          top: 64px;
+          z-index: 100;
+          background-color: #ffffff;
+        }
+
+        @media (max-width: 767px) {
+          .v-plp-sticky-header {
+            top: 54px;
+          }
         }
 
         /* TOP AREA */
