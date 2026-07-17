@@ -966,10 +966,11 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         @media (max-width: 767px) {
           .v-plp-header-row {
-            padding: 16px 20px;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
+            padding: 12px 16px;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
           }
         }
 
@@ -996,8 +997,9 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         @media (max-width: 767px) {
           .v-plp-header-right {
-            width: 100%;
-            justify-content: space-between;
+            width: auto;
+            justify-content: flex-end;
+            gap: 12px;
           }
         }
 
