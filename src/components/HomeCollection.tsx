@@ -52,7 +52,7 @@ export default function HomeCollection({ products }: HomeCollectionProps) {
   return (
     <section className="hc">
       <div className="hc-header">
-        <p className="hc-season">TONER TORRENTINNI — SS MMXXVI</p>
+        <p className="hc-season">TONET TORRENTINNI — SS MMXXVI</p>
         <h2 className="hc-title">The Collection</h2>
         <div className="hc-tabs">
           <button

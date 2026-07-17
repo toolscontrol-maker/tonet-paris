@@ -87,7 +87,7 @@ export default function CartDrawer() {
             <div className="cd-empty-state">
               <p className="cd-empty-text">Your bag is empty</p>
               <button className="cd-continue-btn" onClick={closeCart}>
-                Continue Shopping
+                CONTINUE SHOPPING
               </button>
             </div>
           ) : (
@@ -227,8 +227,8 @@ export default function CartDrawer() {
         }
         .cd-continue-btn {
           width: 100%;
-          background: transparent;
-          color: #000000;
+          background: #000000;
+          color: #ffffff;
           border: 1px solid #000000;
           padding: 16px;
           font-size: 10px;
@@ -237,11 +237,11 @@ export default function CartDrawer() {
           letter-spacing: 0.15em;
           text-transform: uppercase;
           cursor: pointer;
-          transition: background 0.3s, color 0.3s;
+          border-radius: 0;
+          transition: opacity 0.3s;
         }
         .cd-continue-btn:hover {
-          background: #000000;
-          color: #ffffff;
+          opacity: 0.85;
         }
 
         /* ══ ITEM ══ */

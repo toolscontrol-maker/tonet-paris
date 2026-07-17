@@ -26,7 +26,7 @@ export default function AccountClient() {
         />
         <div className="dior-banner-overlay">
           <div className="dior-banner-text">
-            <span className="dior-banner-sub">THE HOUSE OF TONET</span>
+            <span className="dior-banner-sub">THE HOUSE OF TONET TORRENTINNI</span>
             <h1 className="dior-banner-title">WELCOME, {fullName}</h1>
           </div>
         </div>

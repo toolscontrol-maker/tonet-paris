@@ -21,7 +21,7 @@ export default function HousePage() {
     <>
       <style>{`
         /* ════════════════════════════════════════
-           THE HOUSE PAGE — TONER TORRENTINNI
+           THE HOUSE PAGE — TONET TORRENTINNI
         ════════════════════════════════════════ */
 
         /* Reveal */
@@ -421,7 +421,7 @@ export default function HousePage() {
         />
         <div className="h-hero-grad" />
         <div className="h-hero-body">
-          <span className="h-hero-tag">The House of Toner Torrentinni</span>
+          <span className="h-hero-tag">The House of Tonet Torrentinni</span>
           <h1 className="h-hero-title">
             Contemporary<br />Nobility.
           </h1>
@@ -438,7 +438,7 @@ export default function HousePage() {
         <div className="h-manifesto-inner house-reveal">
           <span className="h-eyebrow h-eyebrow-dark">The Manifesto</span>
           <p className="h-manifesto-p">
-            TONER TORRENTINNI was not built for the moment. It was constructed for permanence —
+            TONET TORRENTINNI was not built for the moment. It was constructed for permanence —
             deeply integrated with the silent geometry of natural landscapes —
             for those who understand that true elegance is never loud, and that
             refinement requires no explanation.
@@ -451,7 +451,7 @@ export default function HousePage() {
           <p className="h-manifesto-p">
             The garment is not a statement. It is a condition.
           </p>
-          <span className="h-manifesto-line">The House of Toner Torrentinni — 2026</span>
+          <span className="h-manifesto-line">The House of Tonet Torrentinni — 2026</span>
         </div>
       </section>
 
@@ -461,7 +461,7 @@ export default function HousePage() {
           <p className="h-atm1-quote">
             Silence as architecture.<br />Restraint as identity.
           </p>
-          <span className="h-atm1-attr">House of Toner Torrentinni</span>
+          <span className="h-atm1-attr">House of Tonet Torrentinni</span>
         </div>
       </section>
 
@@ -496,7 +496,7 @@ export default function HousePage() {
           <span className="h-eyebrow h-eyebrow-dark">The Uniform</span>
           <h2 className="h-uniform-title">A System<br />of Dress.</h2>
           <p className="h-uniform-p">
-            The TONER TORRENTINNI garment is not a fashion object. It is a disciplined system
+            The TONET TORRENTINNI garment is not a fashion object. It is a disciplined system
             of dress designed for those who move through the world with
             inherited certainty.
           </p>
@@ -520,7 +520,7 @@ export default function HousePage() {
             "The most elegant gesture is one<br />
             that requires no audience."
           </p>
-          <span className="h-pq-attr">— House of Toner Torrentinni</span>
+          <span className="h-pq-attr">— House of Tonet Torrentinni</span>
         </div>
       </section>
 
@@ -532,12 +532,12 @@ export default function HousePage() {
             The House<br />Exists in Space.
           </h2>
           <p className="h-residence-p">
-            TONER TORRENTINNI is not a virtual identity. It exists inside real architecture —
+            TONET TORRENTINNI is not a virtual identity. It exists inside real architecture —
             in European apartments, private libraries, stone corridors, and silent
             rooms where light enters slowly and deliberately.
           </p>
           <p className="h-residence-p">
-            These are the spaces that shaped the TONER TORRENTINNI aesthetic: marble, shadow,
+            These are the spaces that shaped the TONET TORRENTINNI aesthetic: marble, shadow,
             natural light, wood aged by centuries. The garments were designed
             inside these rooms. They belong here.
           </p>

@@ -53,7 +53,7 @@ const hasBlackColor = (product: Product): boolean => {
 const philosophicalQuotes = [
   "We are not interested in trends. Only permanence and the raw truth of nature.",
   "Repetition is the ultimate form of restraint, mirroring the eternal cycles of landscapes.",
-  "A garment is not a transaction. It is an artifact of the House of Toner Torrentinni.",
+  "A garment is not a transaction. It is an artifact of the House of Tonet Torrentinni.",
   "Restraint is not the absence of design. It is the absolute presence of intention, shaped by natural simplicity.",
   "Garments are not products. They are pieces of a cumulative archive under nature's silent watch."
 ];
@@ -159,12 +159,12 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
         <div className="tonet-archive-hero__bg-overlay" />
         <img
           src="/hero/collection_garden_landscape.png"
-          alt="TONER TORRENTINNI Archival Imagery"
+          alt="TONET TORRENTINNI Archival Imagery"
           className="tonet-archive-hero__image"
           draggable={false}
         />
         <div className="tonet-archive-hero__content">
-          <p className="tonet-archive-hero__eyebrow">HOUSE OF TONER TORRENTINNI</p>
+          <p className="tonet-archive-hero__eyebrow">HOUSE OF TONET TORRENTINNI</p>
           <h1 className="tonet-archive-hero__title">THE COLLECTION</h1>
           <p className="tonet-archive-hero__subtitle">
             A registry of garments produced and preserved by the House, inspired by the geometry of natural landscapes.
@@ -270,7 +270,7 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
                   {shouldShowQuote && (
                     <div className="tonet-archive-quote archive-reveal">
                       <p className="tonet-archive-quote__text">"{quoteText}"</p>
-                      <span className="tonet-archive-quote__sub">TONER TORRENTINNI RESEARCH ARCHIVE</span>
+                      <span className="tonet-archive-quote__sub">TONET TORRENTINNI RESEARCH ARCHIVE</span>
                     </div>
                   )}
 
