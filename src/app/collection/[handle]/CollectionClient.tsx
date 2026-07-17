@@ -998,6 +998,8 @@ export default function CollectionClient({ collection }: { collection: Collectio
           top: 64px;
           z-index: 100;
           background-color: #ffffff;
+          width: 100%;
+          max-width: 100%;
         }
 
         @media (max-width: 767px) {
@@ -1015,6 +1017,8 @@ export default function CollectionClient({ collection }: { collection: Collectio
           border-bottom: 1px solid rgba(0, 0, 0, 0.08);
           background-color: #ffffff;
           box-sizing: border-box;
+          width: 100%;
+          max-width: 100%;
         }
 
         @media (max-width: 767px) {
@@ -1024,6 +1028,8 @@ export default function CollectionClient({ collection }: { collection: Collectio
             justify-content: space-between;
             align-items: center;
             gap: 8px;
+            width: 100%;
+            max-width: 100%;
           }
         }
 
@@ -1064,7 +1070,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           .v-plp-header-right {
             width: auto;
             justify-content: flex-end;
-            gap: 12px;
+            gap: 8px;
           }
         }
 
@@ -1080,6 +1086,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
           transition: color 0.3s ease;
           outline: none;
           text-transform: lowercase;
+        }
+
+        @media (max-width: 767px) {
+          .v-plp-trigger {
+            font-size: 10px;
+            letter-spacing: 0.04em;
+          }
         }
 
         .v-plp-trigger:hover, .v-plp-trigger.active {
