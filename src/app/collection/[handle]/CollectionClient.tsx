@@ -1131,6 +1131,14 @@ export default function CollectionClient({ collection }: { collection: Collectio
           aspect-ratio: 3 / 5;
         }
 
+        @media (max-width: 767px) {
+          .amiri-grid-item--product {
+            background-color: #ffffff;
+            aspect-ratio: unset;
+            overflow: visible;
+          }
+        }
+
         .amiri-grid-item--span-2 {
           grid-column: span 2;
         }
@@ -1172,6 +1180,14 @@ export default function CollectionClient({ collection }: { collection: Collectio
           position: relative;
           overflow: hidden;
           background-color: #f4f3f1;
+        }
+
+        @media (max-width: 767px) {
+          .v-product-gallery-container {
+            flex: none;
+            height: auto;
+            aspect-ratio: 3 / 4;
+          }
         }
 
         .v-product-link-overlay {
@@ -1255,15 +1271,27 @@ export default function CollectionClient({ collection }: { collection: Collectio
         }
 
         .amiri-product-info {
-          padding: 12px 16px 20px 16px;
-          background-color: transparent;
+          padding: 20px 24px;
+          background-color: #f4f3f1;
           display: flex;
-          flex-direction: column;
-          gap: 8px;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 12px;
           box-sizing: border-box;
           z-index: 5;
           width: 100%;
           text-decoration: none;
+        }
+
+        @media (max-width: 767px) {
+          .amiri-product-info {
+            background-color: #ffffff;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px 0 14px 0;
+            align-items: flex-start;
+          }
         }
 
         .amiri-product-name {
@@ -1275,39 +1303,34 @@ export default function CollectionClient({ collection }: { collection: Collectio
           color: #000000;
           margin: 0;
           line-height: 1.3;
-          width: 100%;
+          flex: 1;
           text-align: left;
+        }
+
+        @media (max-width: 767px) {
+          .amiri-product-name {
+            font-size: 11px;
+            white-space: normal;
+            line-height: 1.35;
+          }
         }
 
         .amiri-product-price {
           font-family: var(--font-primary), sans-serif;
           font-size: 11px;
           font-weight: 400;
-          color: #555555;
+          color: #000000;
           letter-spacing: 0.05em;
           margin: 0;
-          text-align: left;
-          width: 100%;
+          text-align: right;
+          flex-shrink: 0;
         }
 
-        @media (min-width: 1024px) {
-          .amiri-product-info {
-            padding: 20px 24px;
-            background-color: #f4f3f1;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 12px;
-          }
-          .amiri-product-name {
-            flex: 1;
-            text-align: left;
-          }
+        @media (max-width: 767px) {
           .amiri-product-price {
-            color: #000000;
-            text-align: right;
-            width: auto;
-            flex-shrink: 0;
+            text-align: left;
+            color: rgba(0,0,0,0.65);
+            font-size: 11px;
           }
         }
 
