@@ -6,6 +6,7 @@ import type { CollectionDetail, Product } from '@/lib/shopify';
 import { getOptimizedImageUrl } from '@/lib/shopify';
 import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
+import { useWishlist } from '@/context/WishlistContext';
 
 // Predefined set of ComfyUI fashion lifestyle images
 const LIFESTYLE_IMAGES = [
@@ -90,6 +91,22 @@ function ProductCard({
   const carouselRef = useRef<HTMLDivElement>(null);
   const images = product.images && product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean) as string[];
 
+  const { toggle, has } = useWishlist();
+  const isFavorite = has(product.handle);
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggle({
+      handle: product.handle,
+      title: product.title,
+      imageUrl: product.imageUrl || '',
+      price: product.price,
+      currencyCode: product.currencyCode || 'EUR',
+      collectionTitle: collectionHandle || ''
+    });
+  };
+
   const handleScroll = () => {
     if (carouselRef.current) {
       const { scrollLeft, clientWidth } = carouselRef.current;
@@ -108,6 +125,24 @@ function ProductCard({
     <div className="amiri-grid-item amiri-grid-item--product">
       {/* Swipeable Image Gallery */}
       <div className="v-product-gallery-container">
+        {/* Wishlist/Favorites Star Button */}
+        <button 
+          type="button"
+          className={`v-wishlist-btn ${isFavorite ? 'favorite' : ''}`}
+          onClick={handleToggleFavorite}
+          aria-label={isFavorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
+        >
+          {isFavorite ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000" stroke="#000000" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          )}
+        </button>
+
         <div 
           ref={carouselRef}
           className="v-product-carousel"
@@ -1449,28 +1484,38 @@ export default function CollectionClient({ collection }: { collection: Collectio
           color: #000000;
         }
 
-        /* FLOATING MONOGRAM BADGE */
-        .amiri-monogram-badge {
-          position: fixed;
-          bottom: 24px;
-          right: 24px;
-          width: 44px;
-          height: 44px;
-          background-color: #000000;
-          border-radius: 50%;
+        /* WISHLIST STAR BUTTON */
+        .v-wishlist-btn {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          background: none;
+          border: none;
+          color: #000000;
+          cursor: pointer;
+          z-index: 10;
+          padding: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          color: #ffffff;
-          font-family: var(--font-brand);
-          font-size: 18px;
-          z-index: 999;
-          cursor: pointer;
-          transition: transform 0.3s ease;
+          transition: opacity 0.25s ease, transform 0.2s ease;
+          outline: none;
         }
-        .amiri-monogram-badge:hover {
-          transform: scale(1.05);
+
+        .v-wishlist-btn:hover {
+          transform: scale(1.1);
+        }
+
+        @media (min-width: 1024px) {
+          .v-wishlist-btn {
+            opacity: 0;
+            pointer-events: none;
+          }
+          .amiri-grid-item:hover .v-wishlist-btn {
+            opacity: 1;
+            pointer-events: all;
+          }
+        }
       `}</style>
     </>
   );
