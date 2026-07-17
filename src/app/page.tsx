@@ -16,8 +16,17 @@ export default async function Home() {
       {/* 1. HERO CAMPAIGN BANNER: PRE-FALL 2026 */}
       <section className="am-hero">
         <div className="am-hero-media">
-          <div className="am-hero-center-logo">
-            <img src="/logo-red.png" alt="TONET" className="am-hero-logo-img" />
+          <img src="/stores-bg.jpg" alt="TONET Campaign" className="am-hero-img" />
+          <div className="am-hero-bottom-content">
+            <span className="am-hero-collection-title">PRE-FALL 2026</span>
+            <div className="am-hero-buttons">
+              <Link href="/collection/women" className="am-hero-btn">
+                PARA ELLA
+              </Link>
+              <Link href="/collection/men" className="am-hero-btn">
+                PARA ÉL
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -55,7 +64,7 @@ export default async function Home() {
           <div className="am-world-tonet-col">
             <div className="am-world-tonet-media">
               <img 
-                src="/cambia_esta_ienda_a_tonert_202606291414.jpg" 
+                src="/stores-bg.jpg" 
                 alt="Stores" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               />
@@ -108,6 +117,84 @@ export default async function Home() {
           justify-content: center;
           background: #000000;
         }
+        .am-hero-media::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.15) 0%,
+            rgba(0, 0, 0, 0) 50%,
+            rgba(0, 0, 0, 0.6) 100%
+          );
+          z-index: 1;
+          pointer-events: none;
+        }
+        .am-hero-bottom-content {
+          position: absolute;
+          bottom: 80px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          z-index: 3;
+          width: 100%;
+          max-width: 600px;
+          padding: 0 20px;
+          box-sizing: border-box;
+        }
+        .am-hero-collection-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 300;
+          letter-spacing: 0.15em;
+          color: #ffffff;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          text-transform: uppercase;
+        }
+        .am-hero-buttons {
+          display: flex;
+          gap: 16px;
+          width: 100%;
+          justify-content: center;
+        }
+        .am-hero-btn {
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: #ffffff;
+          padding: 14px 36px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          text-decoration: none;
+          transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+          cursor: pointer;
+          border-radius: 0; /* Rectangular Borders Rule */
+          display: inline-block;
+          text-align: center;
+          min-width: 140px;
+        }
+        .am-hero-btn:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.8);
+        }
+        @media (max-width: 768px) {
+          .am-hero-bottom-content {
+            bottom: 48px;
+            gap: 12px;
+          }
+          .am-hero-btn {
+            padding: 12px 24px;
+            font-size: 10px;
+            min-width: 120px;
+          }
+        }
         .am-hero-center-logo {
           display: flex;
           align-items: center;
@@ -115,13 +202,18 @@ export default async function Home() {
           z-index: 2;
           pointer-events: none;
         }
-        .am-hero-logo-img {
-          width: 320px;
-          max-width: 80vw;
-          height: auto;
-          display: block;
-          object-fit: contain;
-          filter: none;
+        .am-hero-logo-text {
+          font-family: 'Saint Carell', sans-serif;
+          font-size: 80px;
+          font-weight: 300;
+          color: #ffffff;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        @media (max-width: 768px) {
+          .am-hero-logo-text {
+            font-size: 48px;
+          }
         }
         .am-hero-logo-wrap {
           background: #000000;

@@ -186,7 +186,7 @@ export default function Navbar() {
 
           {/* CENTER: Logo */}
           <Link href="/" className="acne-logo" aria-label="TONET">
-            <img src="/logo-red.png" alt="TONET" className="acne-logo-img" />
+            <span className="acne-logo-text">TONET</span>
           </Link>
 
           {/* RIGHT: Utility Icons (Account, Wishlist, Cart) */}
@@ -604,7 +604,15 @@ export default function Navbar() {
           object-fit: contain;
           transition: opacity 0.3s ease;
         }
-        .acne-logo:hover .acne-logo-img {
+        .acne-logo-text {
+          font-family: 'Saint Carell', sans-serif;
+          font-size: 26px;
+          font-weight: 300;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          transition: opacity 0.3s ease;
+        }
+        .acne-logo:hover .acne-logo-text {
           opacity: 0.7;
         }
 

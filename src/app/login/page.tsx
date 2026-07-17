@@ -103,11 +103,7 @@ export default function LoginPage() {
       {/* ══ TOP LOGO HEADER ══ */}
       <header className="auth-header">
         <Link href="/" className="auth-logo">
-          <img 
-            src="/logo-red.png" 
-            alt="TONET" 
-            className="auth-logo-img"
-          />
+          <span className="auth-logo-text">TONET</span>
         </Link>
       </header>
 
@@ -274,10 +270,13 @@ export default function LoginPage() {
           align-items: center;
           justify-content: center;
         }
-        .auth-logo-img {
-          height: 38px;
-          width: auto;
-          object-fit: contain;
+        .auth-logo-text {
+          font-family: 'Saint Carell', sans-serif;
+          font-size: 26px;
+          color: #000000;
+          font-weight: 300;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
         }
 
         /* Portal grid layout */

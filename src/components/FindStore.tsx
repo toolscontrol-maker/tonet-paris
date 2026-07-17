@@ -6,7 +6,7 @@ export default function FindStore() {
       <Link href="/stores" className="find-store dark-section">
         <div className="find-store-img">
           <img
-            src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=900&q=80"
+            src="/stores-bg.jpg"
             alt="Tienda Tonet"
           />
         </div>
