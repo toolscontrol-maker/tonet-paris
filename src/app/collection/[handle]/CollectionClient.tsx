@@ -93,9 +93,11 @@ function ProductCard({
   const handleScroll = () => {
     if (carouselRef.current) {
       const { scrollLeft, clientWidth } = carouselRef.current;
-      const index = Math.round(scrollLeft / clientWidth);
-      if (index !== activeIdx) {
-        setActiveIdx(index);
+      if (clientWidth > 0) {
+        const index = Math.round(scrollLeft / clientWidth);
+        if (index !== activeIdx) {
+          setActiveIdx(index);
+        }
       }
     }
   };
@@ -106,22 +108,26 @@ function ProductCard({
     <div className="amiri-grid-item amiri-grid-item--product">
       {/* Swipeable Image Gallery */}
       <div className="v-product-gallery-container">
-        <Link href={`/product/${product.handle}`} className="v-product-link-overlay" aria-label={product.title} />
-        
         <div 
           ref={carouselRef}
           className="v-product-carousel"
           onScroll={handleScroll}
         >
           {images.map((imgUrl, i) => (
-            <div key={i} className="v-product-carousel-slide">
+            <Link 
+              key={i} 
+              href={`/product/${product.handle}`} 
+              className="v-product-carousel-slide"
+              draggable={false}
+            >
               <img
                 src={getOptimizedImageUrl(imgUrl, 800)}
                 alt={`${product.title} - Vista ${i + 1}`}
                 className={`amiri-product-img ${imageClass}`}
                 loading="lazy"
+                draggable={false}
               />
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -146,12 +152,12 @@ function ProductCard({
         )}
       </div>
 
-      <div className="amiri-product-info">
+      <Link href={`/product/${product.handle}`} className="amiri-product-info">
         <span className="amiri-product-name">{product.title}</span>
         <span className="amiri-product-price">
           {formatPrice(product.price, product.currencyCode)}
         </span>
-      </div>
+      </Link>
     </div>
   );
 }
@@ -1058,7 +1064,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         /* GRID ITEMS */
         .amiri-grid-item {
-          background-color: #ffffff;
+          background-color: #f4f3f1;
           position: relative;
           box-sizing: border-box;
           overflow: hidden;
@@ -1110,7 +1116,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           height: 100%;
           position: relative;
           overflow: hidden;
-          background-color: #ffffff;
+          background-color: #f4f3f1;
         }
 
         .v-product-link-overlay {
@@ -1143,6 +1149,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           position: relative;
           padding: 12px;
           box-sizing: border-box;
+          background-color: #f4f3f1;
         }
 
         .v-product-carousel-counter {
@@ -1165,7 +1172,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           left: 0;
           width: 100%;
           height: 2px;
-          background-color: rgba(0, 0, 0, 0.06);
+          background-color: #ffffff;
           z-index: 5;
         }
 
@@ -1195,15 +1202,16 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-info {
           padding: 20px 24px;
-          background-color: #ffffff;
+          background-color: #f4f3f1;
           display: flex;
           flex-direction: column;
           gap: 6px;
           box-sizing: border-box;
           z-index: 5;
           width: 100%;
-          align-items: flex-start;
-          text-align: left;
+          align-items: center;
+          text-align: center;
+          text-decoration: none;
         }
 
         .amiri-product-name {
