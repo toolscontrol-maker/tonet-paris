@@ -1027,12 +1027,23 @@ export default function CollectionClient({ collection }: { collection: Collectio
           }
         }
 
+        .v-plp-header-left {
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+          text-align: left;
+        }
+
         .v-breadcrumb {
           font-family: var(--font-primary), sans-serif;
           font-size: 11px;
           color: rgba(0, 0, 0, 0.5);
           letter-spacing: 0.05em;
           text-transform: lowercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: block;
         }
 
         .v-breadcrumb-current {
@@ -1046,6 +1057,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
         .v-plp-header-right {
           display: flex;
           gap: 16px;
+          flex-shrink: 0;
         }
 
         @media (max-width: 767px) {
