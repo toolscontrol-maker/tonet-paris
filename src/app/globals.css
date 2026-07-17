@@ -1,4 +1,12 @@
 @font-face {
+  font-family: 'Realistic Nature';
+  src: local('Realistic Nature'), local('RealisticNature');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Saint Carell';
   src: url('/fonts/SaintCarellClean.otf') format('opentype');
   font-weight: normal;
@@ -169,11 +177,11 @@
   --error-color: #d32f2f;
 
   /* ── Typography system ─────────────────────────────────── */
-  --font-brand: 'Saint Carell', sans-serif;
-  --font-primary: 'Neue Haas Grotesk', 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
-  --font-serif: 'Canela', var(--font-cormorant), Georgia, serif;
-  --font-display: 'Canela', var(--font-cormorant), Georgia, serif;
-  --font-ui: 'Neue Haas Grotesk', 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
+  --font-brand: 'Realistic Nature', 'Saint Carell', sans-serif;
+  --font-primary: 'Realistic Nature', 'Neue Haas Grotesk', 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
+  --font-serif: 'Realistic Nature', 'Canela', var(--font-cormorant), Georgia, serif;
+  --font-display: 'Realistic Nature', 'Canela', var(--font-cormorant), Georgia, serif;
+  --font-ui: 'Realistic Nature', 'Neue Haas Grotesk', 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
 
   /* Scale */
   --t-hero:  72px;  /* hero display */

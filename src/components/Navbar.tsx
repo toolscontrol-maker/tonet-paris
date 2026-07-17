@@ -729,7 +729,7 @@ export default function Navbar() {
           font-family: var(--font-primary);
           font-size: 10px;
           font-weight: 300;
-          text-transform: uppercase;
+          text-transform: lowercase;
           text-decoration: none;
           color: rgba(0, 0, 0, 0.85);
           letter-spacing: 0.15em;
@@ -901,7 +901,7 @@ export default function Navbar() {
           font-family: var(--font-primary);
           font-size: 10px;
           font-weight: 500;
-          text-transform: uppercase;
+          text-transform: lowercase;
           letter-spacing: 0.15em;
           color: rgba(0, 0, 0, 0.85);
           margin: 0 0 16px 0;
@@ -960,7 +960,7 @@ export default function Navbar() {
           font-size: 10px;
           font-weight: 300;
           letter-spacing: 0.1em;
-          text-transform: uppercase;
+          text-transform: lowercase;
           color: rgba(0, 0, 0, 0.7);
         }
 
@@ -1004,7 +1004,7 @@ export default function Navbar() {
           font-weight: 300;
           letter-spacing: 0.08em;
           color: rgba(0, 0, 0, 0.75);
-          text-transform: uppercase;
+          text-transform: lowercase;
           transition: color 0.25s ease;
         }
         .acne-megamenu-thumbnail:hover span {

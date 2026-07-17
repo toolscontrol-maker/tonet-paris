@@ -1032,7 +1032,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-size: 11px;
           color: rgba(0, 0, 0, 0.5);
           letter-spacing: 0.05em;
-          text-transform: uppercase;
+          text-transform: lowercase;
         }
 
         .v-breadcrumb-current {
@@ -1040,7 +1040,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-style: italic;
           font-size: 12.5px;
           color: #000000;
-          text-transform: none;
+          text-transform: lowercase;
         }
 
         .v-plp-header-right {
@@ -1067,7 +1067,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           padding: 6px 0;
           transition: color 0.3s ease;
           outline: none;
-          text-transform: uppercase;
+          text-transform: lowercase;
         }
 
         .v-plp-trigger:hover, .v-plp-trigger.active {
@@ -1272,7 +1272,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-family: var(--font-primary), sans-serif;
           font-size: 11px;
           font-weight: 300;
-          text-transform: none;
+          text-transform: lowercase;
           letter-spacing: 0.05em;
           color: #000000;
           margin: 0;
@@ -1499,7 +1499,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           padding: 4px 0;
           transition: color 0.25s;
           outline: none;
-          text-transform: uppercase;
+          text-transform: lowercase;
         }
         .v-sort-option:hover, .v-sort-option.active {
           color: #000000;
