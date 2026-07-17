@@ -1170,7 +1170,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           bottom: 0;
           left: 0;
           width: 100%;
-          height: 2px;
+          height: 1px;
           background-color: transparent;
           z-index: 5;
         }
