@@ -18,6 +18,7 @@ import SearchDrawer from "@/components/SearchDrawer";
 import CookieBanner from "@/components/CookieBanner";
 import TransitionProvider from "@/components/TransitionProvider";
 import LocaleSelectorModal from "@/components/LocaleSelectorModal";
+import SupportWidget from "@/components/SupportWidget";
 
 
 const jost = Jost({
@@ -65,6 +66,7 @@ export default function RootLayout({
                 <main>{children}</main>
                 <Footer />
                 <CookieBanner />
+                <SupportWidget />
                 <Analytics />
               </WishlistProvider>
               </AuthProvider>
