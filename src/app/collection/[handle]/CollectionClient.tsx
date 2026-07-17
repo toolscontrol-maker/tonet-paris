@@ -998,8 +998,6 @@ export default function CollectionClient({ collection }: { collection: Collectio
           top: 64px;
           z-index: 100;
           background-color: #ffffff;
-          width: 100%;
-          max-width: 100%;
         }
 
         @media (max-width: 767px) {
@@ -1017,8 +1015,6 @@ export default function CollectionClient({ collection }: { collection: Collectio
           border-bottom: 1px solid rgba(0, 0, 0, 0.08);
           background-color: #ffffff;
           box-sizing: border-box;
-          width: 100%;
-          max-width: 100%;
         }
 
         @media (max-width: 767px) {
@@ -1028,16 +1024,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
             justify-content: space-between;
             align-items: center;
             gap: 8px;
-            width: 100%;
-            max-width: 100%;
           }
-        }
-
-        .v-plp-header-left {
-          flex: 1;
-          min-width: 0;
-          overflow: hidden;
-          text-align: left;
         }
 
         .v-breadcrumb {
@@ -1046,10 +1033,6 @@ export default function CollectionClient({ collection }: { collection: Collectio
           color: rgba(0, 0, 0, 0.5);
           letter-spacing: 0.05em;
           text-transform: lowercase;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: block;
         }
 
         .v-breadcrumb-current {
@@ -1063,14 +1046,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
         .v-plp-header-right {
           display: flex;
           gap: 16px;
-          flex-shrink: 0;
         }
 
         @media (max-width: 767px) {
           .v-plp-header-right {
             width: auto;
             justify-content: flex-end;
-            gap: 8px;
+            gap: 12px;
           }
         }
 
@@ -1088,13 +1070,6 @@ export default function CollectionClient({ collection }: { collection: Collectio
           text-transform: lowercase;
         }
 
-        @media (max-width: 767px) {
-          .v-plp-trigger {
-            font-size: 10px;
-            letter-spacing: 0.04em;
-          }
-        }
-
         .v-plp-trigger:hover, .v-plp-trigger.active {
           color: #000000;
           text-decoration: underline;
@@ -1110,7 +1085,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-modular-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 2px; /* tight white separator lines */
           background-color: #ffffff; /* white grid lines */
           box-sizing: border-box;
@@ -1119,13 +1094,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
         }
         @media (max-width: 1023px) {
           .amiri-modular-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 2px;
           }
         }
         @media (max-width: 767px) {
           .amiri-modular-grid {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 2px;
           }
         }
@@ -1154,6 +1129,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           text-decoration: none;
           color: inherit;
           aspect-ratio: 3 / 5;
+          min-width: 0;
         }
 
         @media (max-width: 767px) {
