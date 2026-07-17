@@ -982,9 +982,15 @@ export default function CollectionClient({ collection }: { collection: Collectio
       <style>{`
         /* AMIRI LUXURY EDITORIAL PLP STYLE REPLICA */
         .amiri-collection-container {
-          padding-top: 56px;
+          padding-top: 64px;
           padding-bottom: 120px;
           background-color: #ffffff;
+        }
+
+        @media (max-width: 767px) {
+          .amiri-collection-container {
+            padding-top: 54px;
+          }
         }
 
         .v-plp-sticky-header {
@@ -1009,7 +1015,6 @@ export default function CollectionClient({ collection }: { collection: Collectio
           border-bottom: 1px solid rgba(0, 0, 0, 0.08);
           background-color: #ffffff;
           box-sizing: border-box;
-          margin-top: 10px;
         }
 
         @media (max-width: 767px) {
