@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, Minus, X } from 'lucide-react';
 import type { CollectionDetail, Product } from '@/lib/shopify';
 import { getOptimizedImageUrl } from '@/lib/shopify';
@@ -63,8 +63,104 @@ function hasBlackColor(product: Product): boolean {
   );
 }
 
+function getHexColor(color: string): string {
+  const c = color.toLowerCase();
+  if (c.includes('negro') || c.includes('black')) return '#000000';
+  if (c.includes('blanco') || c.includes('white')) return '#ffffff';
+  if (c.includes('gris') || c.includes('grey') || c.includes('gray')) return '#8e8e93';
+  if (c.includes('azul') || c.includes('blue')) return '#004080';
+  if (c.includes('rojo') || c.includes('red')) return '#a30000';
+  if (c.includes('verde') || c.includes('green')) return '#006400';
+  if (c.includes('marrón') || c.includes('marron') || c.includes('brown')) return '#5c4033';
+  if (c.includes('beis') || c.includes('beige')) return '#f5f5dc';
+  if (c.includes('amarillo') || c.includes('yellow')) return '#ffd700';
+  return '#cccccc';
+}
+
+function ProductCard({ 
+  product, 
+  collectionHandle, 
+  formatPrice 
+}: { 
+  product: Product; 
+  collectionHandle: string; 
+  formatPrice: (price: number, currency: string) => string; 
+}) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const images = product.images && product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean) as string[];
+
+  const handleScroll = () => {
+    if (carouselRef.current) {
+      const { scrollLeft, clientWidth } = carouselRef.current;
+      const index = Math.round(scrollLeft / clientWidth);
+      if (index !== activeIdx) {
+        setActiveIdx(index);
+      }
+    }
+  };
+
+  const imageClass = getProductImageClass(product.title, product.tags);
+
+  return (
+    <div className="amiri-grid-item amiri-grid-item--product">
+      {/* Swipeable Image Gallery */}
+      <div className="v-product-gallery-container">
+        <Link href={`/product/${product.handle}`} className="v-product-link-overlay" aria-label={product.title} />
+        
+        <div 
+          ref={carouselRef}
+          className="v-product-carousel"
+          onScroll={handleScroll}
+        >
+          {images.map((imgUrl, i) => (
+            <div key={i} className="v-product-carousel-slide">
+              <img
+                src={getOptimizedImageUrl(imgUrl, 800)}
+                alt={`${product.title} - Vista ${i + 1}`}
+                className={`amiri-product-img ${imageClass}`}
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Counter of images */}
+        {images.length > 1 && (
+          <span className="v-product-carousel-counter">
+            {activeIdx + 1}/{images.length}
+          </span>
+        )}
+
+        {/* Horizontal Progress Indicator Bar at the bottom of the image */}
+        {images.length > 1 && (
+          <div className="v-product-carousel-indicator-bar">
+            <div 
+              className="v-product-carousel-indicator-progress"
+              style={{
+                width: `${100 / images.length}%`,
+                transform: `translateX(${activeIdx * 100}%)`
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="amiri-product-info">
+        <span className="amiri-product-name">{product.title}</span>
+        <span className="amiri-product-price">
+          {formatPrice(product.price, product.currencyCode)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function CollectionClient({ collection }: { collection: CollectionDetail }) {
   const { formatPrice } = useLocale();
+
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
 
   // Committed Filters State (Controls the Grid)
   const [selectedSort, setSelectedSort] = useState<string>('featured');
@@ -393,29 +489,198 @@ export default function CollectionClient({ collection }: { collection: Collectio
     setActiveFilterAccordion(activeFilterAccordion === name ? null : name);
   };
 
+  const getBreadcrumbs = () => {
+    const handleLower = collection.handle.toLowerCase();
+    let gender = "COLECCIONES";
+    if (handleLower.includes("hombre") || handleLower.includes("men")) {
+      gender = "HOMBRE";
+    } else if (handleLower.includes("mujer") || handleLower.includes("women")) {
+      gender = "MUJER";
+    }
+    
+    return (
+      <span className="v-breadcrumb">
+        Inicio / {gender} / <span className="v-breadcrumb-current">{collection.title}</span> ({filteredAndSortedProducts.length})
+      </span>
+    );
+  };
+
   return (
     <>
       <div className="amiri-collection-container">
         
-        {/* TOP BAR: Title & Refine Trigger */}
-        <div className="amiri-collection-top">
-          <h1 className="amiri-collection-title">
-            {collection.title}
-          </h1>
-          <button 
-            type="button" 
-            className="amiri-refine-trigger"
-            onClick={openRefine}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }}>
-              <line x1="6" y1="3" x2="6" y2="21" />
-              <line x1="18" y1="3" x2="18" y2="21" />
-              <circle cx="6" cy="15" r="3" fill="#ffffff" stroke="currentColor" strokeWidth="1.6" />
-              <circle cx="18" cy="9" r="3" fill="#ffffff" stroke="currentColor" strokeWidth="1.6" />
-            </svg>
-            <span>REFINE</span>
-          </button>
+        {/* TOP BAR: Breadcrumbs & Filters/Sort triggers */}
+        <div className="v-plp-header-row">
+          <div className="v-plp-header-left">
+            {getBreadcrumbs()}
+          </div>
+          <div className="v-plp-header-right">
+            <button 
+              type="button" 
+              className={`v-plp-trigger ${filtersOpen ? 'active' : ''}`}
+              onClick={() => {
+                setFiltersOpen(!filtersOpen);
+                setSortOpen(false);
+              }}
+            >
+              Filtra por {filtersOpen ? '−' : '+'}
+            </button>
+            <button 
+              type="button" 
+              className={`v-plp-trigger ${sortOpen ? 'active' : ''}`}
+              onClick={() => {
+                setSortOpen(!sortOpen);
+                setFiltersOpen(false);
+              }}
+            >
+              Ordenar por {sortOpen ? '−' : '+'}
+            </button>
+          </div>
         </div>
+
+        {/* EXPANDED INLINE FILTERS PANEL */}
+        {filtersOpen && (
+          <div className="v-filters-panel">
+            <div className="v-filters-grid">
+              
+              {/* Column 1: Color */}
+              {filterOptions.colors.length > 0 && (
+                <div className="v-filter-col">
+                  <span className="v-filter-col-title">Color</span>
+                  <div className="v-filter-options">
+                    {filterOptions.colors.map(col => (
+                      <button
+                        key={col}
+                        type="button"
+                        className={`v-filter-option ${tempColors.includes(col) ? 'active' : ''}`}
+                        onClick={() => toggleTempFilter(tempColors, setTempColors, col)}
+                      >
+                        <span className="v-filter-dot" style={{ backgroundColor: getHexColor(col) }} />
+                        <span>{col}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Column 2: Talla (Sizes) */}
+              {filterOptions.sizes.length > 0 && (
+                <div className="v-filter-col">
+                  <span className="v-filter-col-title">Talla</span>
+                  <div className="v-filter-options grid-sizes">
+                    {filterOptions.sizes.map(sz => (
+                      <button
+                        key={sz}
+                        type="button"
+                        className={`v-filter-option size-box ${tempSizes.includes(sz) ? 'active' : ''}`}
+                        onClick={() => toggleTempFilter(tempSizes, setTempSizes, sz)}
+                      >
+                        <span>{sz}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Column 3: Material */}
+              {filterOptions.materials.length > 0 && (
+                <div className="v-filter-col">
+                  <span className="v-filter-col-title">Material</span>
+                  <div className="v-filter-options">
+                    {filterOptions.materials.map(mat => (
+                      <button
+                        key={mat}
+                        type="button"
+                        className={`v-filter-option ${tempMaterials.includes(mat) ? 'active' : ''}`}
+                        onClick={() => toggleTempFilter(tempMaterials, setTempMaterials, mat)}
+                      >
+                        <span>{mat}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Column 4: Disponibilidad */}
+              <div className="v-filter-col">
+                <span className="v-filter-col-title">Disponibilidad</span>
+                <div className="v-filter-options">
+                  <button
+                    type="button"
+                    className={`v-filter-option ${tempAvailability.includes('in-stock') ? 'active' : ''}`}
+                    onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'in-stock')}
+                  >
+                    <span>En Stock</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`v-filter-option ${tempAvailability.includes('out-of-stock') ? 'active' : ''}`}
+                    onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'out-of-stock')}
+                  >
+                    <span>Agotado</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer buttons */}
+            <div className="v-filters-footer">
+              <button type="button" className="v-btn-reset" onClick={clearFilters}>
+                Restablecer todo
+              </button>
+              <button type="button" className="v-btn-apply" onClick={applyFilters}>
+                Aplicar cambios
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* EXPANDED INLINE SORT PANEL */}
+        {sortOpen && (
+          <div className="v-sort-dropdown">
+            <button
+              type="button"
+              className={`v-sort-option ${selectedSort === 'featured' ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedSort('featured');
+                setSortOpen(false);
+              }}
+            >
+              Recomendado
+            </button>
+            <button
+              type="button"
+              className={`v-sort-option ${selectedSort === 'price-asc' ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedSort('price-asc');
+                setSortOpen(false);
+              }}
+            >
+              Precio: de menor a mayor
+            </button>
+            <button
+              type="button"
+              className={`v-sort-option ${selectedSort === 'price-desc' ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedSort('price-desc');
+                setSortOpen(false);
+              }}
+            >
+              Precio: de mayor a menor
+            </button>
+            <button
+              type="button"
+              className={`v-sort-option ${selectedSort === 'newest' ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedSort('price-desc'); // uses newest/price-desc logic
+                setSortOpen(false);
+              }}
+            >
+              Novedades
+            </button>
+          </div>
+        )}
 
         {/* MAIN MODULAR GRID */}
         <div className="amiri-grid-wrapper">
@@ -424,51 +689,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
               {gridItems.map((item) => {
                 if (item.type === 'product' && item.product) {
                   const p = item.product;
-                  const isLarge = item.colSpan === 2 && item.rowSpan === 2;
-                  const imageClass = getProductImageClass(p.title, p.tags);
-                  
                   return (
-                    <Link
-                      href={`/product/${p.handle}`}
+                    <ProductCard
                       key={item.key}
-                      className={`amiri-grid-item amiri-grid-item--product ${
-                        isLarge ? 'amiri-grid-item--span-2 amiri-grid-item--row-2' : ''
-                      } ${p.images && p.images.length > 1 ? 'amiri-grid-item--has-hover' : ''}`}
-                    >
-                      <span className="amiri-product-tag">
-                        {collection.handle === 'coleccion-1' ? 'PRE-FALL' : collection.handle === 'new-arrivals' ? 'NEW ARRIVALS' : 'SUMMER'}
-                      </span>
-                      <div className="amiri-product-img-wrap">
-                        {p.imageUrl && (
-                          <img
-                            src={getOptimizedImageUrl(p.imageUrl, 800)}
-                            alt={p.title}
-                            className={`amiri-product-img amiri-product-img--primary amiri-fade-in ${imageClass}`}
-                            loading="lazy"
-                            decoding="async"
-                            onLoad={(e) => e.currentTarget.classList.add('loaded')}
-                            ref={(el) => {
-                              if (el && el.complete) el.classList.add('loaded');
-                            }}
-                          />
-                        )}
-                        {p.images && p.images.length > 1 && (
-                          <img
-                            src={getOptimizedImageUrl(p.images[1], 800)}
-                            alt={p.title}
-                            className={`amiri-product-img amiri-product-img--secondary ${imageClass}`}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        )}
-                      </div>
-                      <div className="amiri-product-info">
-                        <span className="amiri-product-name">{p.title}</span>
-                        <span className="amiri-product-price">
-                          {formatPrice(p.price, p.currencyCode)}
-                        </span>
-                      </div>
-                    </Link>
+                      product={p}
+                      collectionHandle={collection.handle}
+                      formatPrice={formatPrice}
+                    />
                   );
                 } else {
                   const isLarge = item.colSpan === 2 && item.rowSpan === 2;
@@ -720,91 +947,100 @@ export default function CollectionClient({ collection }: { collection: Collectio
         }
 
         /* TOP AREA */
-        .amiri-collection-top {
+        .v-plp-header-row {
           display: flex;
-          flex-direction: column;
+          justify-content: space-between;
           align-items: center;
-          position: relative;
-          padding: 36px 40px 60px;
-          box-sizing: border-box;
-        }
-        .amiri-collection-title {
-          font-family: var(--font-brand), var(--font-serif), serif;
-          font-size: clamp(18px, 2.5vw, 26px);
-          font-weight: 300;
-          color: #000000;
-          text-align: center;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          margin: 0;
-          line-height: 1.2;
-        }
-        .amiri-refine-trigger {
-          position: absolute;
-          right: 40px;
-          bottom: 60px;
+          padding: 16px 40px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
           background-color: #ffffff;
-          border: 1px solid #d3d3d3;
-          border-radius: 0; /* rectangular corners */
-          color: #000000;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10.5px;
-          font-weight: 400;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          cursor: pointer;
-          padding: 8px 20px;
-          transition: all 0.2s ease;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          outline: none;
-        }
-        .amiri-refine-trigger:hover {
-          background-color: #f9f9f9;
-          border-color: #b0b0b0;
+          box-sizing: border-box;
+          margin-top: 10px;
         }
 
         @media (max-width: 767px) {
-          .amiri-collection-top {
-            padding: 24px 16px 40px;
+          .v-plp-header-row {
+            padding: 16px 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
           }
-          .amiri-refine-trigger {
-            position: static;
-            margin-top: 24px;
+        }
+
+        .v-breadcrumb {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          color: rgba(0, 0, 0, 0.5);
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .v-breadcrumb-current {
+          font-family: var(--font-cormorant), serif;
+          font-style: italic;
+          font-size: 12.5px;
+          color: #000000;
+          text-transform: none;
+        }
+
+        .v-plp-header-right {
+          display: flex;
+          gap: 16px;
+        }
+
+        @media (max-width: 767px) {
+          .v-plp-header-right {
+            width: 100%;
+            justify-content: space-between;
           }
+        }
+
+        .v-plp-trigger {
+          background: none;
+          border: none;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          color: rgba(0, 0, 0, 0.6);
+          letter-spacing: 0.08em;
+          cursor: pointer;
+          padding: 6px 0;
+          transition: color 0.3s ease;
+          outline: none;
+          text-transform: uppercase;
+        }
+
+        .v-plp-trigger:hover, .v-plp-trigger.active {
+          color: #000000;
+          text-decoration: underline;
+          text-underline-offset: 4px;
         }
 
         /* GRID SYSTEM */
         .amiri-grid-wrapper {
-          padding: 0 2px; /* almost a thread / hairline spacing at the left and right outer borders */
+          padding: 0;
           box-sizing: border-box;
           width: 100%;
-        }
-        @media (max-width: 767px) {
-          .amiri-grid-wrapper {
-            padding: 0 2px;
-          }
         }
 
         .amiri-modular-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 2px; /* tight spacing matching the carousel */
-          background-color: transparent;
+          gap: 1px; /* tight hairline border lines */
+          background-color: rgba(0, 0, 0, 0.08); /* grey lines */
           box-sizing: border-box;
-          border: none;
+          border-top: 1px solid rgba(0, 0, 0, 0.08);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         }
         @media (max-width: 1023px) {
           .amiri-modular-grid {
             grid-template-columns: repeat(3, 1fr);
-            gap: 2px;
+            gap: 1px;
           }
         }
         @media (max-width: 767px) {
           .amiri-modular-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 2px;
+            gap: 1px;
           }
         }
 
@@ -817,11 +1053,12 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-size: 11px;
           letter-spacing: 0.15em;
           color: #888888;
+          background-color: #ffffff;
         }
 
         /* GRID ITEMS */
         .amiri-grid-item {
-          background-color: #f4f3f1;
+          background-color: #ffffff;
           position: relative;
           box-sizing: border-box;
           overflow: hidden;
@@ -830,7 +1067,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           justify-content: space-between;
           text-decoration: none;
           color: inherit;
-          aspect-ratio: 3 / 5; /* narrower and longer aspect ratio */
+          aspect-ratio: 3 / 5;
         }
 
         .amiri-grid-item--span-2 {
@@ -840,7 +1077,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           grid-row: span 2;
         }
         .amiri-grid-item--wide {
-          aspect-ratio: 6 / 5; /* mathematically adjusted for wide cards under 3/5 aspect ratio */
+          aspect-ratio: 6 / 5;
         }
 
         @media (max-width: 767px) {
@@ -863,75 +1100,89 @@ export default function CollectionClient({ collection }: { collection: Collectio
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: #000000;
-          z-index: 2;
+          z-index: 6;
         }
 
-        .amiri-product-img-wrap {
+        /* Swiper / Carousel styles */
+        .v-product-gallery-container {
           flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 12px; /* clean spacing for garments */
-          box-sizing: border-box;
           width: 100%;
           height: 100%;
           position: relative;
-          isolation: isolate;
-          background-color: #f4f3f1;
+          overflow: hidden;
+          background-color: #ffffff;
         }
-        @media (max-width: 767px) {
-          .amiri-product-img-wrap {
-            padding: 8px; /* optimized spacing on mobile */
-          }
+
+        .v-product-link-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 4;
+        }
+
+        .v-product-carousel {
+          display: flex;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          width: 100%;
+          height: 100%;
+        }
+        .v-product-carousel::-webkit-scrollbar {
+          display: none;
+        }
+
+        .v-product-carousel-slide {
+          flex: 0 0 100%;
+          width: 100%;
+          height: 100%;
+          scroll-snap-align: start;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          padding: 12px;
+          box-sizing: border-box;
+        }
+
+        .v-product-carousel-counter {
+          position: absolute;
+          bottom: 12px;
+          right: 12px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 9px;
+          font-weight: 300;
+          color: rgba(0, 0, 0, 0.5);
+          background-color: rgba(255, 255, 255, 0.7);
+          padding: 2px 6px;
+          letter-spacing: 0.05em;
+          z-index: 5;
+        }
+
+        .v-product-carousel-indicator-bar {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: rgba(0, 0, 0, 0.06);
+          z-index: 5;
+        }
+
+        .v-product-carousel-indicator-progress {
+          height: 100%;
+          background-color: #000000;
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .amiri-product-img {
           width: 100%;
           height: 100%;
           display: block;
-          object-fit: contain; /* contained inside the wrapper */
+          object-fit: contain;
           mix-blend-mode: multiply;
         }
 
-        .amiri-product-img--primary {
-          opacity: 1;
-          transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .amiri-product-img--secondary {
-          position: absolute;
-          top: 12px;
-          left: 12px;
-          right: 12px;
-          bottom: 12px;
-          width: calc(100% - 24px);
-          height: calc(100% - 24px);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @media (max-width: 767px) {
-          .amiri-product-img--secondary {
-            top: 8px;
-            left: 8px;
-            right: 8px;
-            bottom: 8px;
-            width: calc(100% - 16px);
-            height: calc(100% - 16px);
-          }
-        }
-
-        /* Hover behaviors */
-        .amiri-grid-item--product:hover {
-          opacity: 1 !important; /* prevent transparent white overlay */
-        }
-        .amiri-grid-item--has-hover:hover .amiri-product-img--primary {
-          opacity: 0 !important;
-        }
-        .amiri-grid-item--has-hover:hover .amiri-product-img--secondary {
-          opacity: 1 !important;
-        }
-
-        /* Optical Scaling classes - Overridden for full fill */
         .amiri-product-img--top,
         .amiri-product-img--pants,
         .amiri-product-img--sneaker,
@@ -944,12 +1195,12 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-info {
           padding: 20px 24px;
-          background-color: #f4f3f1;
+          background-color: #ffffff;
           display: flex;
           flex-direction: column;
           gap: 6px;
           box-sizing: border-box;
-          z-index: 2;
+          z-index: 5;
           width: 100%;
           align-items: flex-start;
           text-align: left;
@@ -1011,194 +1262,209 @@ export default function CollectionClient({ collection }: { collection: Collectio
           transform: scale(1.05);
         }
 
-        /* REFINE DRAWER OVERLAY */
-        .amiri-refine-overlay {
-          position: fixed;
-          inset: 0;
-          background-color: rgba(0, 0, 0, 0.15);
-          z-index: 10000;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        /* REFINE DRAWER DRAWER OVERLAYS REMOVED, INLINE DROPDOWN PANELS ACTIVATED */
+        .v-filters-panel {
+          background-color: #ffffff;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+          padding: 32px 40px;
+          box-sizing: border-box;
+          animation: vSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .amiri-refine-overlay.open {
-          opacity: 1;
-          pointer-events: all;
+        @media (max-width: 767px) {
+          .v-filters-panel {
+            padding: 24px 20px;
+          }
         }
 
-        /* REFINE DRAWER */
-        .amiri-refine-drawer {
-          position: fixed;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          width: 100%;
-          max-width: 360px;
-          background-color: #ffffff;
-          z-index: 10001;
-          transform: translateX(-100%);
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        @keyframes vSlideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .v-filters-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 40px;
+        }
+        @media (max-width: 767px) {
+          .v-filters-grid {
+            grid-template-columns: repeat(1, 1fr);
+            gap: 24px;
+          }
+        }
+
+        .v-filter-col {
           display: flex;
           flex-direction: column;
-          box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
-        }
-        .amiri-refine-drawer.open {
-          transform: translateX(0);
         }
 
-        .amiri-refine-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 24px 32px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-        }
-        .amiri-refine-header h2 {
+        .v-filter-col-title {
+          display: block;
           font-family: var(--font-primary), sans-serif;
-          font-size: 12px;
-          font-weight: 400;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          color: #000000;
-          margin: 0;
-        }
-        .amiri-refine-close {
-          background: none;
-          border: none;
-          color: #000000;
-          cursor: pointer;
-          padding: 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: opacity 0.2s ease;
-        }
-        .amiri-refine-close:hover {
-          opacity: 0.6;
-        }
-
-        .amiri-refine-body {
-          flex: 1;
-          overflow-y: auto;
-          padding: 16px 32px;
-          scrollbar-width: none;
-        }
-        .amiri-refine-body::-webkit-scrollbar {
-          display: none;
-        }
-
-        .amiri-refine-section {
-          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-          padding: 18px 0;
-        }
-        .amiri-refine-section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          background: none;
-          border: none;
-          padding: 8px 0;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10.5px;
-          font-weight: 300;
+          font-size: 11px;
+          font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: #000000;
-          cursor: pointer;
-          text-align: left;
-        }
-        .amiri-refine-section-content {
-          padding: 12px 0 8px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+          margin-bottom: 16px;
         }
 
-        .amiri-refine-option {
+        .v-filter-options {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .v-filter-option {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
           background: none;
           border: none;
           font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: 300;
-          color: #555555;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
+          font-size: 11px;
+          color: rgba(0, 0, 0, 0.55);
           cursor: pointer;
           padding: 2px 0;
           text-align: left;
-          transition: color 0.2s ease;
+          transition: color 0.25s ease;
+          outline: none;
+          text-transform: uppercase;
         }
-        .amiri-refine-option:hover {
+        .v-filter-option:hover, .v-filter-option.active {
           color: #000000;
         }
-        .amiri-refine-option.active {
-          color: #000000;
-          font-weight: 400;
-        }
-        .amiri-refine-option-check {
-          width: 5px;
-          height: 5px;
+        .v-filter-dot {
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
-          background-color: #000000;
-          opacity: 0;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          display: inline-block;
           flex-shrink: 0;
         }
-        .amiri-refine-option.active .amiri-refine-option-check {
-          opacity: 1;
-        }
 
-        .amiri-refine-footer {
-          padding: 24px 32px;
-          border-top: 1px solid rgba(0, 0, 0, 0.04);
+        .v-filter-options.grid-sizes {
           display: grid;
-          grid-template-columns: 1fr 1.2fr;
-          gap: 12px;
-          background-color: #ffffff;
-        }
-        .amiri-refine-btn-clear {
-          background-color: #ffffff;
-          color: #000000;
-          border: 1px solid #000000;
-          border-radius: 0;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: 300;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          padding: 12px;
-          cursor: pointer;
-          text-align: center;
-          transition: opacity 0.2s ease;
-        }
-        .amiri-refine-btn-view {
-          background-color: #000000;
-          color: #ffffff;
-          border: none;
-          border-radius: 0;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: 300;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          padding: 12px;
-          cursor: pointer;
-          text-align: center;
-          transition: opacity 0.2s ease;
-        }
-        .amiri-refine-btn-clear:hover,
-        .amiri-refine-btn-view:hover {
-          opacity: 0.8;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
         }
 
+        .v-filter-option.size-box {
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 32px;
+          padding: 0;
+          font-size: 10px;
+          transition: border-color 0.25s, color 0.25s, background-color 0.25s;
+          text-transform: uppercase;
+        }
+        .v-filter-option.size-box.active {
+          border-color: #000000;
+          background: #000000;
+          color: #ffffff;
+        }
+
+        .v-filters-footer {
+          display: flex;
+          justify-content: flex-end;
+          gap: 16px;
+          margin-top: 32px;
+          border-top: 1px solid rgba(0, 0, 0, 0.05);
+          padding-top: 24px;
+        }
+
+        .v-btn-reset {
+          background: none;
+          border: 1px solid #000000;
+          color: #000000;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 10.5px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          padding: 12px 24px;
+          cursor: pointer;
+          transition: opacity 0.3s;
+          border-radius: 0;
+        }
+
+        .v-btn-apply {
+          background: #000000;
+          border: 1px solid #000000;
+          color: #ffffff;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 10.5px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          padding: 12px 28px;
+          cursor: pointer;
+          transition: opacity 0.3s;
+          border-radius: 0;
+        }
+        .v-btn-reset:hover, .v-btn-apply:hover {
+          opacity: 0.85;
+        }
+
+        .v-sort-dropdown {
+          position: absolute;
+          right: 40px;
+          background-color: #ffffff;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          padding: 16px 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          z-index: 100;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+          animation: vSlideDown 0.25s ease forwards;
+          border-radius: 0;
+        }
         @media (max-width: 767px) {
-          .amiri-refine-drawer {
-            max-width: 100%;
+          .v-sort-dropdown {
+            right: 20px;
           }
         }
+        .v-sort-option {
+          background: none;
+          border: none;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          color: rgba(0, 0, 0, 0.55);
+          letter-spacing: 0.08em;
+          cursor: pointer;
+          text-align: left;
+          padding: 4px 0;
+          transition: color 0.25s;
+          outline: none;
+          text-transform: uppercase;
+        }
+        .v-sort-option:hover, .v-sort-option.active {
+          color: #000000;
+        }
+
+        /* FLOATING MONOGRAM BADGE */
+        .amiri-monogram-badge {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          width: 44px;
+          height: 44px;
+          background-color: #000000;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          color: #ffffff;
+          font-family: var(--font-brand);
+          font-size: 18px;
+          z-index: 999;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+        }
+        .amiri-monogram-badge:hover {
+          transform: scale(1.05);
       `}</style>
     </>
   );
