@@ -1065,22 +1065,22 @@ export default function CollectionClient({ collection }: { collection: Collectio
         .amiri-modular-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 1px; /* tight hairline border lines */
-          background-color: rgba(0, 0, 0, 0.08); /* grey lines */
+          gap: 2px; /* tight white separator lines */
+          background-color: #ffffff; /* white grid lines */
           box-sizing: border-box;
-          border-top: 1px solid rgba(0, 0, 0, 0.08);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+          border-top: 2px solid #ffffff;
+          border-bottom: 2px solid #ffffff;
         }
         @media (max-width: 1023px) {
           .amiri-modular-grid {
             grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
+            gap: 2px;
           }
         }
         @media (max-width: 767px) {
           .amiri-modular-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 1px;
+            gap: 2px;
           }
         }
 
