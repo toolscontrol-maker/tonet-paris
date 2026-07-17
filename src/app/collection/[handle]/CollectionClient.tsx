@@ -1570,6 +1570,18 @@ export default function CollectionClient({ collection }: { collection: Collectio
           transform: scale(1.1);
         }
 
+        @media (max-width: 767px) {
+          .v-wishlist-btn {
+            top: 10px;
+            right: 10px;
+            padding: 4px;
+          }
+          .v-wishlist-btn svg {
+            width: 12px;
+            height: 12px;
+          }
+        }
+
         @media (min-width: 1024px) {
           .v-wishlist-btn {
             opacity: 0;
