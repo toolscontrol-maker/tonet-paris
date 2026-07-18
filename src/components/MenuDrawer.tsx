@@ -209,7 +209,7 @@ export default function MenuDrawer() {
             <div className="md-panel">
               <div className="md-panel-main">
                 <nav className="md-nav-links">
-                  {activeItemL2?.items?.map((item) => (
+                  {activeItemL2?.items?.map((item: { title: string; href: string }) => (
                     <button
                       key={item.title}
                       type="button"
@@ -236,7 +236,7 @@ export default function MenuDrawer() {
             <div className="md-panel">
               <div className="md-panel-main">
                 <nav className="md-nav-links">
-                  {activeItemL1?.items?.map((item) => (
+                  {activeItemL1?.items?.map((item: MenuItem) => (
                     <button
                       key={item.title}
                       type="button"
@@ -264,7 +264,7 @@ export default function MenuDrawer() {
             <div className="md-panel">
               <div className="md-panel-main">
                 <nav className="md-nav-links">
-                  {MENU_DATA.map((item) => (
+                  {MENU_DATA.map((item: MenuItem) => (
                     <button
                       key={item.title}
                       type="button"
