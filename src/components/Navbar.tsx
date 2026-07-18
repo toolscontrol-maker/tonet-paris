@@ -738,6 +738,7 @@ export default function Navbar() {
         
         .acne-logo.acne-desktop-only {
           justify-self: flex-start;
+          margin-left: -24px;
         }
         
         .acne-logo-img {
@@ -752,14 +753,14 @@ export default function Navbar() {
         }
 
         .acne-logo-img.logo-black {
-          filter: invert(1) contrast(300%);
+          filter: none;
           mix-blend-mode: multiply;
           opacity: 1;
           z-index: 2;
         }
 
         .acne-logo-img.logo-white {
-          filter: invert(0) contrast(300%);
+          filter: invert(1);
           mix-blend-mode: screen;
           opacity: 0;
           z-index: 1;
@@ -894,7 +895,7 @@ export default function Navbar() {
 
         /* ══ DESKTOP ══ */
         @media (min-width: 768px) {
-          .acne-header-inner { padding: 0 64px; }
+          .acne-header-inner { padding: 0 24px 0 40px; }
         }
 
         /* ══ MEGAMENU STYLING ══ */
