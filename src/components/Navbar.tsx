@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Menu, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useUI } from "@/context/UIContext";
@@ -22,7 +22,21 @@ const thumbnails = [
 ];
 
 export default function Navbar() {
-  const { openCart, openSearch, openMenu, closeMenu, isSearchOpen, openAccount } = useUI();
+  const { 
+    openCart, 
+    openSearch, 
+    openMenu, 
+    closeMenu, 
+    isSearchOpen, 
+    openAccount,
+    isMenuOpen,
+    menuLevel,
+    setMenuLevel,
+    menuActiveItemL1,
+    setMenuActiveItemL1,
+    menuActiveItemL2,
+    setMenuActiveItemL2
+  } = useUI();
   const { cartCount } = useCart();
   const { items: wishlistItems } = useWishlist();
   const { t } = useTranslation();
@@ -150,9 +164,7 @@ export default function Navbar() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
   }, [headerHeight]);
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--nav-top', `${navTop}px`);
-  }, [navTop]);
+
 
   return (
     <>
@@ -163,7 +175,7 @@ export default function Navbar() {
 
       <header 
         ref={headerRef}
-        className={`acne-header ${activeMegaMenu ? "solid" : (isHome ? (isAtTop ? "transparent-home" : "solid") : isProduct ? (isAtTop ? "transparent-pdp" : "solid") : "solid")} ${!headerVisible ? "header-hidden" : ""} ${isSearchOpen ? "search-active" : ""} ${isHome && isAtTop ? "home-at-top" : ""}`} 
+        className={`acne-header ${isMenuOpen ? "menu-open" : ""} ${activeMegaMenu ? "solid" : (isHome ? (isAtTop ? "transparent-home" : "solid") : isProduct ? (isAtTop ? "transparent-pdp" : "solid") : "solid")} ${!headerVisible ? "header-hidden" : ""} ${isSearchOpen ? "search-active" : ""} ${isHome && isAtTop ? "home-at-top" : ""}`} 
         style={{top: `${navTop}px`}}
         onMouseLeave={() => setActiveMegaMenu(null)}
       >
@@ -171,123 +183,173 @@ export default function Navbar() {
           {/* LEFT: Desktop Logo & Mobile Menu/Cart */}
           <div className="acne-nav-left">
             {/* Desktop Logo on the left */}
-            <Link href="/" className="acne-logo acne-desktop-only" aria-label="TONET TORRENTINNI">
-              <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
-              <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
-            </Link>
+            {!isMenuOpen && (
+              <Link href="/" className="acne-logo acne-desktop-only" aria-label="TONET TORRENTINNI">
+                <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
+                <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
+              </Link>
+            )}
 
-            {/* Mobile-only Left side: Menu & Cart */}
+            {/* Mobile-only Left side: Menu & Cart or Back button */}
             <div className="acne-mobile-only acne-nav-left-mobile">
-              {!isClientPage && (
-                <button className="acne-right-icon" aria-label="Menu" onClick={openMenu}>
-                  <Menu size={18} strokeWidth={1} />
-                </button>
+              {isMenuOpen ? (
+                (menuLevel === 2 || menuLevel === 3) && (
+                  <button 
+                    className="acne-right-icon" 
+                    aria-label="Back" 
+                    onClick={() => {
+                      if (menuLevel === 3) {
+                        setMenuActiveItemL2(null);
+                        setMenuLevel(2);
+                      } else if (menuLevel === 2) {
+                        setMenuActiveItemL1(null);
+                        setMenuLevel(1);
+                      }
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                )
+              ) : (
+                !isClientPage && (
+                  <>
+                    <button className="acne-right-icon" aria-label="Menu" onClick={openMenu}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 15H21M3 9H21" />
+                      </svg>
+                    </button>
+                    <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
+                      <div className="cart-icon-wrap">
+                        <svg width="18" height="18" viewBox="3 2 18 20" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round">
+                          <path fillRule="evenodd" clipRule="evenodd" d="M17 6.99998C16.4067 4.69999 14.3267 3 11.84 3C9.35334 3 7.27334 4.69999 6.68 6.99998H3V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V6.99998H17ZM15.6067 6.99998C15.06 5.44666 13.58 4.33333 11.84 4.33333C10.1 4.33333 8.62001 5.44666 8.07334 6.99998H15.6067Z" fill="none"/>
+                        </svg>
+                        {cartCount > 0 && <span className="cart-badge"></span>}
+                      </div>
+                    </button>
+                  </>
+                )
               )}
-              <button className="acne-right-icon" onClick={openCart} aria-label="Open bag">
-                <div className="cart-icon-wrap">
-                  <svg width="18" height="18" viewBox="3 2 18 20" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M17 6.99998C16.4067 4.69999 14.3267 3 11.84 3C9.35334 3 7.27334 4.69999 6.68 6.99998H3V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V6.99998H17ZM15.6067 6.99998C15.06 5.44666 13.58 4.33333 11.84 4.33333C10.1 4.33333 8.62001 5.44666 8.07334 6.99998H15.6067Z" fill="none"/>
-                  </svg>
-                  {cartCount > 0 && <span className="cart-badge"></span>}
-                </div>
-              </button>
             </div>
           </div>
 
-          {/* CENTER: Logo (Mobile only) */}
-          <Link href="/" className="acne-logo acne-mobile-only" aria-label="TONET TORRENTINNI">
-            <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
-            <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
-          </Link>
+          {/* CENTER: Logo or category title */}
+          {isMenuOpen && (menuLevel === 2 || menuLevel === 3) ? (
+            <div className="acne-logo acne-mobile-only acne-menu-center-title">
+              <span className={`acne-header-menu-title ${menuLevel === 2 ? 'uppercase' : 'capitalized'}`}>
+                {menuLevel === 2 ? menuActiveItemL1?.title : menuActiveItemL2?.title}
+              </span>
+            </div>
+          ) : (
+            <Link href="/" className="acne-logo acne-mobile-only" aria-label="TONET TORRENTINNI">
+              <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
+              <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
+            </Link>
+          )}
 
-          {/* RIGHT: Desktop Nav Links + Utility Icons (Account, Search, Wishlist, Cart) */}
+          {/* RIGHT: Desktop Nav Links + Utility Icons or Close button */}
           <div className="acne-nav-right">
-            {/* Desktop Nav Links */}
-            <div className="acne-nav-desktop-links acne-desktop-only">
-              <Link 
-                href="/collection" 
-                className="acne-nav-desktop-link"
-                onMouseEnter={() => setActiveMegaMenu(null)}
-              >
-                REBAJAS
-              </Link>
-              <Link 
-                href="/collection" 
-                className="acne-nav-desktop-link"
-                onMouseEnter={() => setActiveMegaMenu(null)}
-              >
-                NOVEDADES
-              </Link>
-              <Link 
-                href="/collection/men" 
-                className="acne-nav-desktop-link"
-                onMouseEnter={() => setActiveMegaMenu('men')}
-              >
-                HOMBRE
-              </Link>
-              <Link 
-                href="/collection/women" 
-                className="acne-nav-desktop-link"
-                onMouseEnter={() => setActiveMegaMenu('women')}
-              >
-                MUJER
-              </Link>
-              <Link 
-                href="/collection" 
-                className="acne-nav-desktop-link"
-                onMouseEnter={() => setActiveMegaMenu(null)}
-              >
-                REGALOS
-              </Link>
-              <Link 
-                href="/collection" 
-                className="acne-nav-desktop-link"
-                onMouseEnter={() => setActiveMegaMenu('children')}
-              >
-                NIÑOS
-              </Link>
-            </div>
-
-            <div className="acne-right-icons">
-              {!isClientPage && (
-                <>
-                  {/* Account icon */}
-                  <button onClick={openAccount} className="acne-right-icon" aria-label="Account">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </button>
-
-                  {/* Search icon */}
-                  <button className="acne-right-icon" aria-label="Search" onClick={openSearch}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="11" cy="11" r="8"/>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                  </button>
-
-                  {/* Wishlist icon (Desktop only) */}
-                  <Link href="/archive?tab=personal" className="acne-right-icon acne-wishlist-icon acne-desktop-only" aria-label="Wishlist">
-                    <div className="wishlist-icon-wrap">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                      </svg>
-                    </div>
-                  </Link>
-                </>
-              )}
-
-              {/* Cart icon (Desktop only) */}
-              <button className="acne-right-icon acne-desktop-only" onClick={openCart} aria-label="Open bag">
-                <div className="cart-icon-wrap">
-                  <svg width="18" height="18" viewBox="3 2 18 20" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M17 6.99998C16.4067 4.69999 14.3267 3 11.84 3C9.35334 3 7.27334 4.69999 6.68 6.99998H3V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V6.99998H17ZM15.6067 6.99998C15.06 5.44666 13.58 4.33333 11.84 4.33333C10.1 4.33333 8.62001 5.44666 8.07334 6.99998H15.6067Z" fill="none"/>
+            {isMenuOpen ? (
+              <div className="acne-nav-right-close-only">
+                <button className="acne-right-icon" aria-label="Close menu" onClick={closeMenu}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
-                  {cartCount > 0 && <span className="cart-badge"></span>}
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Nav Links */}
+                <div className="acne-nav-desktop-links acne-desktop-only">
+                  <Link 
+                    href="/collection" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu(null)}
+                  >
+                    Sale
+                  </Link>
+                  <Link 
+                    href="/collection" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu(null)}
+                  >
+                    New Arrivals
+                  </Link>
+                  <Link 
+                    href="/collection/men" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu('men')}
+                  >
+                    MEN
+                  </Link>
+                  <Link 
+                    href="/collection/women" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu('women')}
+                  >
+                    WOMEN
+                  </Link>
+                  <Link 
+                    href="/collection" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu(null)}
+                  >
+                    Gifts
+                  </Link>
+                  <Link 
+                    href="/collection" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu('children')}
+                  >
+                    Kids
+                  </Link>
                 </div>
-              </button>
-            </div>
+
+                <div className="acne-right-icons">
+                  {!isClientPage && (
+                    <>
+                      {/* Account icon */}
+                      <button onClick={openAccount} className="acne-right-icon" aria-label="Account">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="9" r="3" />
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M17.9691 20C17.81 17.1085 16.9247 15 11.9999 15C7.07521 15 6.18991 17.1085 6.03076 20" />
+                        </svg>
+                      </button>
+
+                      {/* Search icon */}
+                      <button className="acne-right-icon" aria-label="Search" onClick={openSearch}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8"/>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                      </button>
+
+                      {/* Wishlist icon (Desktop only) */}
+                      <Link href="/archive?tab=personal" className="acne-right-icon acne-wishlist-icon acne-desktop-only" aria-label="Wishlist">
+                        <div className="wishlist-icon-wrap">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                          </svg>
+                        </div>
+                      </Link>
+                    </>
+                  )}
+
+                  {/* Cart icon (Desktop only) */}
+                  <button className="acne-right-icon acne-desktop-only" onClick={openCart} aria-label="Open bag">
+                    <div className="cart-icon-wrap">
+                      <svg width="18" height="18" viewBox="3 2 18 20" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M17 6.99998C16.4067 4.69999 14.3267 3 11.84 3C9.35334 3 7.27334 4.69999 6.68 6.99998H3V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V6.99998H17ZM15.6067 6.99998C15.06 5.44666 13.58 4.33333 11.84 4.33333C10.1 4.33333 8.62001 5.44666 8.07334 6.99998H15.6067Z" fill="none"/>
+                      </svg>
+                      {cartCount > 0 && <span className="cart-badge"></span>}
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -729,7 +791,7 @@ export default function Navbar() {
           font-family: var(--font-primary);
           font-size: 10px;
           font-weight: 300;
-          text-transform: lowercase;
+          text-transform: uppercase;
           text-decoration: none;
           color: rgba(0, 0, 0, 0.85);
           letter-spacing: 0.15em;
@@ -1057,6 +1119,55 @@ export default function Navbar() {
           .acne-right-icon:active {
             opacity: 0.45;
           }
+        }
+
+        .acne-menu-center-title {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: absolute !important;
+          left: 50% !important;
+          top: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          height: 100%;
+        }
+        .acne-header-menu-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11.5px;
+          letter-spacing: 0.1em;
+          color: #000000;
+          font-weight: 400;
+          white-space: nowrap;
+        }
+        .acne-header-menu-title.uppercase {
+          text-transform: uppercase;
+        }
+        .acne-header-menu-title.capitalized {
+          text-transform: capitalize;
+        }
+        .acne-nav-right-close-only {
+          display: flex;
+          align-items: center;
+          height: 100%;
+        }
+
+        .acne-header.menu-open {
+          background: #ffffff !important;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+        .acne-header.menu-open .acne-logo-text,
+        .acne-header.menu-open .acne-nav-desktop-link,
+        .acne-header.menu-open .acne-right-icon,
+        .acne-header.menu-open .acne-mob-icon {
+          color: #000000 !important;
+        }
+        .acne-header.menu-open svg {
+          stroke: #000000 !important;
+        }
+        .acne-header.menu-open svg path,
+        .acne-header.menu-open svg line,
+        .acne-header.menu-open svg polyline {
+          stroke: #000000 !important;
         }
       `}</style>
     </>

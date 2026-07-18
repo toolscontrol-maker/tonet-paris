@@ -20,6 +20,12 @@ interface UIContextType {
   openAccount: () => void;
   closeAccount: () => void;
   toggleAccount: () => void;
+  menuLevel: number;
+  setMenuLevel: (level: number) => void;
+  menuActiveItemL1: any | null;
+  setMenuActiveItemL1: (item: any | null) => void;
+  menuActiveItemL2: any | null;
+  setMenuActiveItemL2: (item: any | null) => void;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
@@ -29,6 +35,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+
+  const [menuLevel, setMenuLevel] = useState<number>(1);
+  const [menuActiveItemL1, setMenuActiveItemL1] = useState<any | null>(null);
+  const [menuActiveItemL2, setMenuActiveItemL2] = useState<any | null>(null);
 
   const openCart = () => {
     setIsCartOpen(true);
@@ -55,7 +65,13 @@ export function UIProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(false);
     setIsSearchOpen(false);
   };
-  const closeMenu = () => { setIsMenuOpen(false); setMenuSearchMode(false); };
+  const closeMenu = () => { 
+    setIsMenuOpen(false); 
+    setMenuSearchMode(false); 
+    setMenuLevel(1);
+    setMenuActiveItemL1(null);
+    setMenuActiveItemL2(null);
+  };
   const openMenuWithSearch = () => {
     setMenuSearchMode(true);
     setIsMenuOpen(true);
@@ -79,7 +95,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
       isCartOpen, openCart, closeCart, toggleCart, 
       isSearchOpen, openSearch, closeSearch, 
       isMenuOpen, openMenu, closeMenu, menuSearchMode, openMenuWithSearch, clearMenuSearchMode,
-      isAccountOpen, openAccount, closeAccount, toggleAccount
+      isAccountOpen, openAccount, closeAccount, toggleAccount,
+      menuLevel, setMenuLevel,
+      menuActiveItemL1, setMenuActiveItemL1,
+      menuActiveItemL2, setMenuActiveItemL2
     }}>
       {children}
     </UIContext.Provider>
@@ -93,7 +112,10 @@ export function useUI(): UIContextType {
       isCartOpen: false, openCart: () => {}, closeCart: () => {}, toggleCart: () => {},
       isSearchOpen: false, openSearch: () => {}, closeSearch: () => {},
       isMenuOpen: false, openMenu: () => {}, closeMenu: () => {}, menuSearchMode: false, openMenuWithSearch: () => {}, clearMenuSearchMode: () => {},
-      isAccountOpen: false, openAccount: () => {}, closeAccount: () => {}, toggleAccount: () => {}
+      isAccountOpen: false, openAccount: () => {}, closeAccount: () => {}, toggleAccount: () => {},
+      menuLevel: 1, setMenuLevel: () => {},
+      menuActiveItemL1: null, setMenuActiveItemL1: () => {},
+      menuActiveItemL2: null, setMenuActiveItemL2: () => {}
     };
   }
   return context;

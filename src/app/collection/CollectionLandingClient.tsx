@@ -14,6 +14,15 @@ const getArchiveRef = (handle: string) => {
   return `ARC-26-${num}`;
 };
 
+const toTitleCase = (str: string): string => {
+  return str
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 const getCollectionInfo = (product: Product) => {
   const matchText = (product.title + ' ' + product.description).toLowerCase();
   if (matchText.includes('grey') || matchText.includes('gray') || matchText.includes('light') || matchText.includes('shadow')) {
@@ -190,7 +199,7 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
           {/* Column 1: Count */}
           <div className="tonet-archive-controls__col tonet-archive-controls__col--info">
             <span className="tonet-archive-controls__text">
-              ALL PIECES · {filteredProducts.length} GARMENTS
+              All Pieces · {filteredProducts.length} Garments
             </span>
           </div>
 
@@ -205,7 +214,7 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
                   className={`tonet-archive-filter__btn ${filterGarmentType === t ? 'active' : ''}`}
                   onClick={() => setFilterGarmentType(t)}
                 >
-                  {t.toUpperCase()}
+                  {toTitleCase(t)}
                 </button>
               ))}
             </div>
@@ -222,7 +231,7 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
                   className={`tonet-archive-filter__btn ${filterCollection === c ? 'active' : ''}`}
                   onClick={() => setFilterCollection(c)}
                 >
-                  {c === 'all' ? 'ALL COLLECTIONS' : c.replace('_', ' ').toUpperCase()}
+                  {c === 'all' ? 'All Collections' : toTitleCase(c)}
                 </button>
               ))}
             </div>
@@ -239,7 +248,7 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
                   className={`tonet-archive-filter__btn ${filterState === s ? 'active' : ''}`}
                   onClick={() => setFilterState(s)}
                 >
-                  {s === 'all' ? 'ALL ARCHIVE' : s.toUpperCase()}
+                  {s === 'all' ? 'All Archive' : toTitleCase(s)}
                 </button>
               ))}
             </div>
@@ -368,7 +377,7 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
         .tonet-archive {
           background: #060606;
           color: #ffffff;
-          overflow-x: hidden;
+          overflow-x: clip;
           min-height: 100vh;
           font-family: var(--font-primary), sans-serif;
         }
@@ -475,6 +484,9 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
           align-items: center;
           padding: 0 40px;
           min-height: 56px;
+          position: sticky;
+          top: var(--header-height, 64px);
+          z-index: 100;
         }
         .tonet-archive-controls__container {
           max-width: 1400px;
@@ -820,6 +832,9 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
         }
 
         @media (max-width: 767px) {
+          .tonet-archive-controls {
+            padding: 0 16px;
+          }
           .tonet-archive-hero {
             height: 35vh;
             min-height: 240px;

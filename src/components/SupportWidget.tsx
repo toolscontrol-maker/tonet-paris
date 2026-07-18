@@ -56,7 +56,7 @@ export default function SupportWidget() {
       const conciergeMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "concierge",
-        text: "Gracias por contactar con TONET TORRENTINNI. Un asesor personal se pondrá en contacto contigo de inmediato para asistirte.",
+        text: "Thank you for contacting TONET TORRENTINNI. A personal advisor will get in touch with you shortly to assist you.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, conciergeMsg]);
@@ -75,7 +75,7 @@ export default function SupportWidget() {
             <button 
               className="sw-btn-main" 
               onClick={() => setIsOpen(true)}
-              aria-label="Abrir soporte y contacto"
+              aria-label="Open support and contact"
             >
               <span className="sw-logo-initial">T</span>
             </button>
@@ -84,7 +84,7 @@ export default function SupportWidget() {
             <button 
               className="sw-btn-secondary"
               onClick={() => console.log("Accesibilidad / Versión simplificada toggle clicked")}
-              aria-label="Ayuda y accesibilidad"
+              aria-label="Help and accessibility"
             >
               <Accessibility size={16} strokeWidth={1.2} />
             </button>
@@ -128,7 +128,7 @@ export default function SupportWidget() {
               <button 
                 className="sw-pill" 
                 onClick={() => {
-                  alert("Gracias por tu feedback.");
+                  alert("Thank you for your feedback.");
                   setIsOpen(false);
                 }}
                 style={{ "--index": 2 } as React.CSSProperties}
@@ -141,13 +141,13 @@ export default function SupportWidget() {
 
               <button 
                 className="sw-pill"
-                onClick={() => alert("Redirigiendo a reserva de citas...")}
+                onClick={() => alert("Redirecting to booking appointments...")}
                 style={{ "--index": 3 } as React.CSSProperties}
               >
                 <span className="sw-pill-icon">
                   <Calendar size={14} strokeWidth={1.2} />
                 </span>
-                <span className="sw-pill-label">Reservar cita</span>
+                <span className="sw-pill-label">Book appointment</span>
               </button>
             </div>
 
@@ -155,7 +155,7 @@ export default function SupportWidget() {
             <button 
               className="sw-btn-close" 
               onClick={() => setIsOpen(false)}
-              aria-label="Cerrar menú"
+              aria-label="Close menu"
             >
               <X size={18} strokeWidth={1.2} />
             </button>
@@ -163,8 +163,8 @@ export default function SupportWidget() {
             {/* Secondary Accessibility Button remains visible */}
             <button 
               className="sw-btn-secondary"
-              onClick={() => console.log("Accesibilidad / Versión simplificada toggle clicked")}
-              aria-label="Ayuda y accesibilidad"
+              onClick={() => console.log("Accessibility / Simplified version toggle clicked")}
+              aria-label="Help and accessibility"
             >
               <Accessibility size={16} strokeWidth={1.2} />
             </button>
@@ -184,7 +184,7 @@ export default function SupportWidget() {
             <button 
               className="sw-header-close" 
               onClick={() => setIsChatOpen(false)}
-              aria-label="Cerrar chat"
+              aria-label="Close chat"
             >
               <ChevronDown size={20} strokeWidth={1.2} />
             </button>
@@ -195,14 +195,14 @@ export default function SupportWidget() {
             {messages.length === 0 ? (
               <div className="sw-welcome-container">
                 <h1 className="sw-welcome-title">
-                  Bienvenido/a a TONET TORRENTINNI, ¿cómo podemos ayudarte?
+                  Welcome to TONET TORRENTINNI, how can we help you?
                 </h1>
                 <p className="sw-legal-text">
-                  Al contactar con TONET TORRENTINNI, el usuario acepta el tratamiento de sus datos personales para actividades vinculadas al servicio de atención al cliente. Consulta nuestra{" "}
+                  By contacting TONET TORRENTINNI, you agree to the processing of your personal data for customer service related purposes. Read our{" "}
                   <Link href="/about" className="sw-link">
-                    política de privacidad
+                    privacy policy
                   </Link>{" "}
-                  para más información.
+                  for more info.
                 </p>
               </div>
             ) : (
@@ -240,11 +240,11 @@ export default function SupportWidget() {
                 className="sw-input" 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Escribe tu pregunta aquí..."
-                aria-label="Escribe tu pregunta aquí"
+                placeholder="Write your question here..."
+                aria-label="Write your question here"
               />
               {inputText.trim() && (
-                <button type="submit" className="sw-send-btn" aria-label="Enviar mensaje">
+                <button type="submit" className="sw-send-btn" aria-label="Send message">
                   <Send size={14} strokeWidth={1.2} />
                 </button>
               )}
@@ -253,8 +253,8 @@ export default function SupportWidget() {
             <button 
               type="button" 
               className="sw-btn-attach" 
-              onClick={() => alert("Función para adjuntar imagen próximamente disponible.")}
-              aria-label="Adjuntar archivo o imagen"
+              onClick={() => alert("Feature to attach image coming soon.")}
+              aria-label="Attach file or image"
             >
               <Camera size={18} strokeWidth={1.2} />
             </button>

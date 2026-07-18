@@ -162,8 +162,9 @@ export default function AccountDrawer() {
             {/* Account (Active state link/indicator) */}
             <span className="ad-icon-btn active" aria-label={t('account.overview')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <circle cx="12" cy="9" r="3" />
+                <circle cx="12" cy="12" r="10" />
+                <path d="M17.9691 20C17.81 17.1085 16.9247 15 11.9999 15C7.07521 15 6.18991 17.1085 6.03076 20" />
               </svg>
             </span>
           </div>

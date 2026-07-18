@@ -69,6 +69,15 @@ function colorNameToCSS(name: string): string {
   return '#888888';
 }
 
+const toTitleCase = (str: string): string => {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 const RECENTLY_VIEWED_KEY = 'rv_products';
 const MAX_RECENTLY_VIEWED = 10;
 
@@ -448,6 +457,34 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
   const [ctlScrollProgress, setCtlScrollProgress] = useState(0);
   const ctlCarouselRef = useRef<HTMLDivElement>(null);
+
+  const [outfitImgHeight, setOutfitImgHeight] = useState(0);
+  const outfitImgRef = useRef<HTMLDivElement>(null);
+
+  const [recImgHeight, setRecImgHeight] = useState(0);
+  const recImgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateHeights = () => {
+      if (outfitImgRef.current) {
+        setOutfitImgHeight(outfitImgRef.current.offsetHeight);
+      }
+      if (recImgRef.current) {
+        setRecImgHeight(recImgRef.current.offsetHeight);
+      }
+    };
+
+    updateHeights();
+    window.addEventListener('resize', updateHeights);
+    const timer1 = setTimeout(updateHeights, 200);
+    const timer2 = setTimeout(updateHeights, 800);
+
+    return () => {
+      window.removeEventListener('resize', updateHeights);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [completeOutfit, arrangedRecommended]);
 
   const handleCtlScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
@@ -876,7 +913,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div className="tonet-info-sticky">
               
               {/* Product Title (uppercase, clean sans-serif) */}
-              <h1 className="tonet-product-title">{product.title.toUpperCase()}</h1>
+              <h1 className="tonet-product-title">{toTitleCase(product.title)}</h1>
               
               {/* Price and Color Swatch row */}
               <div className="tonet-product-meta-row">
@@ -1036,7 +1073,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                 ref={ctlCarouselRef}
                 onScroll={handleCtlScroll}
               >
-                {completeOutfit.map((p) => {
+                {completeOutfit.map((p, idx) => {
                   const pType = getProductType(p);
                   const symbol = p.currencyCode === 'USD' ? '$' : '€';
                   const formattedPrice = Number.isInteger(p.price)
@@ -1046,7 +1083,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
                       <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
-                        <div className="amiri-ctl-image-panel">
+                        <div 
+                          className="amiri-ctl-image-panel"
+                          ref={idx === 0 ? outfitImgRef : null}
+                        >
                           {p.imageUrl && (
                             <img 
                               src={p.imageUrl} 
@@ -1062,7 +1102,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                           )}
                         </div>
                         <div className="amiri-ctl-meta">
-                          <span className="amiri-ctl-name">{p.title.toUpperCase()}</span>
+                          <span className="amiri-ctl-name">{toTitleCase(p.title)}</span>
                           <span className="amiri-ctl-price">{formattedPrice}</span>
                         </div>
                       </Link>
@@ -1103,7 +1143,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                 ref={recCarouselRef}
                 onScroll={handleRecScroll}
               >
-                {arrangedRecommended.map((p) => {
+                {arrangedRecommended.map((p, idx) => {
                   const pType = getProductType(p);
                   const symbol = p.currencyCode === 'USD' ? '$' : '€';
                   const formattedPrice = Number.isInteger(p.price)
@@ -1113,7 +1153,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
                       <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
-                        <div className="amiri-ctl-image-panel">
+                        <div 
+                          className="amiri-ctl-image-panel"
+                          ref={idx === 0 ? recImgRef : null}
+                        >
                           {p.imageUrl && (
                             <img 
                               src={p.imageUrl} 
@@ -1129,7 +1172,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                           )}
                         </div>
                         <div className="amiri-ctl-meta">
-                          <span className="amiri-ctl-name">{p.title.toUpperCase()}</span>
+                          <span className="amiri-ctl-name">{toTitleCase(p.title)}</span>
                           <span className="amiri-ctl-price">{formattedPrice}</span>
                         </div>
                       </Link>
@@ -1685,7 +1728,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           letter-spacing: 0.1em;
           line-height: 1.4;
           margin: 0 0 12px;
-          text-transform: uppercase;
+          text-transform: none;
           color: #000000;
           text-align: center;
         }
@@ -2430,7 +2473,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           font-weight: 400;
           letter-spacing: 0.08em;
           color: #000000;
-          text-transform: uppercase;
+          text-transform: none;
           line-height: 1.4;
           white-space: nowrap;
           overflow: hidden;
@@ -2471,7 +2514,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           top: 0;
           bottom: 0;
           left: 0;
-          background-color: rgba(0, 0, 0, 0.4);
+          background-color: #000000;
           border-radius: 1px;
           transition: transform 0.1s ease-out;
         }

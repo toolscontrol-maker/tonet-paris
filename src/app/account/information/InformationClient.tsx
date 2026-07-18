@@ -270,7 +270,7 @@ export default function InformationClient() {
           border-bottom: 1px solid #ddd8d2;
           width: 100%;
           position: sticky;
-          top: calc(var(--header-height, 64px) + var(--nav-top, 0px));
+          top: var(--header-height, 64px);
           z-index: 10;
         }
         .dior-tabs-container {

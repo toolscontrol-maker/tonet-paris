@@ -7,17 +7,17 @@ import Image from 'next/image';
 const categories = [
   {
     image: '/hero/journal_garden_landscape_1.png',
-    label: 'Para Él',
+    label: 'For Him',
     href: '/collection',
   },
   {
     image: '/hero/art_garden_landscape.png',
-    label: 'Para Ella',
+    label: 'For Her',
     href: '/collection',
   },
   {
     image: '/hero/world_garden_landscape.png',
-    label: 'Novedades',
+    label: 'New In',
     href: '/collection',
   },
 ];
@@ -265,7 +265,7 @@ export default function FashionClient() {
       <section className="fashion-hero">
         <Image
           src="/hero/collection_garden_landscape.png"
-          alt="TONET — La Colección"
+          alt="TONET — The Collection"
           fill
           priority
           sizes="100vw"
@@ -273,7 +273,7 @@ export default function FashionClient() {
         />
         <div className="fashion-hero__overlay" />
         <div className="fashion-hero__content">
-          <h1 className="fashion-hero__title">La Colección</h1>
+          <h1 className="fashion-hero__title">The Collection</h1>
           <div className="fashion-hero__indicators">
             <span className="fashion-hero__dash" />
             <span className="fashion-hero__dash fashion-hero__dash--active" />
@@ -305,16 +305,16 @@ export default function FashionClient() {
       <section className="fashion-featured">
         <Image
           src="/hero/archive_garden_landscape.png"
-          alt="El Archivo — TONET"
+          alt="The Archive — TONET"
           fill
           sizes="100vw"
           className="fashion-featured__image"
         />
         <div className="fashion-featured__overlay" />
         <div className="fashion-featured__content">
-          <h2 className="fashion-featured__title">El Archivo</h2>
+          <h2 className="fashion-featured__title">The Archive</h2>
           <Link href="/archive" className="fashion-featured__link">
-            Descubrir
+            Discover
           </Link>
         </div>
       </section>

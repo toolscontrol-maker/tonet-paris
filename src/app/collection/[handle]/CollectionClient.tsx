@@ -532,16 +532,20 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
   const getBreadcrumbs = () => {
     const handleLower = collection.handle.toLowerCase();
-    let gender = "COLECCIONES";
+    let gender = "Collections";
     if (handleLower.includes("hombre") || handleLower.includes("men")) {
-      gender = "HOMBRE";
+      gender = "MEN";
     } else if (handleLower.includes("mujer") || handleLower.includes("women")) {
-      gender = "MUJER";
+      gender = "WOMEN";
     }
     
+    const displayTitle = (collection.title.toUpperCase() === 'MEN' || collection.title.toUpperCase() === 'WOMEN')
+      ? collection.title.toUpperCase()
+      : collection.title.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
     return (
       <span className="v-breadcrumb">
-        Inicio / {gender} / <span className="v-breadcrumb-current">{collection.title}</span> ({filteredAndSortedProducts.length})
+        Home / {gender} / <span className="v-breadcrumb-current">{displayTitle}</span> ({filteredAndSortedProducts.length})
       </span>
     );
   };
@@ -566,7 +570,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   setSortOpen(false);
                 }}
               >
-                Filtra por {filtersOpen ? '−' : '+'}
+                Filter by {filtersOpen ? '−' : '+'}
               </button>
               <button 
                 type="button" 
@@ -576,7 +580,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   setFiltersOpen(false);
                 }}
               >
-                Ordenar por {sortOpen ? '−' : '+'}
+                Sort by {sortOpen ? '−' : '+'}
               </button>
             </div>
           </div>
@@ -605,13 +609,12 @@ export default function CollectionClient({ collection }: { collection: Collectio
                     </div>
                   </div>
                 )}
-
-                {/* Column 2: Talla (Sizes) */}
+                {/* Column 2: Size */}
                 {filterOptions.sizes.length > 0 && (
                   <div className="v-filter-col">
-                    <span className="v-filter-col-title">Talla</span>
+                    <span className="v-filter-col-title">Size</span>
                     <div className="v-filter-options grid-sizes">
-                      {filterOptions.sizes.map(sz => (
+                       {filterOptions.sizes.map(sz => (
                         <button
                           key={sz}
                           type="button"
@@ -630,7 +633,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   <div className="v-filter-col">
                     <span className="v-filter-col-title">Material</span>
                     <div className="v-filter-options">
-                      {filterOptions.materials.map(mat => (
+                       {filterOptions.materials.map(mat => (
                         <button
                           key={mat}
                           type="button"
@@ -644,23 +647,23 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   </div>
                 )}
 
-                {/* Column 4: Disponibilidad */}
+                {/* Column 4: Availability */}
                 <div className="v-filter-col">
-                  <span className="v-filter-col-title">Disponibilidad</span>
+                  <span className="v-filter-col-title">Availability</span>
                   <div className="v-filter-options">
                     <button
                       type="button"
                       className={`v-filter-option ${tempAvailability.includes('in-stock') ? 'active' : ''}`}
                       onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'in-stock')}
                     >
-                      <span>En Stock</span>
+                      <span>In Stock</span>
                     </button>
                     <button
                       type="button"
                       className={`v-filter-option ${tempAvailability.includes('out-of-stock') ? 'active' : ''}`}
                       onClick={() => toggleTempFilter(tempAvailability, setTempAvailability, 'out-of-stock')}
                     >
-                      <span>Agotado</span>
+                      <span>Out of Stock</span>
                     </button>
                   </div>
                 </div>
@@ -670,10 +673,10 @@ export default function CollectionClient({ collection }: { collection: Collectio
               {/* Footer buttons */}
               <div className="v-filters-footer">
                 <button type="button" className="v-btn-reset" onClick={clearFilters}>
-                  Restablecer todo
+                  Reset All
                 </button>
                 <button type="button" className="v-btn-apply" onClick={applyFilters}>
-                  Aplicar cambios
+                  Apply
                 </button>
               </div>
             </div>
@@ -690,7 +693,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   setSortOpen(false);
                 }}
               >
-                Recomendado
+                Recommended
               </button>
               <button
                 type="button"
@@ -700,7 +703,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   setSortOpen(false);
                 }}
               >
-                Precio: de menor a mayor
+                Price: Low to High
               </button>
               <button
                 type="button"
@@ -710,7 +713,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   setSortOpen(false);
                 }}
               >
-                Precio: de mayor a menor
+                Price: High to Low
               </button>
               <button
                 type="button"
@@ -720,7 +723,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
                   setSortOpen(false);
                 }}
               >
-                Novedades
+                New In
               </button>
             </div>
           )}
@@ -985,6 +988,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           padding-top: 64px;
           padding-bottom: 120px;
           background-color: #ffffff;
+          overflow: visible;
         }
 
         @media (max-width: 767px) {
@@ -995,15 +999,9 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .v-plp-sticky-header {
           position: sticky;
-          top: 64px;
+          top: var(--header-height, 64px);
           z-index: 100;
           background-color: #ffffff;
-        }
-
-        @media (max-width: 767px) {
-          .v-plp-sticky-header {
-            top: 54px;
-          }
         }
 
         /* TOP AREA */
@@ -1032,7 +1030,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-size: 11px;
           color: rgba(0, 0, 0, 0.5);
           letter-spacing: 0.05em;
-          text-transform: lowercase;
+          text-transform: none;
         }
 
         .v-breadcrumb-current {
@@ -1040,7 +1038,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           font-style: italic;
           font-size: 12.5px;
           color: #000000;
-          text-transform: lowercase;
+          text-transform: none;
         }
 
         .v-plp-header-right {
@@ -1067,7 +1065,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           padding: 6px 0;
           transition: color 0.3s ease;
           outline: none;
-          text-transform: lowercase;
+          text-transform: none;
         }
 
         .v-plp-trigger:hover, .v-plp-trigger.active {

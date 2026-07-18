@@ -1,26 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Heart, X } from "lucide-react";
 import { useUI } from "@/context/UIContext";
 import { useLocale } from "@/context/LocaleContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { getProducts, searchProducts, getOptimizedImageUrl } from "@/lib/shopify";
+
+const TRENDING_SEARCHES = [
+  "vendetta new fragrance",
+  "perfume",
+  "sale"
+];
+
+const SEARCH_BY_PRODUCT = [
+  "Bags",
+  "Dresses",
+  "Shoes",
+  "Accessories"
+];
 
 export default function SearchDrawer() {
   const { isSearchOpen, closeSearch } = useUI();
   const { formatPrice } = useLocale();
+  const { toggle: toggleWishlist, has: isInWishlist } = useWishlist();
   const router = useRouter();
-  const drawerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [allProductsCache, setAllProductsCache] = useState<any[]>([]);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Fallback recommended products for "You Might Like"
+  // Fallback recommended products for "También Te Sugerimos" / "New In"
   const fallbackSuggestions = [
     {
       handle: 'essential-heavyweight-shorts',
@@ -52,9 +68,19 @@ export default function SearchDrawer() {
     }
   ];
 
-  // Fetch shopify products for suggestions
+  // Load cache & recent searches on mount/open
   useEffect(() => {
     if (!isSearchOpen) return;
+    
+    // Load recent searches from localStorage
+    const saved = localStorage.getItem("tonet_recent_searches");
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved));
+      } catch (_) {}
+    }
+
+    // Load products
     getProducts()
       .then((prods) => {
         if (prods && prods.length > 0) {
@@ -77,7 +103,7 @@ export default function SearchDrawer() {
       return;
     }
 
-    // Instant client-side filter from cache for responsiveness
+    // Client-side quick filter
     const q = searchQuery.toLowerCase().trim();
     if (allProductsCache.length > 0) {
       const localMatches = allProductsCache.filter((p: any) =>
@@ -85,34 +111,24 @@ export default function SearchDrawer() {
         (p.description?.toLowerCase().includes(q)) ||
         (p.tags?.some((t: string) => t.toLowerCase().includes(q)))
       );
-      if (localMatches.length > 0) {
-        setSearchResults(localMatches.slice(0, 8));
-      }
+      setSearchResults(localMatches.slice(0, 16));
     }
 
     setIsSearching(true);
-
-    // Debounced API search for accurate results
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      searchProducts(searchQuery.trim(), 8)
+    const delayDebounceFn = setTimeout(() => {
+      searchProducts(searchQuery.trim(), 16)
         .then((results) => {
           if (results && results.length > 0) {
             setSearchResults(results);
           }
-          // If API returns empty but local had results, keep local results
         })
-        .catch(() => {
-          // Keep local results on error
-        })
+        .catch(() => {})
         .finally(() => {
           setIsSearching(false);
         });
-    }, 300);
+    }, 250);
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+    return () => clearTimeout(delayDebounceFn);
   }, [searchQuery, allProductsCache]);
 
   // Focus input when opened
@@ -131,431 +147,731 @@ export default function SearchDrawer() {
     };
   }, [isSearchOpen]);
 
-  // Click outside to close
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        drawerRef.current &&
-        !drawerRef.current.contains(e.target as Node) &&
-        isSearchOpen
-      ) {
-        closeSearch();
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [isSearchOpen, closeSearch]);
+  const saveSearchTerm = (term: string) => {
+    const trimmed = term.trim().toLowerCase();
+    if (!trimmed) return;
+    const filtered = recentSearches.filter(t => t !== trimmed);
+    const updated = [trimmed, ...filtered].slice(0, 5);
+    setRecentSearches(updated);
+    localStorage.setItem("tonet_recent_searches", JSON.stringify(updated));
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
+    saveSearchTerm(searchQuery);
     closeSearch();
     router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
-  const handlePopularSearch = (term: string) => {
-    closeSearch();
-    router.push(`/search?q=${encodeURIComponent(term)}`);
+  const handleTermClick = (term: string) => {
+    setSearchQuery(term);
+    saveSearchTerm(term);
+  };
+
+  // Helper to convert Shopify product titles to Title Case
+  const toTitleCase = (str: string) => {
+    if (!str) return "";
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   return (
     <>
-      {/* DRAWER BACKDROP */}
+      {/* Backdrop */}
       <div 
         className={`sd-backdrop ${isSearchOpen ? "open" : ""}`} 
         onClick={closeSearch}
         aria-hidden="true" 
       />
       
-      {/* SIDE PANEL OVERLAY */}
+      {/* Search Modal Overlay */}
       <div 
         className={`sd-overlay ${isSearchOpen ? "open" : ""}`} 
-        ref={drawerRef} 
         role="dialog" 
         aria-modal="true"
       >
-        <div className="sd-container">
-          
-          {/* Top Row with Rectangular Input and Close Button */}
-          <div className="sd-input-row">
-            <form className="sd-search-form" onSubmit={handleSearchSubmit}>
+        <div className="sd-wrapper">
+          {/* Header Row */}
+          <header className="sd-header">
+            <form className="sd-form" onSubmit={handleSearchSubmit}>
               <input
                 ref={inputRef}
                 type="text"
-                className="sd-search-input"
-                placeholder="SEARCH"
+                className="sd-input"
+                placeholder="Search By Color, Mood Or Occasion..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
             <button className="sd-close-btn" onClick={closeSearch} aria-label="Close search">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L10 10M10 1L1 10" stroke="black" strokeWidth="1" strokeLinecap="square"/>
-              </svg>
+              <X size={16} strokeWidth={1.2} />
             </button>
-          </div>
+          </header>
 
-          {/* Search Content Stack */}
-          <div className="sd-content-stack">
+          {/* Body Content */}
+          <main className="sd-body">
             
-            {/* Popular Searches */}
-            <div className="sd-section-popular">
-              <h4 className="sd-section-title">Popular Searches</h4>
-              <ul className="sd-popular-list">
-                <li>
-                  <button type="button" onClick={() => handlePopularSearch("shorts")}>
-                    shorts
-                  </button>
-                </li>
-                <li>
-                  <button type="button" onClick={() => handlePopularSearch("hoodie")}>
-                    hoodie
-                  </button>
-                </li>
-                <li>
-                  <button type="button" onClick={() => handlePopularSearch("tee")}>
-                    tee
-                  </button>
-                </li>
-                <li>
-                  <button type="button" onClick={() => handlePopularSearch("pants")}>
-                    pants
-                  </button>
-                </li>
-                <li>
-                  <button type="button" onClick={() => handlePopularSearch("fleece")}>
-                    fleece
-                  </button>
-                </li>
-              </ul>
-            </div>
+            {/* STATE 1: Empty Search (Show suggestions/curated options) */}
+            {!searchQuery.trim() && (
+              <>
+                <div className="sd-suggestions-columns">
+                  
+                  {/* Column 1: Popular searches */}
+                  <div className="sd-suggest-col">
+                    <h4 className="sd-col-title">Trending Searches</h4>
+                    <ul className="sd-list">
+                      {TRENDING_SEARCHES.map((term) => (
+                        <li key={term}>
+                          <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
+                            {term}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-            {/* You Might Like / Search Results */}
-            <div className="sd-section-suggestions">
-              <h4 className="sd-section-title">
-                {searchQuery.trim() ? (
-                  <>
-                    Search Results
-                    {isSearching && <span className="sd-searching-dot">...</span>}
-                  </>
-                ) : 'You Might Like'}
-              </h4>
-              {searchQuery.trim() && searchResults.length === 0 && !isSearching ? (
-                <p className="sd-no-results">No products found</p>
-              ) : (
-                <div className="sd-suggestions-grid">
-                  {(searchQuery.trim() ? searchResults : suggestedProducts).map((p) => {
+                  {/* Column 2: Recent searches & Product searches */}
+                  <div className="sd-suggest-col">
+                    {recentSearches.length > 0 && (
+                      <div style={{ marginBottom: '28px' }}>
+                        <h4 className="sd-col-title">Recently Searched</h4>
+                        <ul className="sd-list">
+                          {recentSearches.map((term) => (
+                            <li key={term}>
+                              <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
+                                {term}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <h4 className="sd-col-title">Search by Product</h4>
+                    <ul className="sd-list">
+                      {SEARCH_BY_PRODUCT.map((term) => (
+                        <li key={term}>
+                          <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
+                            {term}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Column 3: Recommended Items — Desktop only inline, mobile goes to bottom */}
+                  <div className="sd-suggest-col sd-suggest-col--preview sd-desktop-preview">
+                    <h4 className="sd-col-title">We Also Suggest</h4>
+                    <div className="sd-suggest-strip">
+                      {suggestedProducts.map((p) => {
+                        const image = p.imageUrl || p.images?.[0];
+                        return (
+                          <Link 
+                            key={p.handle} 
+                            href={`/product/${p.handle}`}
+                            className="sd-mini-card"
+                            onClick={closeSearch}
+                          >
+                            <div className="sd-mini-card-img-wrap">
+                              {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Mobile-only: We Also Suggest pinned at the bottom */}
+                <div className="sd-mobile-suggest-bottom">
+                  <h4 className="sd-col-title">We Also Suggest</h4>
+                  <div className="sd-suggest-strip">
+                    {suggestedProducts.map((p) => {
+                      const image = p.imageUrl || p.images?.[0];
+                      return (
+                        <Link 
+                          key={p.handle} 
+                          href={`/product/${p.handle}`}
+                          className="sd-mini-card"
+                          onClick={closeSearch}
+                        >
+                          <div className="sd-mini-card-img-wrap">
+                            {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STATE 2: Has Query but NO Matches */}
+            {searchQuery.trim() && searchResults.length === 0 && !isSearching && (
+              <div className="sd-empty-results-container">
+                <div className="sd-results-header">
+                  <span className="sd-results-count-title">Search Results (0)</span>
+                </div>
+
+                <div className="sd-empty-box">
+                  <h3 className="sd-empty-heading">No Matches Found For "{searchQuery}"</h3>
+                  <p className="sd-empty-subheading">Please Try Another Search Or Contact Us.</p>
+                </div>
+
+                {/* Show fallback suggestions below */}
+                <div className="sd-empty-suggestions-section">
+                  <h4 className="sd-col-title uppercase" style={{ marginBottom: '20px' }}>New In</h4>
+                  <div className="sd-product-grid">
+                    {suggestedProducts.map((p) => {
+                      const image = p.imageUrl || p.images?.[0];
+                      const priceStr = formatPrice(p.price, p.currencyCode ?? 'EUR');
+                      const favorited = isInWishlist(p.handle);
+                      
+                      return (
+                        <div key={p.handle} className="sd-product-card">
+                          <button 
+                            className={`sd-fav-btn ${favorited ? 'active' : ''}`}
+                            onClick={(e) => { e.preventDefault(); toggleWishlist(p); }}
+                            aria-label="Add to wishlist"
+                          >
+                            <Heart size={14} fill={favorited ? "#000000" : "none"} strokeWidth={1.2} />
+                          </button>
+                          
+                          <Link href={`/product/${p.handle}`} onClick={closeSearch} className="sd-card-link">
+                            <div className="sd-card-img-wrap">
+                              {image && <img src={getOptimizedImageUrl(image, 320)} alt={p.title} />}
+                            </div>
+                            <div className="sd-card-meta">
+                              <span className="sd-card-name">{toTitleCase(p.title)}</span>
+                              <span className="sd-card-price">{priceStr}</span>
+                            </div>
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STATE 3: Active Results Grid */}
+            {searchQuery.trim() && searchResults.length > 0 && (
+              <div className="sd-results-container">
+                <header className="sd-results-header">
+                  <span className="sd-results-count-title">
+                    Search Results ({searchResults.length})
+                    {isSearching && <span className="sd-pulse-dot">...</span>}
+                  </span>
+                  <button 
+                    type="button" 
+                    className="sd-results-filter-btn"
+                    onClick={() => {
+                      closeSearch();
+                      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    }}
+                  >
+                    Filter
+                  </button>
+                </header>
+
+                <div className="sd-product-grid">
+                  {searchResults.map((p) => {
                     const image = p.imageUrl || p.images?.[0];
                     const priceStr = formatPrice(p.price, p.currencyCode ?? 'EUR');
+                    const favorited = isInWishlist(p.handle);
+                    
                     return (
-                      <Link
-                        href={`/product/${p.handle}`}
-                        key={p.handle + p.id}
-                        className="sd-suggested-item"
-                        onClick={closeSearch}
-                      >
-                        <div className="sd-suggested-img-wrap">
-                          {image && (
-                            <img 
-                              src={getOptimizedImageUrl(image, 250)} 
-                              alt={p.title} 
-                              className="sd-suggested-img" 
-                            />
-                          )}
-                        </div>
-                        <div className="sd-suggested-info">
-                          <span className="sd-suggested-name">{p.title}</span>
-                          <span className="sd-suggested-price">{priceStr}</span>
-                        </div>
-                      </Link>
+                      <div key={p.handle} className="sd-product-card">
+                        <button 
+                          className={`sd-fav-btn ${favorited ? 'active' : ''}`}
+                          onClick={(e) => { e.preventDefault(); toggleWishlist(p); }}
+                          aria-label="Add to wishlist"
+                        >
+                          <Heart size={14} fill={favorited ? "#000000" : "none"} strokeWidth={1.2} />
+                        </button>
+                        
+                        <Link href={`/product/${p.handle}`} onClick={closeSearch} className="sd-card-link">
+                          <div className="sd-card-img-wrap">
+                            {image && <img src={getOptimizedImageUrl(image, 320)} alt={p.title} />}
+                          </div>
+                          <div className="sd-card-meta">
+                            <span className="sd-card-name">{toTitleCase(p.title)}</span>
+                            <span className="sd-card-price">{priceStr}</span>
+                          </div>
+                        </Link>
+                      </div>
                     );
                   })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-          </div>
-
-        </div>
-
-        {/* Floating Monogram Bottom Right */}
-        <div className="sd-monogram-badge">
-          <span>T</span>
+          </main>
         </div>
       </div>
 
       <style>{`
-         /* BACKDROP */
+        /* ══ BACKDROP ══ */
         .sd-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.05);
-          z-index: 10000;
+          background: rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           opacity: 0;
           pointer-events: none;
-          transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 10000;
+          transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sd-backdrop.open {
           opacity: 1;
-          pointer-events: all;
+          pointer-events: auto;
         }
 
-        /* OVERLAY CONTAINER (SIDE PANEL SLIDING FROM RIGHT) */
+        /* ══ OVERLAY CONTAINER ══ */
         .sd-overlay {
           position: fixed;
-          top: 0; 
-          right: 0; 
-          bottom: 0;
-          width: 100%;
-          max-width: 420px;
-          background: #ffffff;
-          color: #000000;
+          background: #ffffff; /* Pure White */
+          color: #111111;
           z-index: 10001;
-          border-left: 1px solid rgba(0, 0, 0, 0.08);
-          box-shadow: none;
+          box-sizing: border-box;
           font-family: var(--font-primary), sans-serif;
-          transform: translateX(100%);
-          transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          opacity: 0;
+          pointer-events: none;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           overflow-y: auto;
-          display: flex;
-          flex-direction: column;
+          scrollbar-width: none;
+          border-radius: 0 !important;
         }
-        .sd-overlay.open {
-          transform: translateX(0);
+        .sd-overlay::-webkit-scrollbar {
+          display: none;
         }
 
-        .sd-container {
-          padding: 20px 24px 60px;
+        /* Responsive placement */
+        @media (max-width: 767px) {
+          /* Mobile: TRUE full-screen, no margins */
+          .sd-overlay {
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-width: 100%;
+            max-height: 100vh;
+            transform: translateY(10px);
+          }
+          .sd-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+          }
+        }
+        @media (min-width: 768px) {
+          /* Desktop full-width layout covering the upper page */
+          .sd-overlay {
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-height: 90vh;
+            transform: translateY(-20px);
+            border-bottom: none;
+          }
+          .sd-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+          }
+        }
+
+        /* ══ WRAPPER ══ */
+        .sd-wrapper {
+          width: 100%;
+          max-width: 1440px;
+          margin: 0 auto;
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
-          width: 100%;
-          min-height: 100%;
+          padding: 24px 16px;
+          height: 100%;
+        }
+        @media (min-width: 768px) {
+          .sd-wrapper {
+            padding: 40px 24px;
+            height: auto;
+          }
+        }
+        @media (min-width: 1024px) {
+          .sd-wrapper {
+            padding: 48px 40px;
+          }
         }
 
-        /* INPUT ROW */
-        .sd-input-row {
+        /* ══ BODY (flex fill) ══ */
+        .sd-body {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-height: 0;
+        }
+
+        /* ══ HEADER ══ */
+        .sd-header {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           width: 100%;
+          border-bottom: none;
+          padding-bottom: 12px;
           margin-bottom: 24px;
         }
-        .sd-search-form {
-          flex: 1;
-          margin: 0;
+        @media (min-width: 768px) {
+          .sd-header {
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+          }
         }
-        .sd-search-input {
+        .sd-form {
+          flex: 1;
+        }
+        .sd-input {
           width: 100%;
-          height: 36px;
-          border: 1px solid #000000;
-          border-radius: 0;
+          border: none;
           background: transparent;
           outline: none;
           font-family: inherit;
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 300;
-          letter-spacing: 0.15em;
-          padding: 0 12px;
-          text-transform: uppercase;
-          color: #000000;
+          letter-spacing: 0.05em;
+          color: #111111;
+          padding: 0;
           box-sizing: border-box;
         }
-        .sd-search-input::placeholder {
-          color: rgba(0, 0, 0, 0.4);
+        .sd-input::placeholder {
+          color: #999999;
         }
         .sd-close-btn {
           background: none;
           border: none;
           cursor: pointer;
-          color: #000000;
-          padding: 8px;
-          margin-left: 8px;
+          color: #111111;
+          padding: 6px;
+          margin-left: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: opacity 0.3s ease;
+          transition: opacity 0.2s ease;
         }
         .sd-close-btn:hover {
           opacity: 0.6;
         }
 
-        /* CONTENT STACK */
-        .sd-content-stack {
+        /* ══ SUGGESTIONS COLUMNS (Desktop Symmetrical Layout) ══ */
+        .sd-suggestions-columns {
+          display: flex;
+          flex-direction: column;
+          gap: 32px;
+        }
+        @media (min-width: 768px) {
+          .sd-suggestions-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+          }
+        }
+        @media (min-width: 1024px) {
+          .sd-suggestions-columns {
+            gap: 40px;
+          }
+        }
+        /* Desktop preview col: hidden on mobile, visible on desktop */
+        .sd-desktop-preview {
+          display: none !important;
+        }
+        @media (min-width: 768px) {
+          .sd-desktop-preview {
+            display: flex !important;
+            flex-direction: column;
+          }
+          /* Hide mobile strip on desktop */
+          .sd-mobile-suggest-bottom {
+            display: none !important;
+          }
+        }
+        /* Mobile bottom strip: pinned to bottom via margin-top: auto */
+        .sd-mobile-suggest-bottom {
+          display: flex;
+          flex-direction: column;
+          margin-top: auto;
+          padding-top: 20px;
+          border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .sd-suggest-col {
           display: flex;
           flex-direction: column;
         }
-
-        .sd-section-title {
+        .sd-col-title {
+          font-family: var(--font-primary), sans-serif;
           font-size: 9px;
           font-weight: 400;
-          text-transform: uppercase;
+          text-transform: capitalize;
           letter-spacing: 0.15em;
-          color: #000000;
-          margin: 0 0 12px;
-          display: block;
+          color: #777777;
+          margin: 0 0 16px 0;
         }
-
-        /* POPULAR SEARCHES */
-        .sd-section-popular {
-          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-          padding-bottom: 24px;
-          margin-bottom: 24px;
+        .sd-col-title.uppercase {
+          text-transform: capitalize;
         }
-        .sd-popular-list {
+        
+        /* Lists */
+        .sd-list {
           list-style: none;
           padding: 0;
           margin: 0;
           display: flex;
           flex-direction: column;
+          gap: 12px;
         }
-        .sd-popular-list li {
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-        }
-        .sd-popular-list li:last-child {
-          border-bottom: none;
-        }
-        .sd-popular-list button {
-          width: 100%;
+        .sd-list-btn {
           background: none;
           border: none;
-          padding: 10px 0;
-          text-align: left;
-          font-family: inherit;
-          font-size: 9px;
-          font-weight: 300;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: #000000;
           cursor: pointer;
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: 14px;
+          text-transform: capitalize;
+          color: #111111;
+          padding: 0;
+          text-align: left;
           transition: opacity 0.2s ease;
         }
-        .sd-popular-list button:hover {
+        .sd-list-btn:hover {
           opacity: 0.6;
         }
 
-        /* YOU MIGHT LIKE SUGGESTIONS GRID */
-        .sd-section-suggestions {
-          margin-bottom: 40px;
-          overflow: hidden;
-        }
-        .sd-no-results {
-          font-size: 9px;
-          font-weight: 300;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: rgba(0, 0, 0, 0.45);
-          margin: 20px 0;
-        }
-        .sd-searching-dot {
-          display: inline;
-          animation: sd-pulse 1s infinite;
-        }
-        @keyframes sd-pulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
-        }
-        .sd-suggestions-grid {
+        /* Column 3: Recommended Preview Strip */
+        .sd-suggest-strip {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px 8px;
-          overflow: hidden;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
         }
-        .sd-suggested-item {
-          display: flex;
-          flex-direction: column;
+        @media (max-width: 767px) {
+          .sd-suggest-strip {
+            gap: 6px;
+          }
+        }
+        .sd-mini-card {
+          display: block;
           text-decoration: none;
-          color: #000000;
-          transition: opacity 0.2s ease;
+          background: #ffffff;
+          border: none;
         }
-        .sd-suggested-item:hover {
-          opacity: 0.7;
-        }
-
-        .sd-suggested-img-wrap {
+        .sd-mini-card-img-wrap {
           width: 100%;
-          aspect-ratio: 16 / 19;
-          background-color: #f4f3f1;
-          margin-bottom: 4px;
-          overflow: hidden;
+          aspect-ratio: 1 / 1;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: relative;
+          overflow: hidden;
           padding: 8px;
           box-sizing: border-box;
-          border-radius: 0;
+          background: #f5f3f0;
         }
-        .sd-suggested-img {
+        .sd-mini-card-img-wrap img {
           width: 100%;
           height: 100%;
           object-fit: contain;
-          display: block;
-          mix-blend-mode: multiply;
-        }
-        .sd-suggested-info {
-          display: flex;
-          flex-direction: column;
-          gap: 1px;
-          margin-top: 2px;
-        }
-        .sd-suggested-name {
-          font-size: 7.5px;
-          font-weight: 300;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          line-height: 1.2;
-          color: #000000;
-        }
-        .sd-suggested-price {
-          font-size: 7px;
-          font-weight: 300;
-          color: #777777;
-          letter-spacing: 0.04em;
         }
 
-        /* FLOATING MONOGRAM BADGE */
-        .sd-monogram-badge {
-          position: absolute;
-          bottom: 24px;
-          right: 24px;
-          width: 44px;
-          height: 44px;
-          background-color: #000000;
-          border-radius: 50%;
+        /* ══ RESULTS CONTAINER ══ */
+        .sd-results-container,
+        .sd-empty-results-container {
+          width: 100%;
+        }
+        .sd-results-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 20px;
+        }
+        .sd-results-count-title {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: 13.5px;
+          color: #777777;
+        }
+        .sd-pulse-dot {
+          display: inline;
+          animation: sdPulse 1s infinite;
+        }
+        @keyframes sdPulse {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        .sd-results-filter-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 10.5px;
+          letter-spacing: 0.08em;
+          text-transform: capitalize;
+          color: #111111;
+          padding: 4px 0;
+          border-bottom: 1.5px solid #111111;
+          transition: opacity 0.2s ease;
+        }
+        .sd-results-filter-btn:hover {
+          opacity: 0.6;
+        }
+
+        /* ══ PRODUCT GRID ══ */
+        .sd-product-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+        @media (min-width: 768px) {
+          .sd-product-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+          }
+        }
+        @media (min-width: 1024px) {
+          .sd-product-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+          }
+        }
+        @media (min-width: 1440px) {
+          .sd-product-grid {
+            gap: 20px;
+          }
+        }
+
+        /* Product Card */
+        .sd-product-card {
+          background: #ffffff;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          border: none;
+          box-sizing: border-box;
+          border-radius: 0 !important;
+        }
+        .sd-product-card * {
+          border-radius: 0 !important;
+        }
+        .sd-card-link {
+          display: flex;
+          flex-direction: column;
+          text-decoration: none;
+          color: #111111;
+        }
+        .sd-card-img-wrap {
+          width: 100%;
+          aspect-ratio: 16 / 19;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          color: #ffffff;
-          font-family: var(--font-brand);
-          font-size: 18px;
-          z-index: 10;
-          cursor: pointer;
-          transition: transform 0.3s ease;
+          background: #ffffff;
+          overflow: hidden;
+          padding: 12px;
+          box-sizing: border-box;
+          transition: opacity 0.3s ease;
         }
-        .sd-monogram-badge:hover {
-          transform: scale(1.05);
+        .sd-product-card:hover .sd-card-img-wrap {
+          opacity: 0.95;
+        }
+        .sd-card-img-wrap img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+        }
+        .sd-card-meta {
+          padding: 12px 8px 14px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          text-align: center;
+        }
+        .sd-card-name {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 10px;
+          font-weight: 400;
+          letter-spacing: 0.06em;
+          color: #111111;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 100%;
+        }
+        .sd-card-price {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 9px;
+          font-weight: 300;
+          letter-spacing: 0.04em;
+          color: #777777;
         }
 
-        /* MOBILE RESPONSIVE Adjustments */
-        @media (max-width: 767px) {
-          .sd-overlay {
-            max-width: 100%;
-            border-left: none;
-          }
-          .sd-container {
-            padding: 20px 16px 60px;
-          }
-          .sd-suggestions-grid {
-            gap: 12px 8px;
-          }
-          .sd-monogram-badge {
-            bottom: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
-          }
+        /* Wishlist Heart Icon overlay */
+        .sd-fav-btn {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          z-index: 5;
+          padding: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(0, 0, 0, 0.4);
+          transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .sd-fav-btn:hover {
+          color: #000000;
+          transform: scale(1.05);
+        }
+        .sd-fav-btn.active {
+          color: #000000;
+        }
+
+        /* ══ EMPTY BOX ══ */
+        .sd-empty-box {
+          padding: 64px 24px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+        .sd-empty-heading {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 16px;
+          font-weight: 400;
+          color: #111111;
+          margin-bottom: 8px;
+        }
+        .sd-empty-subheading {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 10.5px;
+          color: #777777;
+          letter-spacing: 0.02em;
+        }
+        .sd-empty-suggestions-section {
+          border-top: none;
+          padding-top: 32px;
+          margin-top: 16px;
         }
       `}</style>
     </>

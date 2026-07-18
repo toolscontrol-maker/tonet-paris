@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Realistic Nature';
-  src: local('Realistic Nature'), local('RealisticNature');
+  src: url('/fonts/RealisticNature.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -267,15 +267,12 @@ img {
 /* Hide scrollbar globally */
 html {
   scrollbar-width: none;
-  max-width: 100%;
-  overflow-x: hidden;
 }
 html::-webkit-scrollbar {
   display: none;
 }
 
 body {
-  max-width: 100%;
   overflow-x: hidden;
   overscroll-behavior-y: none;
   background-color: var(--background-color);
