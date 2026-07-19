@@ -2600,7 +2600,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-info {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 12px;
           width: 100%;
           text-align: left;
         }
@@ -2679,7 +2679,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           height: 1px;
           background-color: #000000;
           width: 100%;
-          margin: 8px 0 16px 0;
+          margin: 12px 0 16px 0;
         }
         .tonet-sticky-sizes-grid {
           display: grid;
@@ -2750,7 +2750,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           .tonet-sticky-buy-info {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
             width: 100%;
             text-align: left;
           }
