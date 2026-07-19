@@ -2588,7 +2588,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
           flex-direction: column;
-          gap: 16px;
+          gap: 0;
           height: auto;
         }
 
@@ -2646,6 +2646,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
           height: 50px;
+          margin-top: 16px;
         }
         .tonet-sticky-buy-btn:hover {
           background-color: #1a1a1a;
@@ -2678,7 +2679,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           height: 1px;
           background-color: #000000;
           width: 100%;
-          margin: 12px 0 16px 0;
+          margin: 16px 0;
         }
         .tonet-sticky-sizes-grid {
           display: grid;
@@ -2796,11 +2797,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             text-transform: none;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            margin-top: 20px;
+            margin-top: 16px;
           }
           .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
             height: 40px;
-            margin-top: 20px;
+            margin-top: 16px;
           }
           .tonet-sticky-buy-btn:hover {
             background-color: #333333;
