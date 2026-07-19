@@ -1424,31 +1424,33 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           </div>
           
           {/* SIZES PANEL */}
-          {stickySizesOpen && hasSizes && (
-            <div className="tonet-sticky-sizes-panel">
-              <div className="tonet-sticky-separator" />
-              <div className="tonet-sticky-sizes-grid">
-                {sizeOptions.map(size => {
-                  const isAvailable = isSizeAvailable(size);
-                  const isSelected = selectedSize === size;
-                  return (
-                    <button
-                      key={size}
-                      type="button"
-                      className={`tonet-sticky-size-box ${!isAvailable ? 'sold-out' : ''} ${isSelected ? 'selected' : ''}`}
-                      onClick={() => {
-                        if (isAvailable) {
-                          handleSizeSelectInDrawer(size);
-                          setStickySizesOpen(false);
-                        } else {
-                          openAvailModal(size);
-                        }
-                      }}
-                    >
-                      {size.toUpperCase()}
-                    </button>
-                  );
-                })}
+          {hasSizes && (
+            <div className={`tonet-sticky-sizes-wrapper ${stickySizesOpen ? 'open' : ''}`}>
+              <div className="tonet-sticky-sizes-panel">
+                <div className="tonet-sticky-separator" />
+                <div className="tonet-sticky-sizes-grid">
+                  {sizeOptions.map(size => {
+                    const isAvailable = isSizeAvailable(size);
+                    const isSelected = selectedSize === size;
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        className={`tonet-sticky-size-box ${!isAvailable ? 'sold-out' : ''} ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          if (isAvailable) {
+                            handleSizeSelectInDrawer(size);
+                            setStickySizesOpen(false);
+                          } else {
+                            openAvailModal(size);
+                          }
+                        }}
+                      >
+                        {size.toUpperCase()}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
@@ -2551,17 +2553,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
 
         /* ── STICKY BUY BAR (VALENTINO STYLE) ── */
-        @keyframes vSlideUp {
-          from {
-            transform: translateY(15px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-
         .tonet-sticky-buy-bar {
           position: fixed;
           bottom: 0;
@@ -2660,11 +2651,29 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           background-color: #1a1a1a;
         }
 
-        /* Sizes Panel */
-        .tonet-sticky-sizes-panel {
+        /* Sizes Panel Height and Slide-up Transition (Slower, directional, no flicker) */
+        .tonet-sticky-sizes-wrapper {
+          display: grid;
+          grid-template-rows: 0fr;
+          opacity: 0;
+          overflow: hidden;
           width: 100%;
-          animation: vSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transition: grid-template-rows 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
         }
+        .tonet-sticky-sizes-wrapper.open {
+          grid-template-rows: 1fr;
+          opacity: 1;
+        }
+        
+        .tonet-sticky-sizes-panel {
+          min-height: 0;
+          transform: translateY(25px);
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tonet-sticky-sizes-wrapper.open .tonet-sticky-sizes-panel {
+          transform: translateY(0);
+        }
+
         .tonet-sticky-separator {
           height: 1px;
           background-color: #000000;
