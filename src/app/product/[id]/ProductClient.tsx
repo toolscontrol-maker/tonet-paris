@@ -2560,7 +2560,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           right: 0;
           background: #ffffff;
           border-top: 1px solid #e5e5e5;
-          padding: 16px 20px;
+          padding: 12px 20px;
           z-index: 990;
           transform: translateY(100%);
           opacity: 0;
@@ -2577,7 +2577,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-sticky-buy-bar.sizes-open {
           background: #ffffff;
           border-top: 1px solid #000000;
-          padding: 16px 20px 24px 20px;
+          padding: 12px 20px 20px 20px;
           height: auto;
         }
 
@@ -2604,7 +2604,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         .tonet-sticky-buy-btn {
           width: 100%;
-          height: 48px;
+          height: 40px;
           background: #000000;
           color: #ffffff;
           border: none;
