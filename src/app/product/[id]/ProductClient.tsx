@@ -2687,12 +2687,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           width: 100%;
         }
         .tonet-sticky-size-box {
-          height: 38px;
-          background: #ffffff;
-          border: 1px solid #e5e5e5;
-          color: #000000;
+          height: 32px;
+          background: transparent;
+          border: none;
+          color: #777777;
           font-family: var(--font-primary), sans-serif;
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 400;
           display: flex;
           align-items: center;
@@ -2702,13 +2702,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           border-radius: 0;
         }
         .tonet-sticky-size-box:hover {
-          border-color: #000000;
           color: #000000;
         }
         .tonet-sticky-size-box.selected {
-          border-color: #000000;
           font-weight: 700;
-          background: #fcfcfc;
+          color: #000000;
         }
         .tonet-sticky-size-box.sold-out {
           color: #cccccc;
@@ -2782,8 +2780,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             margin-bottom: 0;
           }
           .tonet-sticky-size-box {
-            height: 36px;
-            font-size: 11px;
+            height: 32px;
+            font-size: 12px;
           }
           .tonet-sticky-buy-btn {
             width: 100%;
