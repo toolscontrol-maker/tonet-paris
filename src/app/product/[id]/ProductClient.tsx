@@ -1781,8 +1781,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         @media (min-width: 1024px) {
           .tonet-info-column {
             padding: 80px 64px 120px 64px;
-            display: flex;
-            justify-content: flex-start;
+            display: block;
           }
         }
         .tonet-info-sticky {
@@ -1802,7 +1801,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             align-items: flex-start;
             text-align: left;
             max-width: 460px;
-            margin: 0;
+            margin-left: 0;
+            margin-right: auto;
           }
         }
 
