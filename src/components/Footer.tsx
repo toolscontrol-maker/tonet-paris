@@ -44,8 +44,9 @@ export default function Footer() {
           letter-spacing: 0.05em;
         }
         .ft-logo-text {
-          font-family: 'Saint Carell', sans-serif;
-          font-weight: normal;
+          font-family: var(--font-primary), sans-serif;
+          font-weight: 500;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           margin-left: 2px;
         }

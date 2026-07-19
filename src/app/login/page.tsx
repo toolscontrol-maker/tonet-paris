@@ -271,10 +271,10 @@ export default function LoginPage() {
           justify-content: center;
         }
         .auth-logo-text {
-          font-family: 'Saint Carell', sans-serif;
+          font-family: var(--font-primary), sans-serif;
           font-size: 26px;
           color: #000000;
-          font-weight: 300;
+          font-weight: 500;
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
