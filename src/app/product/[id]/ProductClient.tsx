@@ -2558,7 +2558,9 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           bottom: 0;
           left: 0;
           right: 0;
-          background: #000000;
+          background: #ffffff;
+          border-top: 1px solid #e5e5e5;
+          padding: 16px 20px;
           z-index: 990;
           transform: translateY(100%);
           opacity: 0;
@@ -2699,6 +2701,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             width: 420px;
             height: auto;
             background: transparent;
+            border-top: none;
+            padding: 0;
             transform: translateY(40px);
             opacity: 0;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
