@@ -1430,10 +1430,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           >
             <span>
               {needsSizeSelection 
-                ? (language === 'es' ? 'Confirme un talle' : 'CONFIRM A SIZE') 
+                ? (language === 'es' ? 'Confirme un talle' : 'Confirm size') 
                 : (adding 
-                    ? (language === 'es' ? 'AÑADIENDO...' : 'ADDING...') 
-                    : (language === 'es' ? 'AÑADIR A LA BOLSA' : 'ADD TO BAG')
+                    ? (language === 'es' ? 'Añadiendo...' : 'Adding...') 
+                    : (language === 'es' ? 'Añadir a la bolsa' : 'Add to bag')
                   )
               }
             </span>
@@ -2557,7 +2557,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           font-size: 13px;
           font-weight: 500;
           letter-spacing: 0.1em;
-          text-transform: uppercase;
+          text-transform: none;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -2623,7 +2623,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           }
           .tonet-sticky-buy-btn {
             width: 100%;
-            height: 50px;
+            height: 40px;
             background: #000000;
             color: #ffffff;
             border: none;
@@ -2631,7 +2631,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.12em;
-            text-transform: uppercase;
+            text-transform: none;
             cursor: pointer;
             transition: background-color 0.2s ease;
           }
