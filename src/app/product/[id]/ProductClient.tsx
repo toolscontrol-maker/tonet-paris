@@ -2659,7 +2659,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           opacity: 0;
           overflow: hidden;
           width: 100%;
-          transition: grid-template-rows 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+          transition: grid-template-rows 0.9s cubic-bezier(0.85, 0, 0.15, 1), opacity 0.7s ease;
         }
         .tonet-sticky-sizes-wrapper.open {
           grid-template-rows: 1fr;
@@ -2669,7 +2669,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-sticky-sizes-panel {
           min-height: 0;
           transform: translateY(25px);
-          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 0.9s cubic-bezier(0.85, 0, 0.15, 1);
         }
         .tonet-sticky-sizes-wrapper.open .tonet-sticky-sizes-panel {
           transform: translateY(0);
