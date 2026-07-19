@@ -1726,7 +1726,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         /* Title */
         .tonet-product-title {
           font-family: var(--font-primary), sans-serif;
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 400;
           letter-spacing: 0.1em;
           line-height: 1.4;
@@ -1737,7 +1737,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         @media (min-width: 1024px) {
           .tonet-product-title {
-            font-size: 18px;
+            font-size: 22px;
             margin-bottom: 16px;
             text-align: center;
           }
@@ -2606,7 +2606,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-title {
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 400;
           color: #000000;
           letter-spacing: 0.08em;
@@ -2632,7 +2632,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           background: #000000;
           color: #ffffff;
           border: none;
-          border-radius: 0;
+          border-radius: 0 !important;
           font-family: var(--font-primary), sans-serif;
           font-size: 13px;
           font-weight: 500;
@@ -2647,6 +2647,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
           height: 40px;
           margin-top: 16px;
+          border-radius: 0 !important;
         }
         .tonet-sticky-buy-btn:hover {
           background-color: #1a1a1a;
@@ -2746,6 +2747,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             gap: 0;
             box-sizing: border-box;
             height: auto;
+            border-radius: 0 !important;
           }
           .tonet-sticky-buy-info {
             display: flex;
@@ -2756,7 +2758,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           }
           .tonet-sticky-buy-title {
             font-family: var(--font-primary), sans-serif;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 400;
             color: #000000;
             letter-spacing: 0.08em;
@@ -2790,7 +2792,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             background: #000000;
             color: #ffffff;
             border: none;
-            border-radius: 0;
+            border-radius: 0 !important;
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.12em;
@@ -2802,6 +2804,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
             height: 32px;
             margin-top: 16px;
+            border-radius: 0 !important;
           }
           .tonet-sticky-buy-btn:hover {
             background-color: #333333;
