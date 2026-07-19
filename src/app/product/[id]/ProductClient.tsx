@@ -2679,7 +2679,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           height: 1px;
           background-color: #000000;
           width: 100%;
-          margin: 16px 0;
+          margin: 8px 0 16px 0;
         }
         .tonet-sticky-sizes-grid {
           display: grid;
