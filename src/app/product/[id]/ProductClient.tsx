@@ -1417,7 +1417,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
       <div className={`tonet-sticky-buy-bar ${stickyBarVisible ? 'visible' : ''} ${stickySizesOpen ? 'sizes-open' : ''}`}>
         <div className="tonet-sticky-buy-card">
           <div className="tonet-sticky-buy-info">
-            <h3 className="tonet-sticky-buy-title">{product.title}</h3>
+            <h3 className="tonet-sticky-buy-title">{toTitleCase(product.title)}</h3>
             <div className="tonet-sticky-buy-price-row">
               <span className="tonet-sticky-buy-price">{priceFormatted}</span>
             </div>
@@ -2628,7 +2628,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         .tonet-sticky-buy-btn {
           width: 100%;
-          height: 60px;
+          height: 48px;
           background: #000000;
           color: #ffffff;
           border: none;
@@ -2645,7 +2645,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           transition: background-color 0.2s ease, height 0.3s ease;
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
-          height: 50px;
+          height: 40px;
           margin-top: 16px;
         }
         .tonet-sticky-buy-btn:hover {
@@ -2786,7 +2786,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           }
           .tonet-sticky-buy-btn {
             width: 100%;
-            height: 40px;
+            height: 32px;
             background: #000000;
             color: #ffffff;
             border: none;
@@ -2800,7 +2800,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             margin-top: 16px;
           }
           .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
-            height: 40px;
+            height: 32px;
             margin-top: 16px;
           }
           .tonet-sticky-buy-btn:hover {
