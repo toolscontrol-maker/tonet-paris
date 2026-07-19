@@ -424,6 +424,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
   // images calculated below based on color index
   const [adding, setAdding] = useState(false);
+  const [expressLoading, setExpressLoading] = useState(false);
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
   const [availModal, setAvailModal] = useState(false);
   const [availSizes, setAvailSizes] = useState<string[]>([]);
@@ -589,7 +590,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   });
 
   const { openCart } = useUI();
-  const { addToCart } = useCart();
+  const { cart, addToCart } = useCart();
 
   const colorOptionName = useMemo(() => {
     for (const v of product.variants)
@@ -744,6 +745,41 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
       } finally {
         setAdding(false);
       }
+    }
+  }
+
+  function handleSizeSelect(sizeValue: string) {
+    setSelectedSize(sizeValue);
+    if (sizeOptionName) {
+      const updated = { ...selectedOptionsState, [sizeOptionName]: sizeValue };
+      setSelectedOptionsState(updated);
+      const next = findVariantByOptions(updated);
+      if (next) {
+        setSelectedVariant(next);
+      }
+    }
+  }
+
+  async function handleExpressCheckout() {
+    if (!selectedVariant.id || expressLoading) return;
+    if (needsSizeSelection) {
+      return;
+    }
+    setExpressLoading(true);
+    try {
+      await addToCart(selectedVariant.id, 1);
+      setTimeout(() => {
+        if (cart.checkoutUrl) {
+          window.location.href = cart.checkoutUrl;
+        } else {
+          openCart();
+        }
+      }, 500);
+    } catch (e) {
+      console.error("Express checkout error:", e);
+      openCart();
+    } finally {
+      setExpressLoading(false);
     }
   }
 
@@ -910,68 +946,113 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             </div>
           </div>
 
-          {/* INFO COLUMN (Right side buy box ~25% on desktop, sticky) */}
+          {/* INFO COLUMN (Right side buy box ~50% on desktop, sticky) */}
           <div className="tonet-info-column">
             <div className="tonet-info-sticky">
               
-              {/* Product Title (uppercase, clean sans-serif) */}
+              {/* Product Title */}
               <h1 className="tonet-product-title">{toTitleCase(product.title)}</h1>
               
-              {/* Price and Color Swatch row */}
-              <div className="tonet-product-meta-row">
+              {/* Price */}
+              <div className="tonet-pdp-price-row">
                 <span className="tonet-product-price">{priceFormatted}</span>
-                
-                {/* Color swatch indicator and name */}
-                <div className="tonet-color-selector">
-                  <span className="tonet-color-swatch" style={{ background: colorNameToCSS(selectedColor) }} />
-                  <span className="tonet-color-name">{selectedColor.toUpperCase()}</span>
-                  
-                  {colorOptions.length > 1 && (
-                    <div className="tonet-color-options-inline">
-                      {colorOptions.map((co) => {
-                        const isSelected = selectedColor === co.value;
-                        return (
-                          <button
-                            key={co.value}
-                            type="button"
-                            className={`tonet-color-dot-opt ${isSelected ? 'active' : ''}`}
-                            onClick={() => handleColorChange(co.value)}
-                            aria-label={`Select color ${co.value}`}
-                            style={{ background: colorNameToCSS(co.value) }}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
+              </div>
+              
+              {/* Wishlist Button */}
+              <button 
+                type="button" 
+                className="tonet-pdp-wishlist-btn"
+                onClick={() => toggle(wishlistItem)}
+              >
+                <span>{inWishlist ? '★ Eliminar de la Wishlist' : '☆ Agregar a la Wishlist'}</span>
+              </button>
+
+              {/* Color Row */}
+              <div className="tonet-pdp-color-row">
+                <span className="tonet-pdp-color-label">{toTitleCase(selectedColor)}</span>
+                <div className="tonet-pdp-color-swatches">
+                  {colorOptions.map((co) => {
+                    const isSelected = selectedColor === co.value;
+                    return (
+                      <button
+                        key={co.value}
+                        type="button"
+                        className={`tonet-pdp-color-dot ${isSelected ? 'active' : ''}`}
+                        onClick={() => handleColorChange(co.value)}
+                        style={{ background: colorNameToCSS(co.value) }}
+                        aria-label={`Select color ${co.value}`}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* SELECT SIZE / ADD TO BAG Button */}
-              <div className="tonet-size-selector-wrap" ref={mainButtonWrapRef}>
-                {hasSizes ? (
-                  <button 
-                    type="button"
-                    className="tonet-select-size-btn"
-                    onClick={() => setSizeDropdownOpen(true)}
-                  >
-                    <span>{selectedSize ? `SIZE: ${selectedSize.toUpperCase()}` : 'SELECT SIZE'} ▾</span>
+              {/* Sizes Row */}
+              {hasSizes && (
+                <div className="tonet-pdp-sizes-container">
+                  <div className="tonet-pdp-sizes-row">
+                    <span className="tonet-pdp-sizes-label">Talle:</span>
+                    <div className="tonet-pdp-sizes-list">
+                      {sizeOptions.map((size) => {
+                        const isAvailable = isSizeAvailable(size);
+                        const isSelected = selectedSize === size;
+                        return (
+                          <button
+                            key={size}
+                            type="button"
+                            className={`tonet-pdp-size-btn ${isSelected ? 'selected' : ''} ${!isAvailable ? 'sold-out' : ''}`}
+                            onClick={() => {
+                              if (isAvailable) {
+                                handleSizeSelect(size);
+                              } else {
+                                openAvailModal(size);
+                              }
+                            }}
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <button type="button" className="tonet-pdp-size-guide-btn" onClick={() => setSizeGuideOpen(true)}>
+                    Guía de talles
                   </button>
-                ) : (
-                  <button 
-                    type="button"
-                    className="tonet-select-size-btn"
-                    onClick={handleAddToBag}
-                    disabled={adding}
-                  >
-                    <span>{adding ? 'ADDING...' : 'ADD TO BAG'}</span>
-                  </button>
-                )}
+                </div>
+              )}
+
+              {/* Main Action Button */}
+              <button 
+                type="button" 
+                className="tonet-pdp-main-btn"
+                onClick={selectedSize ? handleAddToBag : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
+                disabled={adding && selectedSize !== null}
+              >
+                <span>
+                  {selectedSize 
+                    ? (adding ? 'Añadiendo...' : 'Comprar') 
+                    : 'Confirme un talle'
+                  }
+                </span>
+              </button>
+
+              {/* Express Checkout */}
+              <div className="tonet-pdp-express-box">
+                <span className="tonet-pdp-express-label">Pago exprés</span>
+                <button 
+                  type="button" 
+                  className="tonet-pdp-express-btn" 
+                  onClick={selectedSize ? handleExpressCheckout : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
+                  disabled={expressLoading}
+                >
+                  <span>{expressLoading ? 'Cargando PayPal...' : 'Pagar con PayPal'}</span>
+                </button>
               </div>
 
-              {/* Short Description (uppercase, compact) */}
-              <div className="tonet-product-description">
-                <p>{(product.description || "").split('Item Number:')[0]?.trim().toUpperCase()}</p>
-              </div>
+              {/* Klarna Info Text */}
+              <p className="tonet-pdp-klarna-text">
+                Compra ahora, paga después con Klarna. <span className="underline cursor-pointer" onClick={() => alert('Klarna estará disponible en la pasarela de pago.')}>Más información</span>
+              </p>
 
               {/* Accordions */}
               <div className="tonet-accordions">
@@ -1690,36 +1771,38 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           mix-blend-mode: multiply;
         }
 
-        /* ── INFO COLUMN (Right side buy box ~27%) ── */
+        /* ── INFO COLUMN (Right side buy box ~50% width on desktop) ── */
         .tonet-info-column {
           display: block;
-          padding: 12px 20px 80px;
+          padding: 32px 20px 80px;
           box-sizing: border-box;
           width: 100%;
         }
         @media (min-width: 1024px) {
           .tonet-info-column {
-            padding: 100px 64px 120px 64px;
+            padding: 80px 64px 120px 64px;
+            display: flex;
+            justify-content: flex-start;
           }
         }
         .tonet-info-sticky {
           position: relative;
           display: flex;
           flex-direction: column;
-          align-items: center;
-          text-align: center;
+          align-items: flex-start;
+          text-align: left;
           width: 100%;
+          gap: 20px;
         }
         @media (min-width: 1024px) {
           .tonet-info-sticky {
             position: sticky;
             top: 50vh;
             transform: translateY(-50%);
-            align-items: center;
-            text-align: center;
+            align-items: flex-start;
+            text-align: left;
             max-width: 460px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0;
           }
         }
 
@@ -1728,148 +1811,226 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           font-family: var(--font-primary), sans-serif;
           font-size: 18px;
           font-weight: 400;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.05em;
           line-height: 1.4;
-          margin: 0 0 12px;
+          margin: 0;
           text-transform: none;
           color: #000000;
-          text-align: center;
+          text-align: left;
         }
         @media (min-width: 1024px) {
           .tonet-product-title {
             font-size: 22px;
-            margin-bottom: 16px;
-            text-align: center;
+            text-align: left;
           }
         }
 
-        /* Meta Row (price + color inline) */
-        .tonet-product-meta-row {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          margin-bottom: 24px;
+        /* Price */
+        .tonet-pdp-price-row {
           width: 100%;
-          font-size: 11px;
-          letter-spacing: 0.08em;
-          color: #000000;
-        }
-        @media (min-width: 1024px) {
-          .tonet-product-meta-row {
-            justify-content: center;
-            margin-bottom: 32px;
-          }
+          display: flex;
+          justify-content: flex-start;
         }
         .tonet-product-price {
-          font-weight: 300;
-          text-transform: uppercase;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+          color: #000000;
         }
-        
-        .tonet-color-selector {
+
+        /* Wishlist Button */
+        .tonet-pdp-wishlist-btn {
+          background: transparent;
+          border: none;
+          padding: 0;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 12px;
+          font-weight: 400;
+          color: #000000;
+          cursor: pointer;
           display: flex;
           align-items: center;
           gap: 6px;
+          text-decoration: none;
         }
-        .tonet-color-swatch {
-          width: 8px;
-          height: 8px;
-          display: block;
-          border: 1px solid rgba(0, 0, 0, 0.15);
+        .tonet-pdp-wishlist-btn:hover {
+          text-decoration: underline;
         }
-        .tonet-color-name {
-          font-weight: 400;
-        }
-        .tonet-color-options-inline {
+
+        /* Color Row */
+        .tonet-pdp-color-row {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-left: 8px;
+          gap: 20px;
+          width: 100%;
         }
-        .tonet-color-dot-opt {
-          width: 10px;
-          height: 10px;
+        .tonet-pdp-color-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          color: #000000;
+        }
+        .tonet-pdp-color-swatches {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .tonet-pdp-color-dot {
+          width: 16px;
+          height: 16px;
           border-radius: 50%;
-          border: 1px solid transparent;
+          border: 1px solid rgba(0, 0, 0, 0.15);
           cursor: pointer;
           padding: 0;
           box-sizing: border-box;
-          transition: border-color 0.2s;
+          position: relative;
         }
-        .tonet-color-dot-opt.active {
-          border-color: #000000;
+        .tonet-pdp-color-dot.active::after {
+          content: '';
+          position: absolute;
+          top: -3px;
+          left: -3px;
+          right: -3px;
+          bottom: -3px;
+          border: 1px solid #000000;
+          border-radius: 50%;
         }
 
-        /* SELECT SIZE CTA Button */
-        .tonet-size-selector-wrap {
-          margin-bottom: 32px;
-          width: 100%;
+        /* Sizes container */
+        .tonet-pdp-sizes-container {
           display: flex;
-          justify-content: center;
+          flex-direction: column;
+          gap: 8px;
+          width: 100%;
         }
-        @media (min-width: 1024px) {
-          .tonet-size-selector-wrap {
-            margin-bottom: 40px;
-            justify-content: center;
-          }
+        .tonet-pdp-sizes-row {
+          display: flex;
+          align-items: center;
+          gap: 20px;
         }
-        .tonet-select-size-btn {
-          background-color: #555555;
+        .tonet-pdp-sizes-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          color: #000000;
+        }
+        .tonet-pdp-sizes-list {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .tonet-pdp-size-btn {
+          background: transparent;
+          border: none;
+          padding: 0 0 2px 0;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          color: #000000;
+          cursor: pointer;
+          border-bottom: 1px solid transparent;
+          line-height: 1;
+        }
+        .tonet-pdp-size-btn.selected {
+          border-bottom: 1px solid #000000;
+        }
+        .tonet-pdp-size-btn.sold-out {
+          color: #cccccc;
+          text-decoration: line-through;
+        }
+        .tonet-pdp-size-guide-btn {
+          background: transparent;
+          border: none;
+          padding: 0;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          color: #666666;
+          text-decoration: underline;
+          cursor: pointer;
+          width: fit-content;
+          text-align: left;
+        }
+
+        /* PDP Buy Button */
+        .tonet-pdp-main-btn {
+          width: 100%;
+          height: 40px;
+          background: #000000;
           color: #ffffff;
           border: none;
-          padding: 14px 24px;
-          font-size: 11px;
+          border-radius: 0 !important;
           font-family: var(--font-primary), sans-serif;
-          font-weight: 400;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          text-transform: none;
           cursor: pointer;
           display: flex;
-          justify-content: center;
           align-items: center;
-          width: 80%;
-          min-width: 240px;
-          border-radius: 0;
-          transition: opacity 0.3s;
+          justify-content: center;
+          transition: background-color 0.2s ease;
         }
-        @media (min-width: 1024px) {
-          .tonet-select-size-btn {
-            width: 100%;
-            max-width: 100%;
-            min-width: auto;
-          }
-        }
-        .tonet-select-size-btn:hover {
-          opacity: 0.85;
+        .tonet-pdp-main-btn:hover {
+          background-color: #1a1a1a;
         }
 
-        /* Description block */
-        .tonet-product-description {
-          font-size: 10px;
-          font-weight: 300;
-          line-height: 1.6;
-          letter-spacing: 0.08em;
-          color: #000000;
-          margin-bottom: 32px;
+        /* Express Checkout */
+        .tonet-pdp-express-box {
+          position: relative;
+          width: 100%;
+          border: 1px solid #e5e5e5;
+          border-radius: 0 !important;
+          padding: 24px 20px 20px;
+          box-sizing: border-box;
+          margin-top: 8px;
+        }
+        .tonet-pdp-express-label {
+          position: absolute;
+          top: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #ffffff;
+          padding: 0 10px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.05em;
+          color: #666666;
           text-transform: uppercase;
-          text-align: center;
-          width: 80%;
         }
-        @media (min-width: 1024px) {
-          .tonet-product-description {
-            font-size: 10.5px;
-            margin-bottom: 40px;
-            text-align: center;
-            width: 100%;
-          }
+        .tonet-pdp-express-btn {
+          width: 100%;
+          height: 40px;
+          background: #ffffff;
+          border: 1px solid #000000;
+          border-radius: 0 !important;
+          color: #000000;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease;
         }
-        .tonet-product-description p {
+        .tonet-pdp-express-btn:hover {
+          background-color: #f9f9f9;
+        }
+
+        /* Klarna */
+        .tonet-pdp-klarna-text {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          color: #666666;
           margin: 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          line-height: 1.4;
+          width: 100%;
+          text-align: left;
+        }
+        .tonet-pdp-klarna-text span {
+          text-decoration: underline;
+          cursor: pointer;
         }
 
         /* Minimal Accordions */
