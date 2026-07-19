@@ -267,6 +267,7 @@ const arrangeRecommendations = (pool: RecommendedProduct[]): RecommendedProduct[
 
 export default function ProductClient({ product, relatedProductsByTag }: Props) {
   const router = useRouter();
+  const { language } = useLocale();
   const [recommended, setRecommended] = useState<RecommendedProduct[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentProduct[]>([]);
   const [completeOutfit, setCompleteOutfit] = useState<RecommendedProduct[]>([]);
@@ -1413,60 +1414,29 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
       {/* Floating Sticky Buy Bar */}
       <div className={`tonet-sticky-buy-bar ${stickyBarVisible ? 'visible' : ''}`}>
-        {/* Inline size dropdown that unfolds above the bar */}
-        {stickyDropdownOpen && hasSizes && (
-          <>
-            <div className="sticky-size-backdrop" onClick={() => setStickyDropdownOpen(false)} />
-            <div className="sticky-size-dropdown">
-              {sizeOptions.map(size => {
-                const isAvailable = isSizeAvailable(size);
-                const isSelected = selectedSize === size;
-                return (
-                  <button
-                    key={size}
-                    type="button"
-                    className={`sticky-size-option ${isSelected ? 'selected' : ''} ${!isAvailable ? 'sold-out' : ''}`}
-                    onClick={() => {
-                      if (isAvailable) {
-                        handleSizeSelectInDrawer(size);
-                        setStickyDropdownOpen(false);
-                      } else {
-                        setStickyDropdownOpen(false);
-                        openAvailModal(size);
-                      }
-                    }}
-                  >
-                    {size.toUpperCase()}
-                  </button>
-                );
-              })}
+        <div className="tonet-sticky-buy-card">
+          <div className="tonet-sticky-buy-info">
+            <h3 className="tonet-sticky-buy-title">{product.title}</h3>
+            <div className="tonet-sticky-buy-price-row">
+              <span className="tonet-sticky-buy-price">{priceFormatted}</span>
             </div>
-          </>
-        )}
-
-        <div className="tonet-sticky-buy-bar-inner">
-          <div className="tonet-sticky-buy-left">
-            {product.imageUrl && (
-              <div className="tonet-sticky-buy-thumb">
-                <img src={getOptimizedImageUrl(product.imageUrl, 200)} alt={product.title} />
-              </div>
-            )}
-            <span className="tonet-sticky-buy-price">{priceFormatted}</span>
           </div>
           
           <button 
             type="button" 
             className="tonet-sticky-buy-btn"
-            onClick={hasSizes ? () => setStickyDropdownOpen(prev => !prev) : handleAddToBag}
+            onClick={needsSizeSelection ? () => setSizeDropdownOpen(true) : handleAddToBag}
             disabled={adding}
           >
             <span>
-              {hasSizes 
-                ? (selectedSize ? `SIZE: ${selectedSize.toUpperCase()}` : 'SELECT SIZE') 
-                : (adding ? 'ADDING...' : 'ADD TO BAG')
+              {needsSizeSelection 
+                ? (language === 'es' ? 'Confirme un talle' : 'CONFIRM A SIZE') 
+                : (adding 
+                    ? (language === 'es' ? 'AÑADIENDO...' : 'ADDING...') 
+                    : (language === 'es' ? 'AÑADIR A LA BOLSA' : 'ADD TO BAG')
+                  )
               }
             </span>
-            {hasSizes && <span className={`tonet-sticky-arrow ${stickyDropdownOpen ? 'flipped' : ''}`}> ▾</span>}
           </button>
         </div>
       </div>
@@ -2549,19 +2519,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           transform: scale(0.95);
         }
 
-        /* ── STICKY BUY BAR ── */
+        /* ── STICKY BUY BAR (VALENTINO STYLE) ── */
         .tonet-sticky-buy-bar {
           position: fixed;
-          top: 54px;
+          bottom: 0;
           left: 0;
           right: 0;
-          height: 54px;
           background: #000000;
-          color: #ffffff;
-          z-index: 490;
-          transform: translateY(-100%);
+          z-index: 990;
+          transform: translateY(100%);
           opacity: 0;
-          transition: transform 0.3s ease, opacity 0.3s ease;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
           pointer-events: none;
         }
         .tonet-sticky-buy-bar.visible {
@@ -2569,135 +2537,106 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           opacity: 1;
           pointer-events: auto;
         }
-        .tonet-sticky-buy-bar-inner {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 100%;
-          padding: 0 16px;
-          box-sizing: border-box;
+        .tonet-sticky-buy-card {
           width: 100%;
-        }
-        .tonet-sticky-buy-left {
+          height: 100%;
           display: flex;
           align-items: center;
-          gap: 12px;
         }
-        .tonet-sticky-buy-thumb {
-          width: 32px;
-          height: 32px;
-          background: #ffffff;
+        .tonet-sticky-buy-info {
+          display: none; /* Hidden on mobile */
+        }
+        .tonet-sticky-buy-btn {
+          width: 100%;
+          height: 60px;
+          background: #000000;
+          color: #ffffff;
+          border: none;
+          border-radius: 0;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
-        }
-        .tonet-sticky-buy-thumb img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        .tonet-sticky-buy-price {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
-          font-weight: 400;
-          letter-spacing: 0.05em;
-        }
-        .tonet-sticky-buy-btn {
-          background: transparent;
-          border: none;
-          color: #ffffff;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
-          font-weight: 400;
-          letter-spacing: 0.1em;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          padding: 0;
-          text-transform: uppercase;
-          outline: none;
+          transition: background-color 0.2s ease;
         }
         .tonet-sticky-buy-btn:hover {
-          opacity: 0.8;
-        }
-        .tonet-sticky-arrow {
-          font-size: 10px;
-          margin-left: 2px;
-          transition: transform 0.2s ease;
-          display: inline-block;
-        }
-        .tonet-sticky-arrow.flipped {
-          transform: rotate(180deg);
-        }
-
-        /* ── STICKY BAR INLINE SIZE DROPDOWN ── */
-        .sticky-size-backdrop {
-          position: fixed;
-          inset: 0;
-          z-index: 488;
-        }
-        .sticky-size-dropdown {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          background: #000000;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-top: none;
-          display: flex;
-          flex-direction: column;
-          min-width: 160px;
-          z-index: 489;
-          max-height: 280px;
-          overflow-y: auto;
-        }
-        .sticky-size-option {
-          background: transparent;
-          border: none;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          color: #ffffff;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
-          font-weight: 400;
-          letter-spacing: 0.12em;
-          padding: 12px 20px;
-          text-align: left;
-          cursor: pointer;
-          transition: background 0.15s ease;
-          text-transform: uppercase;
-        }
-        .sticky-size-option:last-child {
-          border-bottom: none;
-        }
-        .sticky-size-option:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-        .sticky-size-option.selected {
-          background: rgba(255, 255, 255, 0.15);
-          font-weight: 600;
-        }
-        .sticky-size-option.sold-out {
-          color: rgba(255, 255, 255, 0.3);
-          text-decoration: line-through;
-          cursor: pointer;
+          background-color: #1a1a1a;
         }
 
         @media (min-width: 1024px) {
           .tonet-sticky-buy-bar {
-            top: 64px;
+            bottom: 40px;
+            right: 40px;
             left: auto;
-            right: 64px;
-            width: 400px;
-            height: 54px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            transform: translateY(-20px);
+            top: auto;
+            width: 420px;
+            background: transparent;
+            transform: translateY(40px);
+            opacity: 0;
           }
           .tonet-sticky-buy-bar.visible {
             transform: translateY(0);
             opacity: 1;
           }
-          .tonet-sticky-buy-bar-inner {
-            padding: 0 24px;
+          .tonet-sticky-buy-card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            padding: 24px;
+            box-shadow: 0 10px 45px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+          }
+          .tonet-sticky-buy-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            text-align: left;
+          }
+          .tonet-sticky-buy-title {
+            font-family: var(--font-primary), sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: #000000;
+            letter-spacing: 0.08em;
+            margin: 0;
+            line-height: 1.4;
+            text-transform: uppercase;
+          }
+          .tonet-sticky-buy-price-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+          }
+          .tonet-sticky-buy-price {
+            font-family: var(--font-primary), sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #000000;
+          }
+          .tonet-sticky-buy-btn {
+            width: 100%;
+            height: 50px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 0;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+          }
+          .tonet-sticky-buy-btn:hover {
+            background-color: #333333;
           }
         }
       `}</style>
