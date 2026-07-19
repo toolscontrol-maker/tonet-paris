@@ -439,6 +439,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const mobileCarouselRef = useRef<HTMLDivElement>(null);
 
   const [stickyBarVisible, setStickyBarVisible] = useState(false);
+  const [stickySizesOpen, setStickySizesOpen] = useState(false);
   const mainButtonWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1413,8 +1414,38 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
       )}
 
       {/* Floating Sticky Buy Bar */}
-      <div className={`tonet-sticky-buy-bar ${stickyBarVisible ? 'visible' : ''}`}>
+      <div className={`tonet-sticky-buy-bar ${stickyBarVisible ? 'visible' : ''} ${stickySizesOpen ? 'sizes-open' : ''}`}>
         <div className="tonet-sticky-buy-card">
+          
+          {/* SIZES PANEL */}
+          {stickySizesOpen && hasSizes && (
+            <div className="tonet-sticky-sizes-panel">
+              <div className="tonet-sticky-sizes-grid">
+                {sizeOptions.map(size => {
+                  const isAvailable = isSizeAvailable(size);
+                  const isSelected = selectedSize === size;
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      className={`tonet-sticky-size-box ${!isAvailable ? 'sold-out' : ''} ${isSelected ? 'selected' : ''}`}
+                      onClick={() => {
+                        if (isAvailable) {
+                          handleSizeSelectInDrawer(size);
+                          setStickySizesOpen(false);
+                        } else {
+                          openAvailModal(size);
+                        }
+                      }}
+                    >
+                      {size.toUpperCase()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="tonet-sticky-buy-info">
             <h3 className="tonet-sticky-buy-title">{product.title}</h3>
             <div className="tonet-sticky-buy-price-row">
@@ -1425,7 +1456,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           <button 
             type="button" 
             className="tonet-sticky-buy-btn"
-            onClick={needsSizeSelection ? () => setSizeDropdownOpen(true) : handleAddToBag}
+            onClick={needsSizeSelection ? () => setStickySizesOpen(prev => !prev) : handleAddToBag}
             disabled={adding}
           >
             <span>
@@ -2520,6 +2551,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
 
         /* ── STICKY BUY BAR (VALENTINO STYLE) ── */
+        @keyframes vSlideUp {
+          from {
+            transform: translateY(15px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
         .tonet-sticky-buy-bar {
           position: fixed;
           bottom: 0;
@@ -2529,7 +2571,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           z-index: 990;
           transform: translateY(100%);
           opacity: 0;
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, background-color 0.3s ease, padding 0.3s ease;
           pointer-events: none;
         }
         .tonet-sticky-buy-bar.visible {
@@ -2537,15 +2579,32 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           opacity: 1;
           pointer-events: auto;
         }
+        
+        /* Mobile: sizes open state */
+        .tonet-sticky-buy-bar.sizes-open {
+          background: #ffffff;
+          border-top: 1px solid #e5e5e5;
+          padding: 24px 20px;
+          height: auto;
+        }
+
         .tonet-sticky-buy-card {
           width: 100%;
           height: 100%;
           display: flex;
           align-items: center;
+          transition: all 0.3s ease;
         }
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
+          flex-direction: column;
+          gap: 20px;
+          height: auto;
+        }
+
         .tonet-sticky-buy-info {
           display: none; /* Hidden on mobile */
         }
+        
         .tonet-sticky-buy-btn {
           width: 100%;
           height: 60px;
@@ -2562,10 +2621,53 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: background-color 0.2s ease;
+          transition: background-color 0.2s ease, height 0.3s ease;
+        }
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
+          height: 50px;
         }
         .tonet-sticky-buy-btn:hover {
           background-color: #1a1a1a;
+        }
+
+        /* Sizes Panel */
+        .tonet-sticky-sizes-panel {
+          width: 100%;
+          animation: vSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .tonet-sticky-sizes-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 8px;
+          width: 100%;
+        }
+        .tonet-sticky-size-box {
+          height: 38px;
+          background: #ffffff;
+          border: 1px solid #e5e5e5;
+          color: #000000;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 12px;
+          font-weight: 400;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          border-radius: 0;
+        }
+        .tonet-sticky-size-box:hover {
+          border-color: #000000;
+          color: #000000;
+        }
+        .tonet-sticky-size-box.selected {
+          border-color: #000000;
+          font-weight: 700;
+          background: #fcfcfc;
+        }
+        .tonet-sticky-size-box.sold-out {
+          color: #cccccc;
+          text-decoration: line-through;
         }
 
         @media (min-width: 1024px) {
@@ -2575,9 +2677,16 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             left: auto;
             top: auto;
             width: 420px;
+            height: auto;
             background: transparent;
             transform: translateY(40px);
             opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+          }
+          .tonet-sticky-buy-bar.sizes-open {
+            background: transparent;
+            padding: 0;
+            border-top: none;
           }
           .tonet-sticky-buy-bar.visible {
             transform: translateY(0);
@@ -2592,6 +2701,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             flex-direction: column;
             gap: 20px;
             box-sizing: border-box;
+            height: auto;
+          }
+          .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
+            gap: 24px;
           }
           .tonet-sticky-buy-info {
             display: flex;
@@ -2621,6 +2734,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             font-weight: 600;
             color: #000000;
           }
+          .tonet-sticky-sizes-grid {
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+          }
+          .tonet-sticky-size-box {
+            height: 36px;
+            font-size: 11px;
+          }
           .tonet-sticky-buy-btn {
             width: 100%;
             height: 40px;
@@ -2634,6 +2755,9 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             text-transform: none;
             cursor: pointer;
             transition: background-color 0.2s ease;
+          }
+          .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
+            height: 40px;
           }
           .tonet-sticky-buy-btn:hover {
             background-color: #333333;
