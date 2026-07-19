@@ -1416,10 +1416,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
       {/* Floating Sticky Buy Bar */}
       <div className={`tonet-sticky-buy-bar ${stickyBarVisible ? 'visible' : ''} ${stickySizesOpen ? 'sizes-open' : ''}`}>
         <div className="tonet-sticky-buy-card">
+          <div className="tonet-sticky-buy-info">
+            <h3 className="tonet-sticky-buy-title">{product.title}</h3>
+            <div className="tonet-sticky-buy-price-row">
+              <span className="tonet-sticky-buy-price">{priceFormatted}</span>
+            </div>
+          </div>
           
           {/* SIZES PANEL */}
           {stickySizesOpen && hasSizes && (
             <div className="tonet-sticky-sizes-panel">
+              <div className="tonet-sticky-separator" />
               <div className="tonet-sticky-sizes-grid">
                 {sizeOptions.map(size => {
                   const isAvailable = isSizeAvailable(size);
@@ -1445,13 +1452,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               </div>
             </div>
           )}
-
-          <div className="tonet-sticky-buy-info">
-            <h3 className="tonet-sticky-buy-title">{product.title}</h3>
-            <div className="tonet-sticky-buy-price-row">
-              <span className="tonet-sticky-buy-price">{priceFormatted}</span>
-            </div>
-          </div>
           
           <button 
             type="button" 
@@ -2597,14 +2597,44 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
           flex-direction: column;
-          gap: 20px;
+          gap: 16px;
           height: auto;
         }
 
         .tonet-sticky-buy-info {
-          display: none; /* Hidden on mobile */
+          display: none; /* Hidden on mobile by default */
         }
         
+        /* Show info on mobile when sizes open */
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-info {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          width: 100%;
+          text-align: left;
+        }
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          color: #000000;
+          letter-spacing: 0.08em;
+          margin: 0;
+          line-height: 1.4;
+          text-transform: uppercase;
+        }
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-price-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-price {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          color: #000000;
+        }
+
         .tonet-sticky-buy-btn {
           width: 100%;
           height: 60px;
@@ -2634,6 +2664,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-sticky-sizes-panel {
           width: 100%;
           animation: vSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .tonet-sticky-separator {
+          height: 1px;
+          background-color: #000000;
+          width: 100%;
+          margin: 12px 0 16px 0;
         }
         .tonet-sticky-sizes-grid {
           display: grid;
@@ -2704,7 +2740,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             height: auto;
           }
           .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
-            gap: 24px;
+            gap: 0;
           }
           .tonet-sticky-buy-info {
             display: flex;
@@ -2737,6 +2773,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           .tonet-sticky-sizes-grid {
             grid-template-columns: repeat(7, 1fr);
             gap: 10px;
+            margin-bottom: 20px;
           }
           .tonet-sticky-size-box {
             height: 36px;
