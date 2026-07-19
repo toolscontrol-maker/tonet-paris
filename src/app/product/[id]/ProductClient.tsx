@@ -2570,7 +2570,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         @media (min-width: 1024px) {
           .tonet-sticky-buy-bar {
-            bottom: 40px;
+            bottom: 24px;
             right: 24px;
             left: auto;
             top: auto;
