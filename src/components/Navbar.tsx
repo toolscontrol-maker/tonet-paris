@@ -185,8 +185,8 @@ export default function Navbar() {
             {/* Desktop Logo on the left */}
             {!isMenuOpen && (
               <Link href="/" className="acne-logo acne-desktop-only" aria-label="TONET TORRENTINNI">
-                <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
-                <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
+                <img src="/logo-brand.jpg" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
+                <img src="/logo-brand.jpg" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
               </Link>
             )}
 
@@ -243,8 +243,8 @@ export default function Navbar() {
             </div>
           ) : (
             <Link href="/" className="acne-logo acne-mobile-only" aria-label="TONET TORRENTINNI">
-              <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
-              <img src="/logo-brand.png" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
+              <img src="/logo-brand.jpg" alt="TONET TORRENTINNI" className="acne-logo-img logo-black" />
+              <img src="/logo-brand.jpg" alt="TONET TORRENTINNI" className="acne-logo-img logo-white" />
             </Link>
           )}
 
