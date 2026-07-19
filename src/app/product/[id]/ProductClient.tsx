@@ -2574,8 +2574,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         /* Mobile: sizes open state */
         .tonet-sticky-buy-bar.sizes-open {
           background: #ffffff;
-          border-top: 1px solid #e5e5e5;
-          padding: 24px 20px;
+          border-top: none;
+          padding: 0 20px 24px 20px;
           height: auto;
         }
 
@@ -2594,35 +2594,9 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-sticky-buy-info {
           display: none; /* Hidden on mobile by default */
         }
-        
-        /* Show info on mobile when sizes open */
-        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-info {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          width: 100%;
-          text-align: left;
-        }
-        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-title {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 15px;
-          font-weight: 400;
-          color: #000000;
-          letter-spacing: 0.08em;
-          margin: 0;
-          line-height: 1.4;
-          text-transform: none;
-        }
-        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-price-row {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-price {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          color: #000000;
+
+        .tonet-sticky-buy-bar.sizes-open .tonet-sticky-separator {
+          margin-top: 0;
         }
 
         .tonet-sticky-buy-btn {
