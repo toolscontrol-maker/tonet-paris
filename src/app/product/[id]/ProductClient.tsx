@@ -2612,7 +2612,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           letter-spacing: 0.08em;
           margin: 0;
           line-height: 1.4;
-          text-transform: uppercase;
+          text-transform: none;
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-price-row {
           display: flex;
@@ -2762,7 +2762,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             letter-spacing: 0.08em;
             margin: 0;
             line-height: 1.4;
-            text-transform: uppercase;
+            text-transform: none;
           }
           .tonet-sticky-buy-price-row {
             display: flex;
