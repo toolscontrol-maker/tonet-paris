@@ -2585,6 +2585,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           width: 100%;
           height: 100%;
           display: flex;
+          flex-direction: column;
           align-items: center;
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
