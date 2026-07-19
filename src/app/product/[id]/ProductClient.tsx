@@ -2584,7 +2584,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           height: 100%;
           display: flex;
           align-items: center;
-          transition: all 0.3s ease;
         }
         .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-card {
           flex-direction: column;
@@ -2661,6 +2660,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           overflow: hidden;
           width: 100%;
           transition: grid-template-rows 0.9s cubic-bezier(0.85, 0, 0.15, 1), opacity 0.7s ease;
+          will-change: grid-template-rows, opacity;
         }
         .tonet-sticky-sizes-wrapper.open {
           grid-template-rows: 1fr;
@@ -2671,6 +2671,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           min-height: 0;
           transform: translateY(25px);
           transition: transform 0.9s cubic-bezier(0.85, 0, 0.15, 1);
+          will-change: transform;
         }
         .tonet-sticky-sizes-wrapper.open .tonet-sticky-sizes-panel {
           transform: translateY(0);
