@@ -123,15 +123,17 @@ export function LocaleProvider({ children }: ProviderProps) {
   const formatPrice = useCallback((amount: number, currencyCode: string): string => {
     const code = currencyCode || 'EUR';
     try {
-      const formatted = new Intl.NumberFormat('en-US', {
+      let formatted = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: code,
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(amount);
+      formatted = formatted.replace('€', '€ ').replace('$', '$ ');
       return `${formatted} ${code}`;
     } catch {
-      return `${amount.toFixed(2)} ${code}`;
+      const symbol = code === 'USD' ? '$ ' : '€ ';
+      return `${symbol}${amount.toFixed(2)} ${code}`;
     }
   }, []);
 

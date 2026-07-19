@@ -702,8 +702,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const currencyCode = selectedVariant.price.currencyCode || 'EUR';
   const currencySymbol = currencyCode === 'USD' ? '$' : '€';
   const priceFormatted = Number.isInteger(priceNum)
-    ? `${currencySymbol}${priceNum} ${currencyCode}`
-    : `${currencySymbol}${priceNum.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyCode}`;
+    ? `${currencySymbol} ${priceNum} ${currencyCode}`
+    : `${currencySymbol} ${priceNum.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyCode}`;
 
   const allSizes = sizeOptions;
   const hasSizes = sizeOptions.length > 0;
@@ -1079,8 +1079,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   const pType = getProductType(p);
                   const symbol = p.currencyCode === 'USD' ? '$' : '€';
                   const formattedPrice = Number.isInteger(p.price)
-                    ? `${symbol}${p.price} ${p.currencyCode}`
-                    : `${symbol}${p.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${p.currencyCode}`;
+                    ? `${symbol} ${p.price} ${p.currencyCode}`
+                    : `${symbol} ${p.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${p.currencyCode}`;
                   
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
@@ -1149,8 +1149,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   const pType = getProductType(p);
                   const symbol = p.currencyCode === 'USD' ? '$' : '€';
                   const formattedPrice = Number.isInteger(p.price)
-                    ? `${symbol}${p.price} ${p.currencyCode}`
-                    : `${symbol}${p.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${p.currencyCode}`;
+                    ? `${symbol} ${p.price} ${p.currencyCode}`
+                    : `${symbol} ${p.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${p.currencyCode}`;
                   
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>

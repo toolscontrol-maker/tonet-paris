@@ -96,7 +96,7 @@ export default function HomeCollection({ products }: HomeCollectionProps) {
               <div className="hc-info">
                 <span className="hc-name">{product.title}</span>
                 <span className="hc-price">
-                  {product.currencyCode === 'USD' ? '$' : '€'}
+                  {product.currencyCode === 'USD' ? '$ ' : '€ '}
                   {Number(product.price).toFixed(2)}
                 </span>
                 {colors.length > 0 && (
