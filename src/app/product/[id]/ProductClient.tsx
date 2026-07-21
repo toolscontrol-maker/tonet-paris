@@ -441,7 +441,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
   const [stickyBarVisible, setStickyBarVisible] = useState(false);
   const [stickySizesOpen, setStickySizesOpen] = useState(false);
-  const mainButtonWrapRef = useRef<HTMLDivElement>(null);
+  const mainButtonWrapRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const el = mainButtonWrapRef.current;
@@ -1024,6 +1024,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               {/* Main Action Button */}
               <button 
                 type="button" 
+                ref={mainButtonWrapRef}
                 className="tonet-pdp-main-btn"
                 onClick={selectedSize ? handleAddToBag : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
                 disabled={adding && selectedSize !== null}
