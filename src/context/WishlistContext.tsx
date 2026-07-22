@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
+import { supabase } from '@/lib/supabase';
+
 export interface WishlistItem {
   handle: string;
   title: string;
@@ -41,15 +43,57 @@ function writeStorage(items: WishlistItem[]) {
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
+  // 1. Initial load from local storage
   useEffect(() => {
     setItems(readStorage());
     setLoaded(true);
   }, []);
 
+  // 2. Listen to Supabase Auth State Change to sync with metadata
   useEffect(() => {
-    if (loaded) writeStorage(items);
-  }, [items, loaded]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user ?? null;
+      setCurrentUser(user);
+
+      if (user) {
+        // User logged in: fetch wishlist from metadata and merge with guest items
+        const dbWishlist = user.user_metadata?.wishlist;
+        if (Array.isArray(dbWishlist)) {
+          setItems(prev => {
+            const merged = [...dbWishlist];
+            prev.forEach(guestItem => {
+              if (!merged.some(dbItem => dbItem.handle === guestItem.handle)) {
+                merged.push(guestItem);
+              }
+            });
+            return merged;
+          });
+        }
+      } else {
+        // User logged out: restore guest local storage
+        setItems(readStorage());
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // 3. Write updates to storage / database
+  useEffect(() => {
+    if (loaded) {
+      writeStorage(items);
+      
+      if (currentUser) {
+        supabase.auth.updateUser({
+          data: { wishlist: items }
+        }).catch(err => console.error("Error saving wishlist to user metadata:", err));
+      }
+    }
+  }, [items, loaded, currentUser]);
 
   const add = useCallback((item: WishlistItem) => {
     setItems(prev => {

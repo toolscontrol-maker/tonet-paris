@@ -207,17 +207,17 @@ export default function HomeCollection({ products }: HomeCollectionProps) {
           flex-direction: column;
           text-decoration: none;
           color: inherit;
-          background: #0d0d0d;
+          background: #100f0d;
           overflow: hidden;
           transition: background 0.6s ease;
         }
         .hc-card:hover {
-          background: #111;
+          background: #161410;
         }
         .hc-img-wrap {
           aspect-ratio: 3 / 4;
           overflow: hidden;
-          background: #0d0d0d;
+          background: #100f0d;
         }
         .hc-img {
           width: 100%;

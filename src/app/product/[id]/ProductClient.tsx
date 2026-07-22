@@ -578,6 +578,72 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     })?.value ?? ''
   );
   const [selectedSize, setSelectedSize] = useState<string>('');
+  const [previewModalOpen, setPreviewModalOpen] = useState<boolean>(false);
+  const [previewImageIndex, setPreviewImageIndex] = useState<number>(0);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [wishlistToastVisible, setWishlistToastVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (wishlistToastVisible) {
+      const timer = setTimeout(() => {
+        setWishlistToastVisible(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [wishlistToastVisible]);
+  const [contactModalOpen, setContactModalOpen] = useState<boolean>(false);
+  const [contactForm, setContactForm] = useState({
+    salutation: 'Sr.',
+    firstName: '',
+    lastName: '',
+    email: '',
+    country: 'Spain',
+    phonePrefix: '+34',
+    phone: '',
+    birthDay: '',
+    birthMonth: '',
+    birthYear: '',
+    topic: '',
+    message: '',
+    marketingConsent1: false,
+    marketingConsent2: false
+  });
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(language === 'es' ? 'Mensaje enviado correctamente. Nos pondremos en contacto con usted lo antes posible.' : 'Message sent successfully. We will get back to you as soon as possible.');
+    setContactModalOpen(false);
+    setContactForm({
+      salutation: 'Sr.',
+      firstName: '',
+      lastName: '',
+      email: '',
+      country: 'Spain',
+      phonePrefix: '+34',
+      phone: '',
+      birthDay: '',
+      birthMonth: '',
+      birthYear: '',
+      topic: '',
+      message: '',
+      marketingConsent1: false,
+      marketingConsent2: false
+    });
+  };
+
+  const handleWishlistToggle = () => {
+    const wasInWishlist = inWishlist;
+    toggle(wishlistItem);
+    if (!wasInWishlist) {
+      setWishlistToastVisible(true);
+    }
+  };
+
+  function openPreview(index: number) {
+    setPreviewImageIndex(index);
+    setZoomLevel(1);
+    setPreviewModalOpen(true);
+  }
 
   const [selectedOptionsState, setSelectedOptionsState] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -851,6 +917,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
   function handleColorChange(colorValue: string) {
     setSelectedColor(colorValue);
+    setCurrentSlide(0);
+    setPreviewImageIndex(0);
     if (colorOptionName) {
       const updated = { ...selectedOptionsState, [colorOptionName]: colorValue };
       setSelectedOptionsState(updated);
@@ -913,36 +981,67 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                 ))}
               </div>
               
-              {/* Carousel Dots */}
+              {/* Progress Indicator Bar */}
               {images.length > 1 && (
-                <div className="tonet-mobile-dots">
-                  {images.map((_, i) => (
-                    <span
-                      key={i}
-                      className={`tonet-mobile-dot ${currentSlide === i ? 'active' : ''}`}
-                    />
-                  ))}
+                <div className="tonet-mobile-carousel-indicator-bar">
+                  <div 
+                    className="tonet-mobile-carousel-indicator-progress"
+                    style={{
+                      width: `${100 / images.length}%`,
+                      transform: `translateX(${currentSlide * 100}%)`
+                    }}
+                  />
                 </div>
               )}
             </div>
 
-            {/* Desktop Gallery (Minimal vertical stack of images, no controls/arrows/sliders) */}
+            {/* Desktop Gallery (Main image fixed on left, secondary scrollable thumbnails on right) */}
             <div className="tonet-desktop-gallery">
-              {images.map((img, i) => (
-                <div key={i} className="tonet-desktop-img-wrapper">
-                  <img 
-                    src={getOptimizedImageUrl(img, 1600)} 
-                    alt={`${product.title} - ${i}`} 
-                    className="tonet-pdp-img amiri-fade-in" 
-                    loading={i === 0 ? "eager" : "lazy"}
-                    decoding="async"
-                    onLoad={(e) => e.currentTarget.classList.add('loaded')}
-                    ref={(el) => {
-                      if (el && el.complete) el.classList.add('loaded');
-                    }}
-                  />
+              <div 
+                className="tonet-desktop-main-wrapper"
+                onClick={() => openPreview(0)}
+                style={{ cursor: 'pointer' }}
+                title="Click para ampliar"
+              >
+                <img 
+                  src={getOptimizedImageUrl(images[0], 1600)} 
+                  alt={`${product.title} - Main`} 
+                  className="tonet-pdp-img amiri-fade-in" 
+                  loading="eager"
+                  decoding="async"
+                  onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                  ref={(el) => {
+                    if (el && el.complete) el.classList.add('loaded');
+                  }}
+                />
+              </div>
+
+              {images.length > 1 && (
+                <div className="tonet-desktop-secondary-container">
+                  <div className="tonet-desktop-secondary-scroll">
+                    {images.slice(1).map((img, i) => (
+                      <div 
+                        key={i} 
+                        className="tonet-desktop-secondary-wrapper"
+                        onClick={() => openPreview(i + 1)}
+                        title="Click para ampliar en previsualizador"
+                      >
+                        <img 
+                          src={getOptimizedImageUrl(img, 800)} 
+                          alt={`${product.title} - ${i + 1}`} 
+                          className="tonet-pdp-img amiri-fade-in" 
+                          loading="lazy"
+                          decoding="async"
+                          onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                          ref={(el) => {
+                            if (el && el.complete) el.classList.add('loaded');
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -950,21 +1049,40 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           <div className="tonet-info-column">
             <div className="tonet-info-sticky">
               
-              {/* Product Title */}
-              <h1 className="tonet-product-title">{toTitleCase(product.title)}</h1>
+              {/* Title & Wishlist Row */}
+              <div className="tonet-title-wishlist-row">
+                <h1 className="tonet-product-title">{toTitleCase(product.title)}</h1>
+                <button 
+                  type="button" 
+                  className="tonet-pdp-wishlist-btn mobile-only-wishlist"
+                  onClick={handleWishlistToggle}
+                  title={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
+                  aria-label={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
+                >
+                  <span className="tonet-wishlist-icon">{inWishlist ? '★' : '☆'}</span>
+                </button>
+              </div>
               
               {/* Price */}
               <div className="tonet-pdp-price-row">
                 <span className="tonet-product-price">{priceFormatted}</span>
               </div>
-              
-              {/* Wishlist Button */}
+
+              {/* Desktop Wishlist Button */}
               <button 
                 type="button" 
-                className="tonet-pdp-wishlist-btn"
-                onClick={() => toggle(wishlistItem)}
+                className="tonet-pdp-wishlist-btn desktop-only-wishlist"
+                onClick={handleWishlistToggle}
+                title={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
+                aria-label={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
               >
-                <span>{inWishlist ? '★ Eliminar de la Wishlist' : '☆ Agregar a la Wishlist'}</span>
+                <span className="tonet-wishlist-icon">{inWishlist ? '★' : '☆'}</span>
+                <span className="tonet-wishlist-text">
+                  {inWishlist 
+                    ? (language === 'es' ? 'Eliminar de la Wishlist' : 'Remove from Wishlist') 
+                    : (language === 'es' ? 'Agregar a la Wishlist' : 'Add to Wishlist')
+                  }
+                </span>
               </button>
 
               {/* Color Row */}
@@ -1075,47 +1193,38 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* SIZE AND FIT */}
-                <div className="tonet-accordion-item">
-                  <button className="tonet-accordion-header" onClick={() => toggleAccordion('fit')}>
-                    <span>SIZE & FIT</span>
-                    <span className="tonet-accordion-icon">{expandedAccordion === 'fit' ? '—' : '+'}</span>
+              {/* Help & Boutique Availability Actions */}
+              <div className="tonet-pdp-actions-section">
+                <div className="tonet-pdp-actions-divider" />
+                <div className="tonet-pdp-actions-grid">
+                  
+                  {/* Need Help? Button */}
+                  <button 
+                    type="button" 
+                    className="tonet-pdp-action-btn"
+                    onClick={() => setContactModalOpen(true)}
+                  >
+                    <svg className="tonet-action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                    <span>{language === 'es' ? '¿Necesita ayuda?' : 'Need help?'}</span>
                   </button>
-                  {expandedAccordion === 'fit' && (
-                    <div className="tonet-accordion-content">
-                      <p>FITS TRUE TO SIZE. WE RECOMMEND TAKING YOUR NORMAL SIZE. FITS VARY DEPENDING ON CONSTRUCTION AND MATERIAL.</p>
-                      <button type="button" className="tonet-size-guide-link" onClick={() => setSizeGuideOpen(true)}>
-                        VIEW SIZE GUIDE
-                      </button>
-                    </div>
-                  )}
-                </div>
 
-                {/* CARE AND MAINTENANCE */}
-                <div className="tonet-accordion-item">
-                  <button className="tonet-accordion-header" onClick={() => toggleAccordion('care')}>
-                    <span>CARE & MAINTENANCE</span>
-                    <span className="tonet-accordion-icon">{expandedAccordion === 'care' ? '—' : '+'}</span>
-                  </button>
-                  {expandedAccordion === 'care' && (
-                    <div className="tonet-accordion-content">
-                      <p>{metadata['Care Instructions'] ? metadata['Care Instructions'].toUpperCase() : 'DRY CLEAN ONLY. HANDLE WITH CARE.'}</p>
-                    </div>
-                  )}
-                </div>
+                  {/* Boutique Availability Button */}
+                  <Link 
+                    href="/stores"
+                    className="tonet-pdp-action-btn"
+                  >
+                    <svg className="tonet-action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <span>{language === 'es' ? 'Comprobar la disponibilidad en la boutique' : 'Check boutique availability'}</span>
+                  </Link>
 
-                {/* SHIPPING / RETURNS */}
-                <div className="tonet-accordion-item">
-                  <button className="tonet-accordion-header" onClick={() => toggleAccordion('shipping')}>
-                    <span>SHIPPING / RETURNS</span>
-                    <span className="tonet-accordion-icon">{expandedAccordion === 'shipping' ? '—' : '+'}</span>
-                  </button>
-                  {expandedAccordion === 'shipping' && (
-                    <div className="tonet-accordion-content">
-                      <p>COMPLIMENTARY STANDARD SHIPPING ON ALL ORDERS. DELIVERY TIME TAKES BETWEEN 2 TO 4 BUSINESS DAYS. EASY RETURN WITHIN 14 DAYS FROM RECEIPT OF SHIPMENT.</p>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -1398,6 +1507,282 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         </div>
       )}
 
+      {/* ══ CONTACT MODAL (CONTÁCTENOS) ══ */}
+      {contactModalOpen && (
+        <div className="tonet-contact-overlay" onClick={() => setContactModalOpen(false)}>
+          <div className="tonet-contact-modal" onClick={e => e.stopPropagation()}>
+            
+            {/* Modal Header */}
+            <div className="tonet-contact-header">
+              <h2 className="tonet-contact-title">CONTÁCTENOS</h2>
+              <button 
+                type="button" 
+                className="tonet-contact-close-btn" 
+                onClick={() => setContactModalOpen(false)}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Scroll Content */}
+            <div className="tonet-contact-content">
+              <form onSubmit={handleContactSubmit}>
+                
+                {/* Salutation / Título */}
+                <div className="tonet-contact-field tonet-salutation-field">
+                  <span className="tonet-field-label">Título</span>
+                  <div className="tonet-radio-group">
+                    <label className="tonet-radio-label">
+                      <input 
+                        type="radio" 
+                        name="salutation" 
+                        value="Sr." 
+                        checked={contactForm.salutation === 'Sr.'}
+                        onChange={e => setContactForm(prev => ({ ...prev, salutation: e.target.value }))}
+                      />
+                      <span>Sr.</span>
+                    </label>
+                    <label className="tonet-radio-label">
+                      <input 
+                        type="radio" 
+                        name="salutation" 
+                        value="Señorita"
+                        checked={contactForm.salutation === 'Señorita'}
+                        onChange={e => setContactForm(prev => ({ ...prev, salutation: e.target.value }))}
+                      />
+                      <span>Señorita</span>
+                    </label>
+                    <label className="tonet-radio-label">
+                      <input 
+                        type="radio" 
+                        name="salutation" 
+                        value="Sra."
+                        checked={contactForm.salutation === 'Sra.'}
+                        onChange={e => setContactForm(prev => ({ ...prev, salutation: e.target.value }))}
+                      />
+                      <span>Sra.</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Name Row */}
+                <div className="tonet-form-row">
+                  <div className="tonet-contact-field">
+                    <label className="tonet-input-label">Nombre *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={contactForm.firstName}
+                      onChange={e => setContactForm(prev => ({ ...prev, firstName: e.target.value }))}
+                      className="tonet-contact-input"
+                    />
+                  </div>
+                  <div className="tonet-form-row-space" style={{ width: '20px' }} />
+                  <div className="tonet-contact-field">
+                    <label className="tonet-input-label">Apellido *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={contactForm.lastName}
+                      onChange={e => setContactForm(prev => ({ ...prev, lastName: e.target.value }))}
+                      className="tonet-contact-input"
+                    />
+                  </div>
+                </div>
+
+                {/* Email and Country Row */}
+                <div className="tonet-form-row">
+                  <div className="tonet-contact-field">
+                    <label className="tonet-input-label">Dirección De Correo Electrónico *</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={contactForm.email}
+                      onChange={e => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                      className="tonet-contact-input"
+                    />
+                  </div>
+                  <div className="tonet-form-row-space" style={{ width: '20px' }} />
+                  <div className="tonet-contact-field">
+                    <label className="tonet-input-label">País *</label>
+                    <select 
+                      value={contactForm.country}
+                      onChange={e => setContactForm(prev => ({ ...prev, country: e.target.value }))}
+                      className="tonet-contact-select"
+                    >
+                      <option value="Spain">Spain</option>
+                      <option value="United States">United States</option>
+                      <option value="France">France</option>
+                      <option value="Italy">Italy</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Germany">Germany</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Phone prefix & Number */}
+                <div className="tonet-form-row">
+                  <div className="tonet-contact-field" style={{ flex: '0 0 100px' }}>
+                    <label className="tonet-input-label">Prefijo</label>
+                    <input 
+                      type="text" 
+                      value={contactForm.phonePrefix}
+                      onChange={e => setContactForm(prev => ({ ...prev, phonePrefix: e.target.value }))}
+                      className="tonet-contact-input"
+                    />
+                  </div>
+                  <div className="tonet-form-row-space" style={{ width: '20px' }} />
+                  <div className="tonet-contact-field" style={{ flex: '1' }}>
+                    <label className="tonet-input-label">Teléfono *</label>
+                    <input 
+                      type="tel" 
+                      required
+                      value={contactForm.phone}
+                      onChange={e => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                      className="tonet-contact-input"
+                    />
+                  </div>
+                </div>
+
+                {/* Birthday Row */}
+                <div className="tonet-contact-field">
+                  <span className="tonet-field-label">Cumpleaños</span>
+                  <div className="tonet-birthday-row">
+                    <select 
+                      value={contactForm.birthDay}
+                      onChange={e => setContactForm(prev => ({ ...prev, birthDay: e.target.value }))}
+                      className="tonet-contact-select"
+                    >
+                      <option value="">Día</option>
+                      {Array.from({ length: 31 }, (_, i) => String(i + 1)).map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                    <div style={{ width: '16px' }} />
+                    <select 
+                      value={contactForm.birthMonth}
+                      onChange={e => setContactForm(prev => ({ ...prev, birthMonth: e.target.value }))}
+                      className="tonet-contact-select"
+                    >
+                      <option value="">Mes</option>
+                      {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((m, idx) => (
+                        <option key={m} value={String(idx + 1)}>{m}</option>
+                      ))}
+                    </select>
+                    <div style={{ width: '16px' }} />
+                    <select 
+                      value={contactForm.birthYear}
+                      onChange={e => setContactForm(prev => ({ ...prev, birthYear: e.target.value }))}
+                      className="tonet-contact-select"
+                    >
+                      <option value="">Año</option>
+                      {Array.from({ length: 100 }, (_, i) => String(new Date().getFullYear() - i)).map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Topic / ¿En qué podemos asistirle? */}
+                <div className="tonet-contact-field">
+                  <label className="tonet-input-label">¿En qué podemos asistirle? *</label>
+                  <select 
+                    required
+                    value={contactForm.topic}
+                    onChange={e => setContactForm(prev => ({ ...prev, topic: e.target.value }))}
+                    className="tonet-contact-select"
+                  >
+                    <option value="">Seleccione una opción</option>
+                    <option value="Consulta sobre producto">Consulta sobre producto</option>
+                    <option value="Información sobre envíos">Información sobre envíos</option>
+                    <option value="Devoluciones y reembolsos">Devoluciones y reembolsos</option>
+                    <option value="Opciones de personalización">Opciones de personalización</option>
+                    <option value="Otros temas">Otros temas</option>
+                  </select>
+                </div>
+
+                {/* Message */}
+                <div className="tonet-contact-field">
+                  <label className="tonet-input-label">Cualquier información adicional *</label>
+                  <textarea 
+                    required
+                    placeholder="Mensaje"
+                    rows={4}
+                    value={contactForm.message}
+                    onChange={e => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="tonet-contact-textarea"
+                  />
+                </div>
+
+                {/* Upload Product Photo */}
+                <div className="tonet-contact-field tonet-upload-field">
+                  <label className="tonet-upload-btn">
+                    <input type="file" style={{ display: 'none' }} />
+                    <span>+ Subir foto del producto</span>
+                  </label>
+                </div>
+
+                {/* Disclaimer */}
+                <p className="tonet-contact-disclaimer">
+                  Si necesita ayuda o tiene alguna pregunta relacionada con nuestras colecciones, servicios o tienda en línea, no dude en contactarnos por e-mail o chat.<br/>
+                  También puede ver respuestas a nuestras preguntas más frecuentes en las secciones de <span className="underline cursor-pointer">Atención al cliente</span>.<br/><br/>
+                  Este sitio está protegido por reCAPTCHA, y se aplican la <span className="underline cursor-pointer">Política de privacidad</span> y los <span className="underline cursor-pointer">Términos de servicio de Google</span>.<br/>
+                  Valentino usará sus datos personales para fines relacionados con el servicio o contacto solicitado. Consulte nuestra <span className="underline cursor-pointer">Política de privacidad</span> para obtener más información y para comunicarse con Valentino en caso de tener inquietudes y solicitudes relacionadas con la privacidad.<br/><br/>
+                  Además, si también desea seguir en contacto con Valentino y recibir comunicaciones comerciales personalizadas, autorícenos a:
+                </p>
+
+                {/* Marketing Checkboxes */}
+                <div className="tonet-consent-checkboxes">
+                  <label className="tonet-checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={contactForm.marketingConsent1}
+                      onChange={e => setContactForm(prev => ({ ...prev, marketingConsent1: e.target.checked }))}
+                    />
+                    <span>Doy mi consentimiento para que Valentino procese mis datos personales con fines de marketing (boletines informativos, comunicaciones por teléfono, SMS y mensajes inteligentes).</span>
+                  </label>
+                  <label className="tonet-checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={contactForm.marketingConsent2}
+                      onChange={e => setContactForm(prev => ({ ...prev, marketingConsent2: e.target.checked }))}
+                    />
+                    <span>Doy mi consentimiento para que Valentino procese mis datos con el fin de analizar mis preferencias, hábitos y preferencias de compra.</span>
+                  </label>
+                </div>
+
+                {/* Send Button */}
+                <div className="tonet-contact-actions">
+                  <button type="submit" className="tonet-contact-submit-btn">
+                    ENVIAR
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ══ WISHLIST TOAST NOTIFICATION ══ */}
+      {wishlistToastVisible && (
+        <div className="tonet-wishlist-toast">
+          <div className="tonet-wishlist-toast-header">
+            <span className="tonet-wishlist-toast-title">Wishlist ({items.length})</span>
+            <div className="tonet-wishlist-toast-thumb">
+              <img src={product.imageUrl} alt={product.title} />
+            </div>
+          </div>
+          <div className="tonet-wishlist-toast-footer">
+            <Link href="/archive?tab=personal" className="tonet-wishlist-toast-link">
+              ★ Ver lista
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* ══ SIZE GUIDE MODAL ══ */}
       {sizeGuideOpen && (
         <div className="tonet-modal-overlay" onClick={() => setSizeGuideOpen(false)}>
@@ -1556,6 +1941,93 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         </div>
       </div>
 
+      {/* ── PREVISUALIZADOR MODAL (LIGHTBOX ZOOM) ── */}
+      {previewModalOpen && (
+        <div 
+          className="tonet-preview-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPreviewModalOpen(false);
+          }}
+        >
+          <div className="tonet-preview-stage">
+            <div 
+              className="tonet-preview-img-wrapper"
+              style={{ transform: `scale(${zoomLevel})` }}
+            >
+              <img 
+                src={getOptimizedImageUrl(images[previewImageIndex] || images[0], 2400)} 
+                alt={`${product.title} - Preview`} 
+                className="tonet-preview-img"
+              />
+            </div>
+
+            {/* Bottom Bar: Zoom controls + Title tag */}
+            <div className="tonet-preview-bottom-bar">
+              <div className="tonet-preview-zoom-control">
+                <button 
+                  type="button" 
+                  className="tonet-preview-zoom-btn"
+                  onClick={() => setZoomLevel(prev => Math.max(1, prev - 0.25))}
+                  title="Disminuir zoom"
+                >
+                  −
+                </button>
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="2.5" 
+                  step="0.05" 
+                  value={zoomLevel} 
+                  onChange={(e) => setZoomLevel(parseFloat(e.target.value))}
+                  className="tonet-preview-zoom-slider"
+                />
+                <button 
+                  type="button" 
+                  className="tonet-preview-zoom-btn"
+                  onClick={() => setZoomLevel(prev => Math.min(2.5, prev + 0.25))}
+                  title="Aumentar zoom"
+                >
+                  +
+                </button>
+              </div>
+              <div className="tonet-preview-product-tag">
+                {toTitleCase(product.title)}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar: Close button + Scrollable Image List */}
+          <div className="tonet-preview-sidebar">
+            <button 
+              type="button" 
+              className="tonet-preview-close-btn"
+              onClick={() => setPreviewModalOpen(false)}
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+
+            <div className="tonet-preview-sidebar-list">
+              {images.map((img, i) => (
+                <div 
+                  key={i} 
+                  className={`tonet-preview-sidebar-item ${previewImageIndex === i ? 'active' : ''}`}
+                  onClick={() => {
+                    setPreviewImageIndex(i);
+                    setZoomLevel(1);
+                  }}
+                >
+                  <img 
+                    src={getOptimizedImageUrl(img, 600)} 
+                    alt={`${product.title} - ${i}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         /* ══════════════════════════════════════
            TONET PDP HIGH-FIDELITY STYLES
@@ -1604,7 +2076,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
 
         @media (min-width: 1024px) {
           .tonet-pdp-layout {
-            grid-template-columns: 50% 50%;
+            grid-template-columns: 61.666% 38.334%;
             column-gap: 0;
             padding: 0;
             max-width: none;
@@ -1613,14 +2085,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           }
         }
 
-        /* ── GALLERY COLUMN (Left side ~50% width) ── */
+        /* ── GALLERY COLUMN (Left side ~61.6% width) ── */
         .tonet-gallery-column {
           width: 100%;
         }
         @media (min-width: 1024px) {
           .tonet-gallery-column {
             background-color: #f4f3f1;
-            padding-top: 100px;
+            padding: 140px 0px 80px 40px;
           }
         }
 
@@ -1662,26 +2134,19 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           mix-blend-mode: multiply;
         }
 
-        .tonet-mobile-dots {
-          display: flex;
-          justify-content: center;
-          gap: 8px;
+        .tonet-mobile-carousel-indicator-bar {
+          width: 100%;
+          height: 2px;
+          background-color: rgba(0, 0, 0, 0.05);
           position: absolute;
-          bottom: 16px;
-          left: 50%;
-          transform: translateX(-50%);
+          bottom: 0;
+          left: 0;
           z-index: 10;
-          margin: 0;
         }
-        .tonet-mobile-dot {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background-color: #e0e0e0;
-          transition: background-color 0.3s;
-        }
-        .tonet-mobile-dot.active {
+        .tonet-mobile-carousel-indicator-progress {
+          height: 100%;
           background-color: #000000;
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* Mobile Extra Grid (below accordions) */
@@ -1746,26 +2211,259 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           mix-blend-mode: multiply;
         }
 
-        /* Desktop Stacked Gallery (with extreme whitespace, no controls) */
+        /* Desktop Gallery with Main image & Secondary Scrollable Container */
         .tonet-desktop-gallery {
           display: none;
-          flex-direction: column;
-          gap: 40px;
-          padding-bottom: 120px;
+          grid-template-columns: 4fr 1fr;
+          gap: 12px;
+          width: 100%;
+          align-items: start;
         }
         @media (min-width: 1024px) {
           .tonet-mobile-gallery { display: none; }
-          .tonet-desktop-gallery { display: flex; }
+          .tonet-desktop-gallery { display: grid; }
         }
-        .tonet-desktop-img-wrapper {
+        .tonet-desktop-main-wrapper {
           width: 100%;
           background: #f4f3f1;
           display: flex;
           justify-content: center;
           align-items: center;
           aspect-ratio: 3 / 4;
+          position: sticky;
+          top: 140px;
+          border: none;
         }
-        .tonet-desktop-img-wrapper img {
+        .tonet-desktop-main-wrapper img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+        }
+        .tonet-desktop-secondary-container {
+          width: 100%;
+          position: sticky;
+          top: 140px;
+          max-height: calc(100vh - 180px);
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+          padding-right: 0px;
+        }
+        .tonet-desktop-secondary-container::-webkit-scrollbar {
+          width: 3px;
+        }
+        .tonet-desktop-secondary-container::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+        }
+        .tonet-desktop-secondary-scroll {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          width: 100%;
+        }
+        .tonet-desktop-secondary-wrapper {
+          width: 100%;
+          background: #f4f3f1;
+          aspect-ratio: 3 / 4;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          border: 3px solid #ffffff;
+          box-sizing: border-box;
+          transition: opacity 0.2s ease;
+          opacity: 0.85;
+        }
+        .tonet-desktop-secondary-wrapper:hover {
+          opacity: 1;
+        }
+        .tonet-desktop-secondary-wrapper img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          mix-blend-mode: multiply;
+        }
+
+        /* ══════════════════════════════════════
+           PREVISUALIZADOR / LIGHTBOX MODAL (VALENTINO STYLE)
+        ══════════════════════════════════════ */
+        .tonet-preview-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 10000;
+          background: #ffffff;
+          display: flex;
+          width: 100vw;
+          height: 100vh;
+          overflow: hidden;
+          animation: tonetFadeIn 0.25s ease-out;
+        }
+
+        .tonet-preview-stage {
+          flex: 1;
+          height: 100%;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f4f3f1;
+          overflow: hidden;
+          padding: 40px;
+          box-sizing: border-box;
+        }
+
+        .tonet-preview-img-wrapper {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          transform-origin: center center;
+        }
+
+        .tonet-preview-img {
+          max-width: 90%;
+          max-height: 86vh;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+          user-select: none;
+        }
+
+        .tonet-preview-bottom-bar {
+          position: absolute;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          z-index: 10;
+          pointer-events: auto;
+        }
+
+        .tonet-preview-zoom-control {
+          background: rgba(0, 0, 0, 0.75);
+          backdrop-filter: blur(8px);
+          border-radius: 999px;
+          padding: 6px 16px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: #ffffff;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .tonet-preview-zoom-btn {
+          background: none;
+          border: none;
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 400;
+          cursor: pointer;
+          padding: 0 4px;
+          line-height: 1;
+          opacity: 0.8;
+          transition: opacity 0.2s;
+        }
+        .tonet-preview-zoom-btn:hover {
+          opacity: 1;
+        }
+
+        .tonet-preview-zoom-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 130px;
+          height: 3px;
+          background: rgba(255, 255, 255, 0.35);
+          outline: none;
+          border-radius: 2px;
+        }
+        .tonet-preview-zoom-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: #ffffff;
+          cursor: pointer;
+        }
+
+        .tonet-preview-product-tag {
+          background: #ffffff;
+          border: 1px solid #e5e5e5;
+          padding: 6px 16px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.06em;
+          color: #000000;
+          white-space: nowrap;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .tonet-preview-sidebar {
+          width: 280px;
+          flex-shrink: 0;
+          height: 100%;
+          background: #ffffff;
+          border-left: 1px solid #eee;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+        }
+
+        .tonet-preview-close-btn {
+          position: absolute;
+          top: 24px;
+          right: 24px;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #505050;
+          color: #ffffff;
+          border: none;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 20;
+          transition: background 0.2s, transform 0.2s;
+        }
+        .tonet-preview-close-btn:hover {
+          background: #000000;
+          transform: scale(1.05);
+        }
+
+        .tonet-preview-sidebar-list {
+          margin-top: 80px;
+          flex: 1;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          padding: 0 16px 32px;
+        }
+
+        .tonet-preview-sidebar-item {
+          width: 100%;
+          aspect-ratio: 3 / 4;
+          background: #f4f3f1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          opacity: 0.65;
+          transition: opacity 0.2s;
+        }
+        .tonet-preview-sidebar-item:hover,
+        .tonet-preview-sidebar-item.active {
+          opacity: 1;
+        }
+        .tonet-preview-sidebar-item img {
           width: 100%;
           height: 100%;
           object-fit: contain;
@@ -1781,7 +2479,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         @media (min-width: 1024px) {
           .tonet-info-column {
-            padding: 80px 64px 120px 64px;
+            padding: 140px 64px 120px 64px;
             display: block;
           }
         }
@@ -1797,8 +2495,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         @media (min-width: 1024px) {
           .tonet-info-sticky {
             position: sticky;
-            top: 50vh;
-            transform: translateY(-50%);
+            top: 140px;
             align-items: flex-start;
             text-align: left;
             max-width: 460px;
@@ -1839,23 +2536,108 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           color: #000000;
         }
 
+        .tonet-title-wishlist-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          gap: 16px;
+        }
+
         /* Wishlist Button */
         .tonet-pdp-wishlist-btn {
           background: transparent;
           border: none;
           padding: 0;
           font-family: var(--font-primary), sans-serif;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 400;
           color: #000000;
           cursor: pointer;
           display: flex;
           align-items: center;
           gap: 6px;
-          text-decoration: none;
+          flex-shrink: 0;
+          transition: opacity 0.2s;
         }
         .tonet-pdp-wishlist-btn:hover {
-          text-decoration: underline;
+          opacity: 0.7;
+        }
+        .tonet-wishlist-icon {
+          font-size: 18px;
+          line-height: 1;
+        }
+
+        /* Mobile-only & Desktop-only wishlist visibility */
+        .mobile-only-wishlist {
+          display: flex;
+        }
+        .desktop-only-wishlist {
+          display: none;
+          margin-top: 4px;
+          margin-bottom: 8px;
+        }
+        @media (min-width: 1024px) {
+          .mobile-only-wishlist {
+            display: none !important;
+          }
+          .desktop-only-wishlist {
+            display: flex !important;
+          }
+        }
+
+        /* ── Help & Boutique Actions Section ── */
+        .tonet-pdp-actions-section {
+          width: 100%;
+          margin-top: 32px;
+          margin-bottom: 24px;
+        }
+        .tonet-pdp-actions-divider {
+          width: 100%;
+          height: 1px;
+          background-color: #e5e5e5;
+          margin-bottom: 24px;
+        }
+        .tonet-pdp-actions-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          align-items: start;
+        }
+        .tonet-pdp-action-btn {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          background: none;
+          border: none;
+          padding: 0;
+          margin: 0;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          color: #000000;
+          text-align: left;
+          text-decoration: none;
+          cursor: pointer;
+          line-height: 1.4;
+          transition: opacity 0.2s ease;
+        }
+        .tonet-pdp-action-btn:hover {
+          opacity: 0.7;
+        }
+        .tonet-action-icon {
+          flex-shrink: 0;
+          margin-top: 2px;
+          color: #333333;
+        }
+        @media (max-width: 600px) {
+          .tonet-pdp-actions-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+          }
+          .tonet-pdp-action-btn {
+            font-size: 12px;
+          }
         }
 
         /* Color Row */
@@ -2900,12 +3682,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           }
           .tonet-sticky-buy-title {
             font-family: var(--font-primary), sans-serif;
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 400;
             color: #000000;
             letter-spacing: 0.08em;
             margin: 0;
-            line-height: 1.4;
+            line-height: 1.3;
             text-transform: none;
           }
           .tonet-sticky-buy-price-row {
@@ -2954,6 +3736,484 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           .tonet-sticky-buy-btn:hover {
             background-color: #333333;
           }
+        }
+
+        /* ══ CONTACT MODAL (Valentino Style) ══ */
+        .tonet-contact-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+        }
+        .tonet-contact-modal {
+          width: 90%;
+          max-width: 680px;
+          max-height: 90vh;
+          background: #ffffff;
+          display: flex;
+          flex-direction: column;
+          border-radius: 0 !important;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+          overflow: hidden;
+        }
+        .tonet-contact-header {
+          padding: 24px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #eeeeee;
+          flex-shrink: 0;
+        }
+        .tonet-contact-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 18px;
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          color: #000000;
+          margin: 0;
+        }
+        .tonet-contact-close-btn {
+          background: none;
+          border: none;
+          font-size: 20px;
+          color: #000000;
+          cursor: pointer;
+          padding: 4px;
+        }
+        .tonet-contact-content {
+          padding: 32px;
+          overflow-y: auto;
+          flex: 1;
+        }
+        .tonet-form-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0px;
+          width: 100%;
+        }
+        .tonet-form-row-space {
+          flex-shrink: 0;
+        }
+        .tonet-contact-field {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 24px;
+        }
+        .tonet-field-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          color: #777777;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+        .tonet-input-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.06em;
+          color: #777777;
+          margin-bottom: 4px;
+        }
+        .tonet-contact-input,
+        .tonet-contact-select,
+        .tonet-contact-textarea {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          color: #000000;
+          border: none;
+          border-bottom: 1px solid #cccccc;
+          border-radius: 0 !important;
+          background: transparent;
+          padding: 8px 0;
+          outline: none;
+          width: 100%;
+          box-sizing: border-box;
+          transition: border-bottom-color 0.2s ease;
+        }
+        .tonet-contact-input:focus,
+        .tonet-contact-select:focus,
+        .tonet-contact-textarea:focus {
+          border-bottom-color: #000000;
+        }
+        .tonet-radio-group {
+          display: flex;
+          gap: 24px;
+          margin-top: 6px;
+        }
+        .tonet-radio-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          cursor: pointer;
+        }
+        .tonet-radio-label input {
+          border-radius: 0 !important;
+        }
+        .tonet-birthday-row {
+          display: flex;
+          align-items: center;
+          width: 100%;
+        }
+        .tonet-birthday-row select {
+          flex: 1;
+        }
+        .tonet-upload-btn {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          color: #000000;
+          cursor: pointer;
+          display: inline-block;
+          margin-top: 8px;
+        }
+        .tonet-contact-disclaimer {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          line-height: 1.6;
+          color: #666666;
+          margin-top: 32px;
+          margin-bottom: 24px;
+        }
+        .tonet-consent-checkboxes {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .tonet-checkbox-label {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          line-height: 1.5;
+          color: #333333;
+          cursor: pointer;
+        }
+        .tonet-checkbox-label input {
+          margin-top: 3px;
+          border-radius: 0 !important;
+          flex-shrink: 0;
+        }
+        .tonet-contact-actions {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 0 !important;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 16px;
+          }
+          .tonet-sticky-buy-bar.sizes-open .tonet-sticky-buy-btn {
+            height: 32px;
+            margin-top: 16px;
+            border-radius: 0 !important;
+          }
+          .tonet-sticky-buy-btn:hover {
+            background-color: #333333;
+          }
+        }
+
+        /* ══ CONTACT MODAL (Valentino Style) ══ */
+        .tonet-contact-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+        }
+        .tonet-contact-modal {
+          width: 90%;
+          max-width: 680px;
+          max-height: 90vh;
+          background: #ffffff;
+          display: flex;
+          flex-direction: column;
+          border-radius: 0 !important;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+          overflow: hidden;
+        }
+        .tonet-contact-header {
+          padding: 24px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #eeeeee;
+          flex-shrink: 0;
+        }
+        .tonet-contact-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 18px;
+          font-weight: 400;
+          letter-spacing: 0.15em;
+          color: #000000;
+          margin: 0;
+        }
+        .tonet-contact-close-btn {
+          background: none;
+          border: none;
+          font-size: 20px;
+          color: #000000;
+          cursor: pointer;
+          padding: 4px;
+        }
+        .tonet-contact-content {
+          padding: 32px;
+          overflow-y: auto;
+          flex: 1;
+        }
+        .tonet-form-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0px;
+          width: 100%;
+        }
+        .tonet-form-row-space {
+          flex-shrink: 0;
+        }
+        .tonet-contact-field {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 24px;
+        }
+        .tonet-field-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          color: #777777;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+        .tonet-input-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.06em;
+          color: #777777;
+          margin-bottom: 4px;
+        }
+        .tonet-contact-input,
+        .tonet-contact-select,
+        .tonet-contact-textarea {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          color: #000000;
+          border: none;
+          border-bottom: 1px solid #cccccc;
+          border-radius: 0 !important;
+          background: transparent;
+          padding: 8px 0;
+          outline: none;
+          width: 100%;
+          box-sizing: border-box;
+          transition: border-bottom-color 0.2s ease;
+        }
+        .tonet-contact-input:focus,
+        .tonet-contact-select:focus,
+        .tonet-contact-textarea:focus {
+          border-bottom-color: #000000;
+        }
+        .tonet-radio-group {
+          display: flex;
+          gap: 24px;
+          margin-top: 6px;
+        }
+        .tonet-radio-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          cursor: pointer;
+        }
+        .tonet-radio-label input {
+          border-radius: 0 !important;
+        }
+        .tonet-birthday-row {
+          display: flex;
+          align-items: center;
+          width: 100%;
+        }
+        .tonet-birthday-row select {
+          flex: 1;
+        }
+        .tonet-upload-btn {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          color: #000000;
+          cursor: pointer;
+          display: inline-block;
+          margin-top: 8px;
+        }
+        .tonet-contact-disclaimer {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          line-height: 1.6;
+          color: #666666;
+          margin-top: 32px;
+          margin-bottom: 24px;
+        }
+        .tonet-consent-checkboxes {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .tonet-checkbox-label {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          line-height: 1.5;
+          color: #333333;
+          cursor: pointer;
+        }
+        .tonet-checkbox-label input {
+          margin-top: 3px;
+          border-radius: 0 !important;
+          flex-shrink: 0;
+        }
+        .tonet-contact-actions {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+        .tonet-contact-submit-btn {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 0.15em;
+          color: #ffffff;
+          background: #000000;
+          border: 1px solid #000000;
+          border-radius: 0 !important;
+          padding: 12px 64px;
+          cursor: pointer;
+          transition: background-color 0.2s ease, color 0.2s ease;
+          width: 100%;
+          text-align: center;
+        }
+        .tonet-contact-submit-btn:hover {
+          background: #ffffff;
+          color: #000000;
+        }
+        @media (max-width: 600px) {
+          .tonet-form-row {
+            flex-direction: column;
+            gap: 0;
+            margin-bottom: 0;
+          }
+          .tonet-form-row-space {
+            display: none;
+          }
+          .tonet-contact-content {
+            padding: 20px;
+          }
+        }
+
+        /* ══ WISHLIST TOAST NOTIFICATION ══ */
+        .tonet-wishlist-toast {
+          position: fixed;
+          top: 100px;
+          right: 24px;
+          width: 320px;
+          background: #ffffff;
+          border: 1px solid #e5e5e5;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          padding: 16px 20px;
+          z-index: 99999;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          border-radius: 0 !important;
+          animation: tonet-toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes tonet-toast-slide-in {
+          from {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .tonet-wishlist-toast-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+        .tonet-wishlist-toast-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+          color: #000000;
+          letter-spacing: 0.05em;
+        }
+        .tonet-wishlist-toast-thumb {
+          width: 60px;
+          height: 80px;
+          background: #f4f3f1;
+          flex-shrink: 0;
+          border: 1px solid #eeeeee;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        .tonet-wishlist-toast-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+        }
+        .tonet-wishlist-toast-footer {
+          display: flex;
+          justify-content: flex-start;
+          width: 100%;
+        }
+        .tonet-wishlist-toast-link {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+          color: #000000;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: opacity 0.2s;
+        }
+        .tonet-wishlist-toast-link:hover {
+          opacity: 0.7;
         }
       `}</style>
     </>

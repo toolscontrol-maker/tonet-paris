@@ -12,7 +12,6 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/context/AuthContext";
 import CartDrawer from "@/components/CartDrawer";
 import AccountDrawer from "@/components/AccountDrawer";
-import AnnouncementBar from "@/components/AnnouncementBar";
 import MenuDrawer from "@/components/MenuDrawer";
 import SearchDrawer from "@/components/SearchDrawer";
 import CookieBanner from "@/components/CookieBanner";
@@ -56,7 +55,6 @@ export default function RootLayout({
             <CartProvider>
               <AuthProvider>
               <WishlistProvider>
-                <AnnouncementBar />
                 <Navbar />
                 <CartDrawer />
                 <AccountDrawer />
