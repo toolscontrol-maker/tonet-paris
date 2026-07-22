@@ -282,14 +282,14 @@ export default function Navbar() {
                     className="acne-nav-desktop-link"
                     onMouseEnter={() => setActiveMegaMenu('men')}
                   >
-                    MEN
+                    Men
                   </Link>
                   <Link 
                     href="/collection/women" 
                     className="acne-nav-desktop-link"
                     onMouseEnter={() => setActiveMegaMenu('women')}
                   >
-                    WOMEN
+                    Women
                   </Link>
                   <Link 
                     href="/collection" 
@@ -790,12 +790,12 @@ export default function Navbar() {
         }
         .acne-nav-desktop-link {
           font-family: var(--font-primary);
-          font-size: 10px;
-          font-weight: 300;
+          font-size: 11px;
+          font-weight: var(--w-medium);
           text-transform: uppercase;
           text-decoration: none;
-          color: rgba(0, 0, 0, 0.85);
-          letter-spacing: 0.15em;
+          color: #000000;
+          letter-spacing: 0.03em;
           padding: 8px 0;
           position: relative;
           background: none;
@@ -1135,7 +1135,7 @@ export default function Navbar() {
         .acne-header-menu-title {
           font-family: var(--font-primary), sans-serif;
           font-size: 11.5px;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.03em;
           color: #000000;
           font-weight: 400;
           white-space: nowrap;
@@ -1144,7 +1144,7 @@ export default function Navbar() {
           text-transform: uppercase;
         }
         .acne-header-menu-title.capitalized {
-          text-transform: capitalize;
+          text-transform: uppercase;
         }
         .acne-nav-right-close-only {
           display: flex;

@@ -22,9 +22,141 @@ const SEARCH_BY_PRODUCT = [
   "Accessories"
 ];
 
+const getProductImageClass = (title: string, tags?: string[]) => {
+  const t = title.toLowerCase();
+  const tg = (tags || []).map(x => x.toLowerCase());
+  const isSneaker = t.includes('sneaker') || t.includes('shoe') || tg.includes('sneakers') || tg.includes('shoes');
+  const isPants = t.includes('pants') || t.includes('jeans') || t.includes('trousers') || tg.includes('pants') || tg.includes('jeans');
+  const isAccessory = t.includes('bag') || t.includes('accessory') || t.includes('sunglasses') || tg.includes('accessories');
+  if (isSneaker) return 'amiri-product-img--sneaker';
+  if (isPants) return 'amiri-product-img--pants';
+  if (isAccessory) return 'amiri-product-img--accessory';
+  return 'amiri-product-img--top'; // Default
+};
+
+function SearchProductCard({ 
+  product, 
+  formatPrice,
+  closeSearch
+}: { 
+  product: any; 
+  formatPrice: (price: number, currency: string) => string; 
+  closeSearch: () => void;
+}) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const images = product.images && product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean) as string[];
+
+  const { toggle, has } = useWishlist();
+  const isFavorite = has(product.handle);
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggle({
+      handle: product.handle,
+      title: product.title,
+      imageUrl: product.imageUrl || '',
+      price: product.price,
+      currencyCode: product.currencyCode || 'EUR',
+      collectionTitle: ''
+    });
+  };
+
+  const handleScroll = () => {
+    if (carouselRef.current) {
+      const { scrollLeft, clientWidth } = carouselRef.current;
+      if (clientWidth > 0) {
+        const index = Math.round(scrollLeft / clientWidth);
+        if (index !== activeIdx) {
+          setActiveIdx(index);
+        }
+      }
+    }
+  };
+
+  const imageClass = getProductImageClass(product.title, product.tags);
+
+  return (
+    <div className="amiri-grid-item amiri-grid-item--product">
+      {/* Swipeable Image Gallery */}
+      <div className="v-product-gallery-container">
+        {/* Wishlist/Favorites Star Button */}
+        <button 
+          type="button"
+          className={`v-wishlist-btn ${isFavorite ? 'favorite' : ''}`}
+          onClick={handleToggleFavorite}
+          aria-label={isFavorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
+        >
+          {isFavorite ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000" stroke="#000000" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          )}
+        </button>
+
+        <div 
+          ref={carouselRef}
+          className="v-product-carousel"
+          onScroll={handleScroll}
+        >
+          {images.map((imgUrl, i) => (
+            <Link 
+              key={i} 
+              href={`/product/${product.handle}`} 
+              className="v-product-carousel-slide"
+              draggable={false}
+              onClick={closeSearch}
+            >
+              <img
+                src={getOptimizedImageUrl(imgUrl, 800)}
+                alt={`${product.title} - Vista ${i + 1}`}
+                className={`amiri-product-img ${imageClass}`}
+                loading="lazy"
+                draggable={false}
+              />
+            </Link>
+          ))}
+        </div>
+
+        {/* Counter of images */}
+        {images.length > 1 && (
+          <span className="v-product-carousel-counter">
+            {activeIdx + 1}/{images.length}
+          </span>
+        )}
+      </div>
+
+      <Link href={`/product/${product.handle}`} className="amiri-product-info" onClick={closeSearch}>
+        <span className="amiri-product-name">{product.title}</span>
+        <span className="amiri-product-price">
+          {formatPrice(product.price, product.currencyCode || 'EUR')}
+        </span>
+      </Link>
+
+      {/* Horizontal Progress Indicator Bar below title and price */}
+      {images.length > 1 && (
+        <div className="v-product-carousel-indicator-bar">
+          <div 
+            className="v-product-carousel-indicator-progress"
+            style={{
+              width: `${100 / images.length}%`,
+              transform: `translateX(${activeIdx * 100}%)`
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SearchDrawer() {
   const { isSearchOpen, closeSearch } = useUI();
-  const { formatPrice } = useLocale();
+  const { formatPrice, language } = useLocale();
   const { toggle: toggleWishlist, has: isInWishlist } = useWishlist();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,6 +167,7 @@ export default function SearchDrawer() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [allProductsCache, setAllProductsCache] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [hasExpanded, setHasExpanded] = useState(false);
 
   // Fallback recommended products for "También Te Sugerimos" / "New In"
   const fallbackSuggestions = [
@@ -136,16 +269,28 @@ export default function SearchDrawer() {
     if (isSearchOpen) {
       setTimeout(() => inputRef.current?.focus(), 150);
       document.body.style.overflow = "hidden";
+      document.body.classList.add("search-open");
     } else {
       document.body.style.overflow = "";
+      document.body.classList.remove("search-open");
       setSearchQuery("");
       setSearchResults([]);
       setIsSearching(false);
+      setHasExpanded(false);
     }
     return () => {
       document.body.style.overflow = "";
+      document.body.classList.remove("search-open");
+      setHasExpanded(false);
     };
   }, [isSearchOpen]);
+
+  // Set hasExpanded to true when search results are populated
+  useEffect(() => {
+    if (searchQuery.trim() && searchResults.length > 0) {
+      setHasExpanded(true);
+    }
+  }, [searchQuery, searchResults]);
 
   const saveSearchTerm = (term: string) => {
     const trimmed = term.trim().toLowerCase();
@@ -190,7 +335,7 @@ export default function SearchDrawer() {
       
       {/* Search Modal Overlay */}
       <div 
-        className={`sd-overlay ${isSearchOpen ? "open" : ""}`} 
+        className={`sd-overlay ${isSearchOpen ? "open" : ""} ${hasExpanded ? "expanded" : ""}`} 
         role="dialog" 
         aria-modal="true"
       >
@@ -222,7 +367,7 @@ export default function SearchDrawer() {
                   
                   {/* Column 1: Popular searches */}
                   <div className="sd-suggest-col">
-                    <h4 className="sd-col-title">Trending Searches</h4>
+                    <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Populares' : 'Trending Searches'}</h4>
                     <ul className="sd-list">
                       {TRENDING_SEARCHES.map((term) => (
                         <li key={term}>
@@ -238,7 +383,7 @@ export default function SearchDrawer() {
                   <div className="sd-suggest-col">
                     {recentSearches.length > 0 && (
                       <div style={{ marginBottom: '28px' }}>
-                        <h4 className="sd-col-title">Recently Searched</h4>
+                        <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Recientes' : 'Recently Searched'}</h4>
                         <ul className="sd-list">
                           {recentSearches.map((term) => (
                             <li key={term}>
@@ -251,7 +396,7 @@ export default function SearchDrawer() {
                       </div>
                     )}
 
-                    <h4 className="sd-col-title">Search by Product</h4>
+                    <h4 className="sd-col-title">{language === 'es' ? 'Buscar por Categoría' : 'Search by Product'}</h4>
                     <ul className="sd-list">
                       {SEARCH_BY_PRODUCT.map((term) => (
                         <li key={term}>
@@ -265,23 +410,25 @@ export default function SearchDrawer() {
 
                   {/* Column 3: Recommended Items — Desktop only inline, mobile goes to bottom */}
                   <div className="sd-suggest-col sd-suggest-col--preview sd-desktop-preview">
-                    <h4 className="sd-col-title">We Also Suggest</h4>
-                    <div className="sd-suggest-strip">
-                      {suggestedProducts.map((p) => {
-                        const image = p.imageUrl || p.images?.[0];
-                        return (
-                          <Link 
-                            key={p.handle} 
-                            href={`/product/${p.handle}`}
-                            className="sd-mini-card"
-                            onClick={closeSearch}
-                          >
-                            <div className="sd-mini-card-img-wrap">
-                              {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
-                            </div>
-                          </Link>
-                        );
-                      })}
+                    <div className="sd-suggest-inner-wrap">
+                      <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
+                      <div className="sd-suggest-strip">
+                        {suggestedProducts.map((p) => {
+                          const image = p.imageUrl || p.images?.[0];
+                          return (
+                            <Link 
+                              key={p.handle} 
+                              href={`/product/${p.handle}`}
+                              className="sd-mini-card"
+                              onClick={closeSearch}
+                            >
+                              <div className="sd-mini-card-img-wrap">
+                                {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
@@ -289,7 +436,7 @@ export default function SearchDrawer() {
 
                 {/* Mobile-only: We Also Suggest pinned at the bottom */}
                 <div className="sd-mobile-suggest-bottom">
-                  <h4 className="sd-col-title">We Also Suggest</h4>
+                  <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
                   <div className="sd-suggest-strip">
                     {suggestedProducts.map((p) => {
                       const image = p.imageUrl || p.images?.[0];
@@ -315,45 +462,32 @@ export default function SearchDrawer() {
             {searchQuery.trim() && searchResults.length === 0 && !isSearching && (
               <div className="sd-empty-results-container">
                 <div className="sd-results-header">
-                  <span className="sd-results-count-title">Search Results (0)</span>
+                  <span className="sd-results-count-title">{language === 'es' ? 'Resultados de la búsqueda (0)' : 'Search Results (0)'}</span>
                 </div>
 
                 <div className="sd-empty-box">
-                  <h3 className="sd-empty-heading">No Matches Found For "{searchQuery}"</h3>
-                  <p className="sd-empty-subheading">Please Try Another Search Or Contact Us.</p>
+                  <h3 className="sd-empty-heading">
+                    {language === 'es' ? `No se encontraron coincidencias para "${searchQuery}"` : `No Matches Found For "${searchQuery}"`}
+                  </h3>
+                  <p className="sd-empty-subheading">
+                    {language === 'es' ? 'Intente realizar otra búsqueda o póngase en contacto con nosotros.' : 'Please Try Another Search Or Contact Us.'}
+                  </p>
                 </div>
 
                 {/* Show fallback suggestions below */}
                 <div className="sd-empty-suggestions-section">
-                  <h4 className="sd-col-title uppercase" style={{ marginBottom: '20px' }}>New In</h4>
+                  <h4 className="sd-col-title uppercase" style={{ marginBottom: '20px' }}>
+                    {language === 'es' ? 'Novedades' : 'New In'}
+                  </h4>
                   <div className="sd-product-grid">
-                    {suggestedProducts.map((p) => {
-                      const image = p.imageUrl || p.images?.[0];
-                      const priceStr = formatPrice(p.price, p.currencyCode ?? 'EUR');
-                      const favorited = isInWishlist(p.handle);
-                      
-                      return (
-                        <div key={p.handle} className="sd-product-card">
-                          <button 
-                            className={`sd-fav-btn ${favorited ? 'active' : ''}`}
-                            onClick={(e) => { e.preventDefault(); toggleWishlist(p); }}
-                            aria-label="Add to wishlist"
-                          >
-                            <Heart size={14} fill={favorited ? "#000000" : "none"} strokeWidth={1.2} />
-                          </button>
-                          
-                          <Link href={`/product/${p.handle}`} onClick={closeSearch} className="sd-card-link">
-                            <div className="sd-card-img-wrap">
-                              {image && <img src={getOptimizedImageUrl(image, 320)} alt={p.title} />}
-                            </div>
-                            <div className="sd-card-meta">
-                              <span className="sd-card-name">{toTitleCase(p.title)}</span>
-                              <span className="sd-card-price">{priceStr}</span>
-                            </div>
-                          </Link>
-                        </div>
-                      );
-                    })}
+                    {suggestedProducts.map((p) => (
+                      <SearchProductCard 
+                        key={p.handle} 
+                        product={p} 
+                        formatPrice={formatPrice} 
+                        closeSearch={closeSearch} 
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -364,7 +498,7 @@ export default function SearchDrawer() {
               <div className="sd-results-container">
                 <header className="sd-results-header">
                   <span className="sd-results-count-title">
-                    Search Results ({searchResults.length})
+                    {language === 'es' ? 'Resultados de la búsqueda' : 'Search Results'} ({searchResults.length})
                     {isSearching && <span className="sd-pulse-dot">...</span>}
                   </span>
                   <button 
@@ -375,38 +509,19 @@ export default function SearchDrawer() {
                       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
                     }}
                   >
-                    Filter
+                    {language === 'es' ? 'Filtrar' : 'Filter'}
                   </button>
                 </header>
 
                 <div className="sd-product-grid">
-                  {searchResults.map((p) => {
-                    const image = p.imageUrl || p.images?.[0];
-                    const priceStr = formatPrice(p.price, p.currencyCode ?? 'EUR');
-                    const favorited = isInWishlist(p.handle);
-                    
-                    return (
-                      <div key={p.handle} className="sd-product-card">
-                        <button 
-                          className={`sd-fav-btn ${favorited ? 'active' : ''}`}
-                          onClick={(e) => { e.preventDefault(); toggleWishlist(p); }}
-                          aria-label="Add to wishlist"
-                        >
-                          <Heart size={14} fill={favorited ? "#000000" : "none"} strokeWidth={1.2} />
-                        </button>
-                        
-                        <Link href={`/product/${p.handle}`} onClick={closeSearch} className="sd-card-link">
-                          <div className="sd-card-img-wrap">
-                            {image && <img src={getOptimizedImageUrl(image, 320)} alt={p.title} />}
-                          </div>
-                          <div className="sd-card-meta">
-                            <span className="sd-card-name">{toTitleCase(p.title)}</span>
-                            <span className="sd-card-price">{priceStr}</span>
-                          </div>
-                        </Link>
-                      </div>
-                    );
-                  })}
+                  {searchResults.map((p) => (
+                    <SearchProductCard 
+                      key={p.handle} 
+                      product={p} 
+                      formatPrice={formatPrice} 
+                      closeSearch={closeSearch} 
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -416,13 +531,25 @@ export default function SearchDrawer() {
       </div>
 
       <style>{`
+        /* ══ WEB BLUR EFFECT WHEN SEARCH OPEN ══ */
+        body > main,
+        .acne-header,
+        footer {
+          transition: filter 0.4s ease;
+        }
+        body.search-open > main,
+        body.search-open .acne-header,
+        body.search-open footer {
+          filter: blur(8px);
+        }
+
         /* ══ BACKDROP ══ */
         .sd-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.2);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          background: rgba(0, 0, 0, 0.15);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
           opacity: 0;
           pointer-events: none;
           z-index: 10000;
@@ -443,10 +570,18 @@ export default function SearchDrawer() {
           font-family: var(--font-primary), sans-serif;
           opacity: 0;
           pointer-events: none;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+                      opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+                      height 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                      max-height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
           overflow-y: auto;
           scrollbar-width: none;
           border-radius: 0 !important;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: auto;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
         .sd-overlay::-webkit-scrollbar {
           display: none;
@@ -454,61 +589,62 @@ export default function SearchDrawer() {
 
         /* Responsive placement */
         @media (max-width: 767px) {
-          /* Mobile: TRUE full-screen, no margins */
+          /* Mobile: top overlay covering 60% height with a 2D dice/tilt roll */
           .sd-overlay {
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
             width: 100%;
             max-width: 100%;
-            max-height: 100vh;
-            transform: translateY(10px);
+            height: 60vh;
+            max-height: 60vh;
+            transform: translateY(-100%) rotate(-4deg);
           }
           .sd-overlay.open {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(0);
+            transform: translateY(0) rotate(0deg);
+          }
+          .sd-overlay.open.expanded {
+            height: 100vh;
+            max-height: 100vh;
           }
         }
         @media (min-width: 768px) {
-          /* Desktop full-width layout covering the upper page */
+          /* Desktop: top overlay covering 60% height with a 2D dice/tilt roll */
           .sd-overlay {
-            top: 0;
-            left: 0;
-            right: 0;
             width: 100%;
-            max-height: 90vh;
-            transform: translateY(-20px);
-            border-bottom: none;
+            height: 60vh;
+            max-height: 60vh;
+            transform: translateY(-100%) rotate(-2deg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
           }
           .sd-overlay.open {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(0);
+            transform: translateY(0) rotate(0deg);
+          }
+          .sd-overlay.open.expanded {
+            height: 100vh;
+            max-height: 100vh;
           }
         }
 
         /* ══ WRAPPER ══ */
         .sd-wrapper {
           width: 100%;
-          max-width: 1440px;
-          margin: 0 auto;
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
-          padding: 24px 16px;
+          padding: 12px 16px 24px 16px;
           height: 100%;
         }
         @media (min-width: 768px) {
           .sd-wrapper {
-            padding: 40px 24px;
+            padding: 20px 24px 40px 24px;
             height: auto;
           }
         }
         @media (min-width: 1024px) {
           .sd-wrapper {
-            padding: 48px 40px;
+            padding: 24px 40px 48px 40px;
           }
         }
 
@@ -598,6 +734,15 @@ export default function SearchDrawer() {
             display: flex !important;
             flex-direction: column;
           }
+          .sd-suggest-inner-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            width: 100%;
+            max-width: 380px;
+            margin-left: auto;
+          }
           /* Hide mobile strip on desktop */
           .sd-mobile-suggest-bottom {
             display: none !important;
@@ -658,34 +803,38 @@ export default function SearchDrawer() {
         .sd-suggest-strip {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 8px;
+          gap: 1px;
+          background-color: #ffffff;
+          max-width: 380px;
+          width: 100%;
         }
         @media (max-width: 767px) {
           .sd-suggest-strip {
-            gap: 6px;
+            gap: 1px;
           }
         }
         .sd-mini-card {
           display: block;
           text-decoration: none;
-          background: #ffffff;
+          background: #f5f2ea;
           border: none;
         }
         .sd-mini-card-img-wrap {
           width: 100%;
-          aspect-ratio: 1 / 1;
+          aspect-ratio: 3 / 4;
           display: flex;
           align-items: center;
           justify-content: center;
           overflow: hidden;
           padding: 8px;
           box-sizing: border-box;
-          background: #f5f3f0;
+          background: #f5f2ea;
         }
         .sd-mini-card-img-wrap img {
           width: 100%;
           height: 100%;
           object-fit: contain;
+          mix-blend-mode: multiply;
         }
 
         /* ══ RESULTS CONTAINER ══ */
@@ -734,115 +883,251 @@ export default function SearchDrawer() {
         .sd-product-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 8px;
+          gap: 1px;
+          background-color: #ffffff;
+          margin-top: 16px;
+          margin-left: -16px;
+          margin-right: -16px;
         }
         @media (min-width: 768px) {
           .sd-product-grid {
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 1px;
+            margin-left: -24px;
+            margin-right: -24px;
           }
         }
         @media (min-width: 1024px) {
           .sd-product-grid {
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-          }
-        }
-        @media (min-width: 1440px) {
-          .sd-product-grid {
-            gap: 20px;
+            gap: 1px;
+            margin-left: -40px;
+            margin-right: -40px;
           }
         }
 
-        /* Product Card */
-        .sd-product-card {
+        .amiri-grid-item {
           background: #ffffff;
           position: relative;
           display: flex;
           flex-direction: column;
           border: none;
           box-sizing: border-box;
+          height: 100%;
+        }
+        .amiri-grid-item * {
           border-radius: 0 !important;
         }
-        .sd-product-card * {
-          border-radius: 0 !important;
-        }
-        .sd-card-link {
-          display: flex;
-          flex-direction: column;
-          text-decoration: none;
-          color: #111111;
-        }
-        .sd-card-img-wrap {
+
+        /* Swiper / Carousel styles */
+        .v-product-gallery-container {
           width: 100%;
-          aspect-ratio: 16 / 19;
+          aspect-ratio: 3 / 4;
+          position: relative;
+          overflow: hidden;
+          background-color: #f5f2ea;
+          flex-shrink: 0;
+        }
+        @media (max-width: 767px) {
+          .v-product-gallery-container {
+            flex: none;
+            height: auto;
+            aspect-ratio: 3 / 4;
+          }
+        }
+
+        .v-product-link-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 4;
+        }
+
+        .v-product-carousel {
+          display: flex;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          width: 100%;
+          height: 100%;
+        }
+        .v-product-carousel::-webkit-scrollbar {
+          display: none;
+        }
+
+        .v-product-carousel-slide {
+          flex: 0 0 100%;
+          width: 100%;
+          height: 100%;
+          scroll-snap-align: start;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #ffffff;
-          overflow: hidden;
+          position: relative;
           padding: 12px;
           box-sizing: border-box;
-          transition: opacity 0.3s ease;
+          background-color: #f5f2ea;
         }
-        .sd-product-card:hover .sd-card-img-wrap {
-          opacity: 0.95;
+        .v-product-carousel-slide:hover {
+          background-color: #f5f2ea;
+          opacity: 1;
         }
-        .sd-card-img-wrap img {
-          max-width: 100%;
-          max-height: 100%;
+
+        .v-product-carousel-counter {
+          position: absolute;
+          bottom: 8px;
+          right: 12px;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 8px;
+          font-weight: 300;
+          color: rgba(0, 0, 0, 0.4);
+          background-color: transparent;
+          letter-spacing: 0.05em;
+          z-index: 5;
+        }
+
+        .v-product-carousel-indicator-bar {
+          width: 100%;
+          height: 2px;
+          background-color: transparent;
+        }
+
+        .v-product-carousel-indicator-progress {
+          height: 100%;
+          background-color: #000000;
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .amiri-product-img {
+          width: 100%;
+          height: 100%;
+          display: block;
           object-fit: contain;
           mix-blend-mode: multiply;
         }
-        .sd-card-meta {
-          padding: 12px 8px 14px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          text-align: center;
+
+        .amiri-product-img--top,
+        .amiri-product-img--pants,
+        .amiri-product-img--sneaker,
+        .amiri-product-img--accessory {
+          width: 100%;
+          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
         }
-        .sd-card-name {
+
+        .amiri-product-info {
+          padding: 20px 24px 20px 40px;
+          background-color: #f5f2ea;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 12px;
+          box-sizing: border-box;
+          z-index: 5;
+          width: 100%;
+          text-decoration: none;
+        }
+        .amiri-product-info:hover {
+          opacity: 1;
+        }
+
+        @media (max-width: 767px) {
+          .amiri-product-info {
+            background-color: #f5f2ea;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 16px;
+            align-items: flex-start;
+          }
+        }
+
+        .amiri-product-name {
           font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 0.06em;
-          color: #111111;
+          font-size: 11px;
+          font-weight: 300;
+          text-transform: lowercase;
+          letter-spacing: 0.05em;
+          color: #000000;
+          margin: 0;
+          line-height: 1.3;
+          flex: 1;
+          text-align: left;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          width: 100%;
-        }
-        .sd-card-price {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 9px;
-          font-weight: 300;
-          letter-spacing: 0.04em;
-          color: #777777;
         }
 
-        /* Wishlist Heart Icon overlay */
-        .sd-fav-btn {
+        @media (max-width: 767px) {
+          .amiri-product-name {
+            font-size: 11px;
+            white-space: normal;
+            line-height: 1.35;
+          }
+        }
+
+        .amiri-product-price {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: 400;
+          color: #000000;
+          letter-spacing: 0.05em;
+          margin: 0;
+          text-align: right;
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 767px) {
+          .amiri-product-price {
+            text-align: left;
+            color: rgba(0,0,0,0.65);
+          }
+        }
+
+        /* WISHLIST STAR BUTTON */
+        .v-wishlist-btn {
           position: absolute;
-          top: 10px;
-          right: 10px;
+          top: 16px;
+          right: 16px;
           background: none;
           border: none;
+          color: #000000;
           cursor: pointer;
-          z-index: 5;
+          z-index: 10;
           padding: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: rgba(0, 0, 0, 0.4);
-          transition: color 0.2s ease, transform 0.2s ease;
+          transition: opacity 0.25s ease, transform 0.2s ease;
+          outline: none;
         }
-        .sd-fav-btn:hover {
-          color: #000000;
-          transform: scale(1.05);
+
+        .v-wishlist-btn:hover {
+          transform: scale(1.1);
         }
-        .sd-fav-btn.active {
-          color: #000000;
+
+        @media (max-width: 767px) {
+          .v-wishlist-btn {
+            top: 10px;
+            right: 10px;
+            padding: 4px;
+          }
+          .v-wishlist-btn svg {
+            width: 12px;
+            height: 12px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .v-wishlist-btn {
+            opacity: 0;
+            pointer-events: none;
+          }
+          .amiri-grid-item:hover .v-wishlist-btn {
+            opacity: 1;
+            pointer-events: all;
+          }
         }
 
         /* ══ EMPTY BOX ══ */

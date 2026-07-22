@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const ANNOUNCEMENTS = [
-  "COMPLIMENTARY SHIPPING ON ALL ORDERS",
-  "DISCOVER THE NEW COLLECTIONS"
+  "PRE FALL-WINTER COLLECTION LIVE NOW"
 ];
 
 export default function AnnouncementBar() {
@@ -76,10 +75,10 @@ export default function AnnouncementBar() {
           left: 0;
           right: 0;
           z-index: 600;
-          font-family: var(--font-primary), sans-serif;
-          font-size: 8px;
-          font-weight: 300;
-          letter-spacing: 0.3em;
+          font-family: 'Erode', var(--font-primary), sans-serif;
+          font-size: 10px;
+          font-weight: 400;
+          letter-spacing: 0.15em;
           text-transform: uppercase;
           padding: 0 40px;
           box-sizing: border-box;
@@ -91,9 +90,10 @@ export default function AnnouncementBar() {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-transform: uppercase;
         }
         .ann-fade-in {
-          opacity: 0.85;
+          opacity: 0.95;
           transform: translateY(0);
         }
         .ann-fade-out {
@@ -121,8 +121,8 @@ export default function AnnouncementBar() {
         }
         @media (max-width: 767px) {
           .ann-bar {
-            font-size: 7.5px;
-            letter-spacing: 0.22em;
+            font-size: 9px;
+            letter-spacing: 0.12em;
             padding: 0 32px 0 16px;
           }
           .ann-close {

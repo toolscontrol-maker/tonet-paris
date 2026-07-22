@@ -4,6 +4,7 @@ import { Jost, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AnnouncementBar from "@/components/AnnouncementBar";
 
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
@@ -55,6 +56,7 @@ export default function RootLayout({
             <CartProvider>
               <AuthProvider>
               <WishlistProvider>
+                <AnnouncementBar />
                 <Navbar />
                 <CartDrawer />
                 <AccountDrawer />
