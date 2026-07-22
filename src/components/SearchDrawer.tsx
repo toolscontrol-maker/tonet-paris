@@ -45,7 +45,7 @@ function SearchProductCard({
 }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const images = product.images && product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean) as string[];
+  const images: string[] = product.images && product.images.length > 0 ? product.images : ([product.imageUrl].filter(Boolean) as string[]);
 
   const { toggle, has } = useWishlist();
   const isFavorite = has(product.handle);
@@ -104,7 +104,7 @@ function SearchProductCard({
           className="v-product-carousel"
           onScroll={handleScroll}
         >
-          {images.map((imgUrl, i) => (
+          {images.map((imgUrl: string, i: number) => (
             <Link 
               key={i} 
               href={`/product/${product.handle}`} 
