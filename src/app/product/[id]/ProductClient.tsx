@@ -1275,37 +1275,30 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
-                      <div className="amiri-ctl-card">
-                        <Link href={`/product/${p.handle}`} className="amiri-ctl-image-link">
-                          <div 
-                            className="amiri-ctl-image-panel"
-                            ref={idx === 0 ? outfitImgRef : null}
-                          >
-                            {p.imageUrl && (
-                              <img 
-                                src={p.imageUrl} 
-                                alt={p.title} 
-                                className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
-                                loading="lazy"
-                                decoding="async"
-                                onLoad={(e) => e.currentTarget.classList.add('loaded')}
-                                ref={(el) => {
-                                  if (el && el.complete) el.classList.add('loaded');
-                                }}
-                              />
-                            )}
-                          </div>
-                        </Link>
-                        <div className="amiri-ctl-meta">
-                          <Link href={`/product/${p.handle}`} className="amiri-ctl-meta-left">
-                            <span className="amiri-ctl-name">{p.title}</span>
-                            <span className="amiri-ctl-price">{formattedPrice}</span>
-                          </Link>
-                          <Link href={`/product/${p.handle}`} className="amiri-ctl-buy-btn">
-                            {language === 'es' ? 'Comprar' : 'Buy'}
-                          </Link>
+                      <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
+                        <div 
+                          className="amiri-ctl-image-panel"
+                          ref={idx === 0 ? outfitImgRef : null}
+                        >
+                          {p.imageUrl && (
+                            <img 
+                              src={p.imageUrl} 
+                              alt={p.title} 
+                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
+                              loading="lazy"
+                              decoding="async"
+                              onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                              ref={(el) => {
+                                if (el && el.complete) el.classList.add('loaded');
+                              }}
+                            />
+                          )}
                         </div>
-                      </div>
+                        <div className="amiri-ctl-meta">
+                          <span className="amiri-ctl-name">{p.title}</span>
+                          <span className="amiri-ctl-price">{formattedPrice}</span>
+                        </div>
+                      </Link>
                     </div>
                   );
                 })}
@@ -1352,37 +1345,30 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
-                      <div className="amiri-ctl-card">
-                        <Link href={`/product/${p.handle}`} className="amiri-ctl-image-link">
-                          <div 
-                            className="amiri-ctl-image-panel"
-                            ref={idx === 0 ? recImgRef : null}
-                          >
-                            {p.imageUrl && (
-                              <img 
-                                src={p.imageUrl} 
-                                alt={p.title} 
-                                className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
-                                loading="lazy"
-                                decoding="async"
-                                onLoad={(e) => e.currentTarget.classList.add('loaded')}
-                                ref={(el) => {
-                                  if (el && el.complete) el.classList.add('loaded');
-                                }}
-                              />
-                            )}
-                          </div>
-                        </Link>
-                        <div className="amiri-ctl-meta">
-                          <Link href={`/product/${p.handle}`} className="amiri-ctl-meta-left">
-                            <span className="amiri-ctl-name">{p.title}</span>
-                            <span className="amiri-ctl-price">{formattedPrice}</span>
-                          </Link>
-                          <Link href={`/product/${p.handle}`} className="amiri-ctl-buy-btn">
-                            {language === 'es' ? 'Comprar' : 'Buy'}
-                          </Link>
+                      <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
+                        <div 
+                          className="amiri-ctl-image-panel"
+                          ref={idx === 0 ? recImgRef : null}
+                        >
+                          {p.imageUrl && (
+                            <img 
+                              src={p.imageUrl} 
+                              alt={p.title} 
+                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
+                              loading="lazy"
+                              decoding="async"
+                              onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                              ref={(el) => {
+                                if (el && el.complete) el.classList.add('loaded');
+                              }}
+                            />
+                          )}
                         </div>
-                      </div>
+                        <div className="amiri-ctl-meta">
+                          <span className="amiri-ctl-name">{p.title}</span>
+                          <span className="amiri-ctl-price">{formattedPrice}</span>
+                        </div>
+                      </Link>
                     </div>
                   );
                 })}
@@ -3401,7 +3387,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: block;
           width: 100%;
         }
-        .amiri-ctl-image-link:hover .amiri-ctl-image {
+        .amiri-ctl-card {
+          display: block;
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+        }
+        .amiri-ctl-card:hover .amiri-ctl-image {
           transform: scale(1.04);
         }
 
@@ -3426,23 +3418,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .amiri-ctl-meta {
           padding: 16px 8px 24px 8px;
           display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: 12px;
-          box-sizing: border-box;
-          width: 100%;
-        }
-
-        .amiri-ctl-meta-left {
-          display: flex;
           flex-direction: column;
           align-items: flex-start;
           gap: 6px;
-          flex: 1;
-          text-decoration: none;
-          color: inherit;
-          min-width: 0;
+          box-sizing: border-box;
+          width: 100%;
         }
 
         .amiri-ctl-name {
@@ -3471,28 +3451,9 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           text-align: left;
         }
 
-        .amiri-ctl-buy-btn {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: var(--w-medium);
-          letter-spacing: 0.05em;
-          text-transform: capitalize;
-          text-decoration: underline;
-          text-underline-offset: 3px;
-          color: #111111;
-          flex-shrink: 0;
-          margin-bottom: 2px;
-        }
-        .amiri-ctl-buy-btn:hover {
-          opacity: 0.7;
-        }
-
         @media (max-width: 767px) {
           .amiri-ctl-meta {
             padding: 12px 4px 16px 4px;
-            gap: 8px;
-          }
-          .amiri-ctl-meta-left {
             gap: 2px;
           }
           .amiri-ctl-name {
@@ -3506,9 +3467,6 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           .amiri-ctl-price {
             font-size: 9.5px;
             color: rgba(0, 0, 0, 0.65);
-          }
-          .amiri-ctl-buy-btn {
-            font-size: 9px;
           }
         }
 

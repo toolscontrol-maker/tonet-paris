@@ -10,58 +10,47 @@ interface Props {
 }
 
 export default function RecommendedCard({ product }: Props) {
-  const { formatPrice, language } = useLocale();
+  const { formatPrice } = useLocale();
   const displayHref = `/product/${product.handle}`;
   const primaryImage = getOptimizedImageUrl(product.imageUrl, 600);
   const secondImage = product.siblings.length > 0 ? getOptimizedImageUrl(product.siblings[0].imageUrl, 600) : null;
 
   return (
     <div className="tonet-house-carousel__card-wrap">
-      <div className="tonet-house-carousel__card">
-        <Link href={displayHref} className="tonet-house-carousel__image-link">
-          <div className="tonet-house-carousel__image-wrap">
-            {product.imageUrl && (
-              <img 
-                src={primaryImage} 
-                alt={product.title} 
-                className="tonet-house-carousel__image tonet-house-carousel__image--primary" 
-              />
-            )}
-            {secondImage && (
-              <img 
-                src={secondImage} 
-                alt={product.title} 
-                className="tonet-house-carousel__image tonet-house-carousel__image--secondary" 
-              />
-            )}
-          </div>
-        </Link>
-        <div className="tonet-house-carousel__meta">
-          <Link href={displayHref} className="tonet-house-carousel__meta-left">
-            <span className="tonet-house-carousel__title">{product.title}</span>
-            <span className="tonet-house-carousel__price">
-              {formatPrice(product.price, product.currencyCode)}
-            </span>
-          </Link>
-          <Link href={displayHref} className="tonet-house-carousel__buy-btn">
-            {language === 'es' ? 'Comprar' : 'Buy'}
-          </Link>
+      <Link href={displayHref} className="tonet-house-carousel__card">
+        <div className="tonet-house-carousel__image-wrap">
+          {product.imageUrl && (
+            <img 
+              src={primaryImage} 
+              alt={product.title} 
+              className="tonet-house-carousel__image tonet-house-carousel__image--primary" 
+            />
+          )}
+          {secondImage && (
+            <img 
+              src={secondImage} 
+              alt={product.title} 
+              className="tonet-house-carousel__image tonet-house-carousel__image--secondary" 
+            />
+          )}
         </div>
-      </div>
+        <div className="tonet-house-carousel__meta">
+          <span className="tonet-house-carousel__title">{product.title}</span>
+          <span className="tonet-house-carousel__price">
+            {formatPrice(product.price, product.currencyCode)}
+          </span>
+        </div>
+      </Link>
 
       <style>{`
         .tonet-house-carousel__card-wrap {
           position: relative;
         }
         .tonet-house-carousel__card {
-          display: flex;
-          flex-direction: column;
+          display: block;
           text-decoration: none;
           color: inherit;
-        }
-        .tonet-house-carousel__image-link {
-          display: block;
-          width: 100%;
+          cursor: pointer;
         }
         .tonet-house-carousel__image-wrap {
           position: relative;
@@ -89,38 +78,27 @@ export default function RecommendedCard({ product }: Props) {
           inset: 2px;
           opacity: 0;
         }
-        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image-wrap {
+        .tonet-house-carousel__card:hover .tonet-house-carousel__image-wrap {
           transform: translateY(-2px);
           box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
         }
-        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image {
+        .tonet-house-carousel__card:hover .tonet-house-carousel__image {
           transform: scale(1.04);
         }
-        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image--primary {
+        .tonet-house-carousel__card:hover .tonet-house-carousel__image--primary {
           opacity: ${secondImage ? 0 : 1};
         }
-        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image--secondary {
+        .tonet-house-carousel__card:hover .tonet-house-carousel__image--secondary {
           opacity: 1;
         }
         .tonet-house-carousel__meta {
           padding: 16px 8px 24px 8px;
           display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: 12px;
-          box-sizing: border-box;
-          width: 100%;
-        }
-        .tonet-house-carousel__meta-left {
-          display: flex;
           flex-direction: column;
           align-items: flex-start;
           gap: 6px;
-          flex: 1;
-          text-decoration: none;
-          color: inherit;
-          min-width: 0;
+          box-sizing: border-box;
+          width: 100%;
         }
         .tonet-house-carousel__title {
           font-family: var(--font-primary), sans-serif;
@@ -146,28 +124,10 @@ export default function RecommendedCard({ product }: Props) {
           margin: 0;
           text-align: left;
         }
-        .tonet-house-carousel__buy-btn {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: var(--w-medium);
-          letter-spacing: 0.05em;
-          text-transform: capitalize;
-          text-decoration: underline;
-          text-underline-offset: 3px;
-          color: #111111;
-          flex-shrink: 0;
-          margin-bottom: 2px;
-        }
-        .tonet-house-carousel__buy-btn:hover {
-          opacity: 0.7;
-        }
 
         @media (max-width: 767px) {
           .tonet-house-carousel__meta {
             padding: 12px 4px 16px 4px;
-            gap: 8px;
-          }
-          .tonet-house-carousel__meta-left {
             gap: 2px;
           }
           .tonet-house-carousel__title {
@@ -181,9 +141,6 @@ export default function RecommendedCard({ product }: Props) {
           .tonet-house-carousel__price {
             font-size: 9.5px;
             color: rgba(0, 0, 0, 0.65);
-          }
-          .tonet-house-carousel__buy-btn {
-            font-size: 9px;
           }
         }
       `}</style>

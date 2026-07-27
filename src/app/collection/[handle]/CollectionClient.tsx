@@ -181,17 +181,12 @@ function ProductCard({
         )}
       </div>
 
-      <div className="amiri-product-info">
-        <Link href={`/product/${product.handle}`} className="amiri-product-info-left">
-          <span className="amiri-product-name">{product.title}</span>
-          <span className="amiri-product-price">
-            {formatPrice(product.price, product.currencyCode)}
-          </span>
-        </Link>
-        <Link href={`/product/${product.handle}`} className="amiri-product-buy-btn">
-          {language === 'es' ? 'Comprar' : 'Buy'}
-        </Link>
-      </div>
+      <Link href={`/product/${product.handle}`} className="amiri-product-info">
+        <span className="amiri-product-name">{product.title}</span>
+        <span className="amiri-product-price">
+          {formatPrice(product.price, product.currencyCode)}
+        </span>
+      </Link>
     </div>
   );
 }
@@ -1579,10 +1574,9 @@ export default function CollectionClient({ collection }: { collection: Collectio
           padding: 20px 24px 20px 40px;
           background-color: #f7f8fa;
           display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: 12px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
           box-sizing: border-box;
           z-index: 5;
           width: 100%;
@@ -1592,47 +1586,14 @@ export default function CollectionClient({ collection }: { collection: Collectio
           opacity: 1;
         }
 
-        .amiri-product-info-left {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 6px;
-          flex: 1;
-          text-decoration: none;
-          color: inherit;
-        }
-
-        .amiri-product-buy-btn {
-          font-family: var(--font-primary), sans-serif;
-          font-size: 10px;
-          font-weight: var(--w-medium);
-          letter-spacing: 0.05em;
-          text-transform: capitalize;
-          text-decoration: underline;
-          text-underline-offset: 3px;
-          color: #111111;
-          flex-shrink: 0;
-          margin-bottom: 2px;
-        }
-        .amiri-product-buy-btn:hover {
-          opacity: 0.7;
-        }
-
         @media (max-width: 767px) {
           .amiri-product-info {
             background-color: #ffffff;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 8px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
             padding: 12px 16px;
             flex-grow: 1;
-          }
-          .amiri-product-info-left {
-            gap: 2px;
-          }
-          .amiri-product-buy-btn {
-            font-size: 9px;
           }
         }
 
