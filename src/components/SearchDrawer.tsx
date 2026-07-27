@@ -816,7 +816,7 @@ export default function SearchDrawer() {
         .sd-mini-card {
           display: block;
           text-decoration: none;
-          background: #f5f2ea;
+          background: #e3e7ea;
           border: none;
         }
         .sd-mini-card-img-wrap {
@@ -828,7 +828,7 @@ export default function SearchDrawer() {
           overflow: hidden;
           padding: 8px;
           box-sizing: border-box;
-          background: #f5f2ea;
+          background: #e3e7ea;
         }
         .sd-mini-card-img-wrap img {
           width: 100%;
@@ -925,7 +925,7 @@ export default function SearchDrawer() {
           aspect-ratio: 3 / 4;
           position: relative;
           overflow: hidden;
-          background-color: #f5f2ea;
+          background-color: #e3e7ea;
           flex-shrink: 0;
         }
         @media (max-width: 767px) {
@@ -966,10 +966,10 @@ export default function SearchDrawer() {
           position: relative;
           padding: 12px;
           box-sizing: border-box;
-          background-color: #f5f2ea;
+          background-color: #e3e7ea;
         }
         .v-product-carousel-slide:hover {
-          background-color: #f5f2ea;
+          background-color: #e3e7ea;
           opacity: 1;
         }
 
@@ -1018,7 +1018,7 @@ export default function SearchDrawer() {
 
         .amiri-product-info {
           padding: 20px 24px 20px 40px;
-          background-color: #f5f2ea;
+          background-color: #e3e7ea;
           display: flex;
           flex-direction: row;
           justify-content: space-between;
@@ -1035,7 +1035,7 @@ export default function SearchDrawer() {
 
         @media (max-width: 767px) {
           .amiri-product-info {
-            background-color: #f5f2ea;
+            background-color: #e3e7ea;
             flex-direction: column;
             gap: 4px;
             padding: 12px 16px;
