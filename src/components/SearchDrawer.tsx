@@ -124,13 +124,6 @@ function SearchProductCard({
           ))}
         </div>
 
-        {/* Counter of images */}
-        {images.length > 1 && (
-          <span className="v-product-carousel-counter">
-            {activeIdx + 1}/{images.length}
-          </span>
-        )}
-
         {/* Horizontal Progress Indicator Bar sticky inside the image block */}
         {images.length > 1 && (
           <div className="v-product-carousel-indicator-bar">
@@ -1001,7 +994,7 @@ export default function SearchDrawer() {
           left: 0;
           width: 100%;
           height: 2px;
-          background-color: rgba(0, 0, 0, 0.08);
+          background-color: transparent;
           z-index: 6;
           overflow: hidden;
         }
