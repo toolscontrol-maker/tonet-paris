@@ -9,8 +9,7 @@ import {
   HelpCircle, 
   ChevronDown, 
   Camera, 
-  Send,
-  Accessibility
+  Send
 } from "lucide-react";
 
 interface Message {
@@ -78,15 +77,6 @@ export default function SupportWidget() {
               aria-label="Open support and contact"
             >
               <span className="sw-logo-initial">T</span>
-            </button>
-
-            {/* Secondary Accessibility/Help Button */}
-            <button 
-              className="sw-btn-secondary"
-              onClick={() => console.log("Accesibilidad / Versión simplificada toggle clicked")}
-              aria-label="Help and accessibility"
-            >
-              <Accessibility size={16} strokeWidth={1.2} />
             </button>
           </div>
         )}
@@ -158,15 +148,6 @@ export default function SupportWidget() {
               aria-label="Close menu"
             >
               <X size={18} strokeWidth={1.2} />
-            </button>
-
-            {/* Secondary Accessibility Button remains visible */}
-            <button 
-              className="sw-btn-secondary"
-              onClick={() => console.log("Accessibility / Simplified version toggle clicked")}
-              aria-label="Help and accessibility"
-            >
-              <Accessibility size={16} strokeWidth={1.2} />
             </button>
           </div>
         )}
