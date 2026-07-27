@@ -1275,30 +1275,37 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
-                      <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
-                        <div 
-                          className="amiri-ctl-image-panel"
-                          ref={idx === 0 ? outfitImgRef : null}
-                        >
-                          {p.imageUrl && (
-                            <img 
-                              src={p.imageUrl} 
-                              alt={p.title} 
-                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
-                              loading="lazy"
-                              decoding="async"
-                              onLoad={(e) => e.currentTarget.classList.add('loaded')}
-                              ref={(el) => {
-                                if (el && el.complete) el.classList.add('loaded');
-                              }}
-                            />
-                          )}
-                        </div>
+                      <div className="amiri-ctl-card">
+                        <Link href={`/product/${p.handle}`} className="amiri-ctl-image-link">
+                          <div 
+                            className="amiri-ctl-image-panel"
+                            ref={idx === 0 ? outfitImgRef : null}
+                          >
+                            {p.imageUrl && (
+                              <img 
+                                src={p.imageUrl} 
+                                alt={p.title} 
+                                className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
+                                loading="lazy"
+                                decoding="async"
+                                onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                                ref={(el) => {
+                                  if (el && el.complete) el.classList.add('loaded');
+                                }}
+                              />
+                            )}
+                          </div>
+                        </Link>
                         <div className="amiri-ctl-meta">
-                          <span className="amiri-ctl-name">{toTitleCase(p.title)}</span>
-                          <span className="amiri-ctl-price">{formattedPrice}</span>
+                          <Link href={`/product/${p.handle}`} className="amiri-ctl-meta-left">
+                            <span className="amiri-ctl-name">{p.title}</span>
+                            <span className="amiri-ctl-price">{formattedPrice}</span>
+                          </Link>
+                          <Link href={`/product/${p.handle}`} className="amiri-ctl-buy-btn">
+                            {language === 'es' ? 'Comprar' : 'Buy'}
+                          </Link>
                         </div>
-                      </Link>
+                      </div>
                     </div>
                   );
                 })}
@@ -1345,30 +1352,37 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   
                   return (
                     <div className="amiri-ctl-item" key={p.handle}>
-                      <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
-                        <div 
-                          className="amiri-ctl-image-panel"
-                          ref={idx === 0 ? recImgRef : null}
-                        >
-                          {p.imageUrl && (
-                            <img 
-                              src={p.imageUrl} 
-                              alt={p.title} 
-                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
-                              loading="lazy"
-                              decoding="async"
-                              onLoad={(e) => e.currentTarget.classList.add('loaded')}
-                              ref={(el) => {
-                                if (el && el.complete) el.classList.add('loaded');
-                              }}
-                            />
-                          )}
-                        </div>
+                      <div className="amiri-ctl-card">
+                        <Link href={`/product/${p.handle}`} className="amiri-ctl-image-link">
+                          <div 
+                            className="amiri-ctl-image-panel"
+                            ref={idx === 0 ? recImgRef : null}
+                          >
+                            {p.imageUrl && (
+                              <img 
+                                src={p.imageUrl} 
+                                alt={p.title} 
+                                className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
+                                loading="lazy"
+                                decoding="async"
+                                onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                                ref={(el) => {
+                                  if (el && el.complete) el.classList.add('loaded');
+                                }}
+                              />
+                            )}
+                          </div>
+                        </Link>
                         <div className="amiri-ctl-meta">
-                          <span className="amiri-ctl-name">{toTitleCase(p.title)}</span>
-                          <span className="amiri-ctl-price">{formattedPrice}</span>
+                          <Link href={`/product/${p.handle}`} className="amiri-ctl-meta-left">
+                            <span className="amiri-ctl-name">{p.title}</span>
+                            <span className="amiri-ctl-price">{formattedPrice}</span>
+                          </Link>
+                          <Link href={`/product/${p.handle}`} className="amiri-ctl-buy-btn">
+                            {language === 'es' ? 'Comprar' : 'Buy'}
+                          </Link>
                         </div>
-                      </Link>
+                      </div>
                     </div>
                   );
                 })}
@@ -3377,7 +3391,17 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
-        .amiri-ctl-card:hover .amiri-ctl-image {
+        .amiri-ctl-card {
+          display: flex;
+          flex-direction: column;
+          text-decoration: none;
+          color: inherit;
+        }
+        .amiri-ctl-image-link {
+          display: block;
+          width: 100%;
+        }
+        .amiri-ctl-image-link:hover .amiri-ctl-image {
           transform: scale(1.04);
         }
 
@@ -3400,49 +3424,91 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
 
         .amiri-ctl-meta {
-          padding-top: 16px;
-          padding-bottom: 8px;
+          padding: 16px 8px 24px 8px;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 12px;
+          box-sizing: border-box;
+          width: 100%;
+        }
+
+        .amiri-ctl-meta-left {
           display: flex;
           flex-direction: column;
-          gap: 4px;
-          text-align: center;
-          align-items: center;
-        }
-        @media (min-width: 1024px) {
-          .amiri-ctl-meta {
-            padding-top: 16px;
-          }
+          align-items: flex-start;
+          gap: 6px;
+          flex: 1;
+          text-decoration: none;
+          color: inherit;
+          min-width: 0;
         }
 
         .amiri-ctl-name {
           font-family: var(--font-primary), sans-serif;
           font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 0.08em;
+          font-weight: 300;
+          text-transform: lowercase;
+          letter-spacing: 0.05em;
+          line-height: 1.3;
           color: #000000;
-          text-transform: none;
-          line-height: 1.4;
+          margin: 0;
+          text-align: left;
+          width: 100%;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        @media (min-width: 1024px) {
-          .amiri-ctl-name {
-            font-size: 10.5px;
-          }
-        }
 
         .amiri-ctl-price {
           font-family: var(--font-primary), sans-serif;
-          font-size: 9.5px;
-          font-weight: 300;
+          font-size: 10px;
+          font-weight: 400;
+          color: #000000;
           letter-spacing: 0.05em;
-          color: #555555;
-          text-transform: uppercase;
+          margin: 0;
+          text-align: left;
         }
-        @media (min-width: 1024px) {
+
+        .amiri-ctl-buy-btn {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 10px;
+          font-weight: var(--w-medium);
+          letter-spacing: 0.05em;
+          text-transform: capitalize;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          color: #111111;
+          flex-shrink: 0;
+          margin-bottom: 2px;
+        }
+        .amiri-ctl-buy-btn:hover {
+          opacity: 0.7;
+        }
+
+        @media (max-width: 767px) {
+          .amiri-ctl-meta {
+            padding: 12px 4px 16px 4px;
+            gap: 8px;
+          }
+          .amiri-ctl-meta-left {
+            gap: 2px;
+          }
+          .amiri-ctl-name {
+            font-size: 9.5px;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.35;
+          }
           .amiri-ctl-price {
-            font-size: 10px;
+            font-size: 9.5px;
+            color: rgba(0, 0, 0, 0.65);
+          }
+          .amiri-ctl-buy-btn {
+            font-size: 9px;
           }
         }
 
