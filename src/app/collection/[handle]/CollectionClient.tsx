@@ -173,6 +173,19 @@ function ProductCard({
             {activeIdx + 1}/{images.length}
           </span>
         )}
+
+        {/* Horizontal Progress Indicator Bar sticky inside the image block */}
+        {images.length > 1 && (
+          <div className="v-product-carousel-indicator-bar">
+            <div 
+              className="v-product-carousel-indicator-progress"
+              style={{
+                width: `${100 / images.length}%`,
+                transform: `translateX(${activeIdx * 100}%)`
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="amiri-product-info">
@@ -186,19 +199,6 @@ function ProductCard({
           {language === 'es' ? 'Comprar' : 'Buy'}
         </Link>
       </div>
-
-      {/* Horizontal Progress Indicator Bar below title and price */}
-      {images.length > 1 && (
-        <div className="v-product-carousel-indicator-bar">
-          <div 
-            className="v-product-carousel-indicator-progress"
-            style={{
-              width: `${100 / images.length}%`,
-              transform: `translateX(${activeIdx * 100}%)`
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }
@@ -1444,13 +1444,6 @@ export default function CollectionClient({ collection }: { collection: Collectio
             aspect-ratio: unset;
             overflow: visible;
           }
-          /* On mobile: reorder so bar appears between image and text */
-          .amiri-grid-item--product .v-product-gallery-container { order: 0; }
-          .amiri-grid-item--product .v-product-carousel-indicator-bar { order: 1; }
-          .amiri-grid-item--product .amiri-product-info { order: 2; }
-          .v-product-carousel-indicator-bar {
-            margin: 0 auto 10px auto;
-          }
         }
 
         .amiri-grid-item--span-2 {
@@ -1555,11 +1548,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
         }
 
         .v-product-carousel-indicator-bar {
-          width: calc(100% - 32px);
-          height: 3px;
-          background-color: #e5e7eb;
-          margin: 10px auto 0 auto;
-          position: relative;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: rgba(0, 0, 0, 0.08);
+          z-index: 6;
           overflow: hidden;
         }
 
