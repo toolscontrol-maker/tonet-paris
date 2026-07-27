@@ -16,7 +16,7 @@ export default async function Home() {
       {/* 1. HERO CAMPAIGN BANNER: PRE-FALL 2026 */}
       <section className="am-hero">
         <div className="am-hero-media">
-          <img src="/stores-bg.jpg" alt="TONET Campaign" className="am-hero-img" />
+          <img src="/hero-campaign.jpeg" alt="TONET Campaign" className="am-hero-img" />
           <div className="am-hero-bottom-content">
             <span className="am-hero-collection-title">PRE-FALL 2026</span>
             <div className="am-hero-buttons">
