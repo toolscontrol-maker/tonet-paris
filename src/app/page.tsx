@@ -469,12 +469,13 @@ export default async function Home() {
           scroll-snap-stop: always;
         }
         .am-world-tonet-title {
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.25em;
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          font-weight: var(--w-medium);
+          letter-spacing: 0.03em;
           text-align: center;
           margin: 0 0 50px 0;
-          text-transform: uppercase;
+          text-transform: uppercase !important;
           color: #000000;
         }
         .am-world-tonet-grid {
@@ -620,7 +621,7 @@ export default async function Home() {
           }
           .am-world-tonet-title {
             margin-bottom: 40px;
-            font-size: 13px;
+            font-size: 11px;
             padding: 0 20px;
           }
           .am-world-tonet-grid {
