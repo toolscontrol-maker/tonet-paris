@@ -1604,7 +1604,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-buy-btn {
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: var(--w-medium);
           letter-spacing: 0.05em;
           text-transform: capitalize;
@@ -1632,13 +1632,13 @@ export default function CollectionClient({ collection }: { collection: Collectio
             gap: 2px;
           }
           .amiri-product-buy-btn {
-            font-size: 10px;
+            font-size: 9px;
           }
         }
 
         .amiri-product-name {
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 300;
           text-transform: lowercase;
           letter-spacing: 0.05em;
@@ -1651,7 +1651,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         @media (max-width: 767px) {
           .amiri-product-name {
-            font-size: 11px;
+            font-size: 9.5px;
             white-space: normal;
             line-height: 1.35;
           }
@@ -1659,7 +1659,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-price {
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 400;
           color: #000000;
           letter-spacing: 0.05em;
@@ -1672,7 +1672,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           .amiri-product-price {
             text-align: left;
             color: rgba(0,0,0,0.65);
-            font-size: 11px;
+            font-size: 9.5px;
           }
         }
 
