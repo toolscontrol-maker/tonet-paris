@@ -1421,7 +1421,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         /* GRID ITEMS */
         .amiri-grid-item {
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           position: relative;
           box-sizing: border-box;
           overflow: visible;
@@ -1483,7 +1483,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           aspect-ratio: 3 / 4;
           position: relative;
           overflow: hidden;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           flex-shrink: 0;
         }
 
@@ -1525,10 +1525,10 @@ export default function CollectionClient({ collection }: { collection: Collectio
           position: relative;
           padding: 12px;
           box-sizing: border-box;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
         }
         .v-product-carousel-slide:hover {
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           opacity: 1;
         }
 
@@ -1577,7 +1577,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .amiri-product-info {
           padding: 20px 24px 20px 40px;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           display: flex;
           flex-direction: row;
           justify-content: space-between;
@@ -1594,7 +1594,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         @media (max-width: 767px) {
           .amiri-product-info {
-            background-color: #e3e7ea;
+            background-color: #f7f8fa;
             flex-direction: column;
             gap: 4px;
             padding: 10px 0 14px 16px;

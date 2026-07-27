@@ -302,7 +302,7 @@ export default function SearchClient({ query, products, collections }: Props) {
 
         /* CARD STYLE */
         .amiri-search-card {
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           position: relative;
           box-sizing: border-box;
           overflow: hidden;
@@ -336,7 +336,7 @@ export default function SearchClient({ query, products, collections }: Props) {
           height: 100%;
           position: relative;
           isolation: isolate;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
         }
         @media (max-width: 767px) {
           .amiri-search-img-wrap {
@@ -403,7 +403,7 @@ export default function SearchClient({ query, products, collections }: Props) {
 
         .amiri-search-meta {
           padding: 16px 20px;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           display: flex;
           flex-direction: column;
           gap: 4px;

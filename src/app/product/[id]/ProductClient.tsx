@@ -2091,7 +2091,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         @media (min-width: 1024px) {
           .tonet-gallery-column {
-            background-color: #e3e7ea;
+            background-color: #f7f8fa;
             padding: 140px 0px 80px 40px;
           }
         }
@@ -2120,7 +2120,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           justify-content: center;
           align-items: center;
-          background: #e3e7ea;
+          background: #f7f8fa;
           padding: 2px;
           box-sizing: border-box;
           aspect-ratio: 3 / 4;
@@ -2174,7 +2174,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-grid-item {
           aspect-ratio: 3 / 4;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2196,7 +2196,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-stack-item {
           aspect-ratio: 3 / 4;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2225,7 +2225,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-desktop-main-wrapper {
           width: 100%;
-          background: #e3e7ea;
+          background: #f7f8fa;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -2265,7 +2265,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-desktop-secondary-wrapper {
           width: 100%;
-          background: #e3e7ea;
+          background: #f7f8fa;
           aspect-ratio: 3 / 4;
           display: flex;
           justify-content: center;
@@ -2308,7 +2308,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #e3e7ea;
+          background: #f7f8fa;
           overflow: hidden;
           padding: 40px;
           box-sizing: border-box;
@@ -2451,7 +2451,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-preview-sidebar-item {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: #e3e7ea;
+          background: #f7f8fa;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -3355,7 +3355,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .amiri-ctl-image-panel {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background-color: #e3e7ea;
+          background-color: #f7f8fa;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -4182,7 +4182,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-wishlist-toast-thumb {
           width: 60px;
           height: 80px;
-          background: #e3e7ea;
+          background: #f7f8fa;
           flex-shrink: 0;
           border: 1px solid #eeeeee;
           display: flex;

@@ -58,7 +58,7 @@ export default function RecommendedCard({ product }: Props) {
           position: relative;
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: #e3e7ea;
+          background: #f7f8fa;
           border-radius: 0;
           overflow: hidden;
           transition: transform 0.3s ease, box-shadow 0.3s ease;
