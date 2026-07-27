@@ -40,7 +40,7 @@ export default function RecommendedCard({ product }: Props) {
           <Link href={displayHref} className="tonet-house-carousel__meta-left">
             <span className="tonet-house-carousel__title">{product.title}</span>
             <span className="tonet-house-carousel__price">
-              {formatPrice(product.price, product.currencyCode || 'EUR')}
+              {formatPrice(product.price, product.currencyCode)}
             </span>
           </Link>
           <Link href={displayHref} className="tonet-house-carousel__buy-btn">
@@ -54,14 +54,14 @@ export default function RecommendedCard({ product }: Props) {
           position: relative;
         }
         .tonet-house-carousel__card {
-          display: block;
+          display: flex;
+          flex-direction: column;
           text-decoration: none;
           color: inherit;
-          cursor: pointer;
         }
         .tonet-house-carousel__image-link {
           display: block;
-          text-decoration: none;
+          width: 100%;
         }
         .tonet-house-carousel__image-wrap {
           position: relative;
@@ -89,22 +89,21 @@ export default function RecommendedCard({ product }: Props) {
           inset: 2px;
           opacity: 0;
         }
-        .tonet-house-carousel__card:hover .tonet-house-carousel__image-wrap {
+        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image-wrap {
           transform: translateY(-2px);
           box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
         }
-        .tonet-house-carousel__card:hover .tonet-house-carousel__image {
+        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image {
           transform: scale(1.04);
         }
-        .tonet-house-carousel__card:hover .tonet-house-carousel__image--primary {
+        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image--primary {
           opacity: ${secondImage ? 0 : 1};
         }
-        .tonet-house-carousel__card:hover .tonet-house-carousel__image--secondary {
+        .tonet-house-carousel__image-link:hover .tonet-house-carousel__image--secondary {
           opacity: 1;
         }
         .tonet-house-carousel__meta {
-          padding-top: 18px;
-          padding-bottom: 24px;
+          padding: 16px 8px 24px 8px;
           display: flex;
           flex-direction: row;
           justify-content: space-between;
@@ -112,7 +111,6 @@ export default function RecommendedCard({ product }: Props) {
           gap: 12px;
           box-sizing: border-box;
           width: 100%;
-          text-decoration: none;
         }
         .tonet-house-carousel__meta-left {
           display: flex;
@@ -122,18 +120,22 @@ export default function RecommendedCard({ product }: Props) {
           flex: 1;
           text-decoration: none;
           color: inherit;
+          min-width: 0;
         }
         .tonet-house-carousel__title {
           font-family: var(--font-primary), sans-serif;
           font-size: 10px;
           font-weight: 300;
-          text-transform: capitalize;
+          text-transform: lowercase;
           letter-spacing: 0.05em;
           line-height: 1.3;
-          color: #111;
+          color: #000000;
           margin: 0;
-          white-space: normal;
           text-align: left;
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .tonet-house-carousel__price {
           font-family: var(--font-primary), sans-serif;
@@ -162,7 +164,7 @@ export default function RecommendedCard({ product }: Props) {
 
         @media (max-width: 767px) {
           .tonet-house-carousel__meta {
-            padding: 12px 0;
+            padding: 12px 4px 16px 4px;
             gap: 8px;
           }
           .tonet-house-carousel__meta-left {
@@ -170,9 +172,15 @@ export default function RecommendedCard({ product }: Props) {
           }
           .tonet-house-carousel__title {
             font-size: 9.5px;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.35;
           }
           .tonet-house-carousel__price {
             font-size: 9.5px;
+            color: rgba(0, 0, 0, 0.65);
           }
           .tonet-house-carousel__buy-btn {
             font-size: 9px;
