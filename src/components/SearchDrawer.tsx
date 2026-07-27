@@ -940,11 +940,14 @@ export default function SearchDrawer() {
             height: auto;
             aspect-ratio: 3 / 4;
           }
+          .amiri-grid-item {
+            background: #ffffff !important;
+          }
           .amiri-grid-item--product .v-product-gallery-container { order: 0; }
           .amiri-grid-item--product .v-product-carousel-indicator-bar { order: 1; }
           .amiri-grid-item--product .amiri-product-info { order: 2; }
           .v-product-carousel-indicator-bar {
-            margin: 8px auto;
+            margin: 0 auto 10px auto;
           }
         }
 
@@ -1076,7 +1079,7 @@ export default function SearchDrawer() {
 
         @media (max-width: 767px) {
           .amiri-product-info {
-            background-color: #f7f8fa;
+            background-color: #ffffff;
             flex-direction: row;
             justify-content: space-between;
             align-items: flex-end;
