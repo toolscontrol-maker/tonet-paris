@@ -907,7 +907,7 @@ export default function SearchDrawer() {
         }
 
         .amiri-grid-item {
-          background: #ffffff;
+          background: #f7f8fa;
           position: relative;
           display: flex;
           flex-direction: column;
@@ -1040,6 +1040,7 @@ export default function SearchDrawer() {
             gap: 4px;
             padding: 12px 16px;
             align-items: flex-start;
+            flex-grow: 1;
           }
         }
 

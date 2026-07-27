@@ -1434,7 +1434,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         @media (max-width: 767px) {
           .amiri-grid-item--product {
-            background-color: #ffffff;
+            background-color: #f7f8fa;
             aspect-ratio: unset;
             overflow: visible;
           }
@@ -1599,6 +1599,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
             gap: 4px;
             padding: 10px 0 14px 16px;
             align-items: flex-start;
+            flex-grow: 1;
           }
         }
 
