@@ -513,5 +513,11 @@ img {
   opacity: 1;
 }
 
+/* Global capitalization of the first letter of each word, excluding the header, inputs, and textareas */
+body *:not(.acne-header):not(.acne-header *):not(input):not(textarea) {
+  text-transform: capitalize;
+}
+
+
 
 
