@@ -1553,7 +1553,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
 
         .v-product-carousel-indicator-progress {
           height: 100%;
-          background-color: #000000;
+          background-color: rgba(0, 0, 0, 0.75);
           transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
