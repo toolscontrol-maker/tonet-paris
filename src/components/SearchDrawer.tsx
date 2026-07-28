@@ -323,7 +323,7 @@ export default function SearchDrawer() {
     const t = setTimeout(() => {
       setActiveTab(targetTab);
       setTransitionState("in");
-    }, 500); // 500ms delay matches 0.5s CSS transition
+    }, 800); // 800ms delay matches 0.8s CSS transition
     
     return () => clearTimeout(t);
   }, [searchQuery, searchResults, isSearching, activeTab]);
@@ -669,7 +669,7 @@ export default function SearchDrawer() {
 
         /* ── Transitions between tabs ── */
         .sd-transition-wrap {
-          transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+          transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1);
           width: 100%;
           display: flex;
           flex-direction: column;
@@ -677,11 +677,9 @@ export default function SearchDrawer() {
         }
         .sd-fade-in {
           opacity: 1;
-          transform: translateY(0);
         }
         .sd-fade-out {
           opacity: 0;
-          transform: translateY(10px);
         }
 
         @media (min-width: 768px) {
