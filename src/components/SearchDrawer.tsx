@@ -162,6 +162,8 @@ export default function SearchDrawer() {
   const [allProductsCache, setAllProductsCache] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasExpanded, setHasExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"suggestions" | "results" | "empty">("suggestions");
+  const [transitionState, setTransitionState] = useState<"in" | "out">("in");
 
   // Fallback recommended products for "También Te Sugerimos" / "New In"
   const fallbackSuggestions = [
@@ -271,6 +273,8 @@ export default function SearchDrawer() {
       setSearchResults([]);
       setIsSearching(false);
       setHasExpanded(false);
+      setActiveTab("suggestions");
+      setTransitionState("in");
     }
     return () => {
       document.body.style.overflow = "";
@@ -285,6 +289,32 @@ export default function SearchDrawer() {
       setHasExpanded(true);
     }
   }, [searchQuery, searchResults]);
+
+  // Tab transition state machine
+  useEffect(() => {
+    const hasQuery = !!searchQuery.trim();
+    let targetTab: "suggestions" | "results" | "empty" = "suggestions";
+    
+    if (hasQuery) {
+      if (searchResults.length > 0 || isSearching) {
+        targetTab = "results";
+      } else {
+        targetTab = "empty";
+      }
+    }
+    
+    if (targetTab === activeTab) return;
+    
+    // Start fade out transition
+    setTransitionState("out");
+    
+    const t = setTimeout(() => {
+      setActiveTab(targetTab);
+      setTransitionState("in");
+    }, 200);
+    
+    return () => clearTimeout(t);
+  }, [searchQuery, searchResults, isSearching, activeTab]);
 
   const saveSearchTerm = (term: string) => {
     const trimmed = term.trim().toLowerCase();
@@ -353,128 +383,162 @@ export default function SearchDrawer() {
 
           {/* Body Content */}
           <main className="sd-body">
-            
-            {/* STATE 1: Empty Search (Show suggestions/curated options) */}
-            {!searchQuery.trim() && (
-              <>
-                <div className="sd-suggestions-columns">
-                  
-                  {/* Column 1: Popular searches */}
-                  <div className="sd-suggest-col">
-                    <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Populares' : 'Trending Searches'}</h4>
-                    <ul className="sd-list">
-                      {TRENDING_SEARCHES.map((term) => (
-                        <li key={term}>
-                          <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
-                            {term}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+            <div className={`sd-transition-wrap sd-fade-${transitionState}`}>
+              {/* STATE 1: Empty Search (Show suggestions/curated options) */}
+              {activeTab === "suggestions" && (
+                <>
+                  <div className="sd-suggestions-columns">
+                    
+                    {/* Column 1: Popular searches */}
+                    <div className="sd-suggest-col">
+                      <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Populares' : 'Trending Searches'}</h4>
+                      <ul className="sd-list">
+                        {TRENDING_SEARCHES.map((term) => (
+                          <li key={term}>
+                            <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
+                              {term}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  {/* Column 2: Recent searches & Product searches */}
-                  <div className="sd-suggest-col">
-                    {recentSearches.length > 0 && (
-                      <div style={{ marginBottom: '28px' }}>
-                        <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Recientes' : 'Recently Searched'}</h4>
-                        <ul className="sd-list">
-                          {recentSearches.map((term) => (
-                            <li key={term}>
-                              <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
-                                {term}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {/* Column 2: Recent searches & Product searches */}
+                    <div className="sd-suggest-col">
+                      {recentSearches.length > 0 && (
+                        <div style={{ marginBottom: '28px' }}>
+                          <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Recientes' : 'Recently Searched'}</h4>
+                          <ul className="sd-list">
+                            {recentSearches.map((term) => (
+                              <li key={term}>
+                                <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
+                                  {term}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                    <h4 className="sd-col-title">{language === 'es' ? 'Buscar por Categoría' : 'Search by Product'}</h4>
-                    <ul className="sd-list">
-                      {SEARCH_BY_PRODUCT.map((term) => (
-                        <li key={term}>
-                          <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
-                            {term}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                      <h4 className="sd-col-title">{language === 'es' ? 'Buscar por Categoría' : 'Search by Product'}</h4>
+                      <ul className="sd-list">
+                        {SEARCH_BY_PRODUCT.map((term) => (
+                          <li key={term}>
+                            <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
+                              {term}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  {/* Column 3: Recommended Items — Desktop only inline, mobile goes to bottom */}
-                  <div className="sd-suggest-col sd-suggest-col--preview sd-desktop-preview">
-                    <div className="sd-suggest-inner-wrap">
-                      <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
-                      <div className="sd-suggest-strip">
-                        {suggestedProducts.map((p) => {
-                          const image = p.imageUrl || p.images?.[0];
-                          return (
-                            <Link 
-                              key={p.handle} 
-                              href={`/product/${p.handle}`}
-                              className="sd-mini-card"
-                              onClick={closeSearch}
-                            >
-                              <div className="sd-mini-card-img-wrap">
-                                {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
-                              </div>
-                            </Link>
-                          );
-                        })}
+                    {/* Column 3: Recommended Items — Desktop only inline, mobile goes to bottom */}
+                    <div className="sd-suggest-col sd-suggest-col--preview sd-desktop-preview">
+                      <div className="sd-suggest-inner-wrap">
+                        <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
+                        <div className="sd-suggest-strip">
+                          {suggestedProducts.map((p) => {
+                            const image = p.imageUrl || p.images?.[0];
+                            return (
+                              <Link 
+                                key={p.handle} 
+                                href={`/product/${p.handle}`}
+                                className="sd-mini-card"
+                                onClick={closeSearch}
+                              >
+                                <div className="sd-mini-card-img-wrap">
+                                  {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
+
                   </div>
 
-                </div>
+                  {/* Mobile-only: We Also Suggest pinned at the bottom */}
+                  <div className="sd-mobile-suggest-bottom">
+                    <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
+                    <div className="sd-suggest-strip">
+                      {suggestedProducts.map((p) => {
+                        const image = p.imageUrl || p.images?.[0];
+                        return (
+                          <Link 
+                            key={p.handle} 
+                            href={`/product/${p.handle}`}
+                            className="sd-mini-card"
+                            onClick={closeSearch}
+                          >
+                            <div className="sd-mini-card-img-wrap">
+                              {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
 
-                {/* Mobile-only: We Also Suggest pinned at the bottom */}
-                <div className="sd-mobile-suggest-bottom">
-                  <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
-                  <div className="sd-suggest-strip">
-                    {suggestedProducts.map((p) => {
-                      const image = p.imageUrl || p.images?.[0];
-                      return (
-                        <Link 
+              {/* STATE 2: Has Query but NO Matches */}
+              {activeTab === "empty" && (
+                <div className="sd-empty-results-container">
+                  <div className="sd-results-header">
+                    <span className="sd-results-count-title">{language === 'es' ? 'Resultados de la búsqueda (0)' : 'Search Results (0)'}</span>
+                  </div>
+
+                  <div className="sd-empty-box">
+                    <h3 className="sd-empty-heading">
+                      {language === 'es' ? `No se encontraron coincidencias para "${searchQuery}"` : `No Matches Found For "${searchQuery}"`}
+                    </h3>
+                    <p className="sd-empty-subheading">
+                      {language === 'es' ? 'Intente realizar otra búsqueda o póngase en contacto con nosotros.' : 'Please Try Another Search Or Contact Us.'}
+                    </p>
+                  </div>
+
+                  {/* Show fallback suggestions below */}
+                  <div className="sd-empty-suggestions-section">
+                    <h4 className="sd-col-title uppercase" style={{ marginBottom: '20px' }}>
+                      {language === 'es' ? 'Novedades' : 'New In'}
+                    </h4>
+                    <div className="sd-product-grid">
+                      {suggestedProducts.map((p) => (
+                        <SearchProductCard 
                           key={p.handle} 
-                          href={`/product/${p.handle}`}
-                          className="sd-mini-card"
-                          onClick={closeSearch}
-                        >
-                          <div className="sd-mini-card-img-wrap">
-                            {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
-                          </div>
-                        </Link>
-                      );
-                    })}
+                          product={p} 
+                          formatPrice={formatPrice} 
+                          closeSearch={closeSearch} 
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </>
-            )}
+              )}
 
-            {/* STATE 2: Has Query but NO Matches */}
-            {searchQuery.trim() && searchResults.length === 0 && !isSearching && (
-              <div className="sd-empty-results-container">
-                <div className="sd-results-header">
-                  <span className="sd-results-count-title">{language === 'es' ? 'Resultados de la búsqueda (0)' : 'Search Results (0)'}</span>
-                </div>
+              {/* STATE 3: Active Results Grid */}
+              {activeTab === "results" && (
+                <div className="sd-results-container">
+                  <header className="sd-results-header">
+                    <span className="sd-results-count-title">
+                      {language === 'es' ? 'Resultados de la búsqueda' : 'Search Results'} ({searchResults.length})
+                      {isSearching && <span className="sd-pulse-dot">...</span>}
+                    </span>
+                    <button 
+                      type="button" 
+                      className="sd-results-filter-btn"
+                      onClick={() => {
+                        closeSearch();
+                        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                      }}
+                    >
+                      {language === 'es' ? 'Filtrar' : 'Filter'}
+                    </button>
+                  </header>
 
-                <div className="sd-empty-box">
-                  <h3 className="sd-empty-heading">
-                    {language === 'es' ? `No se encontraron coincidencias para "${searchQuery}"` : `No Matches Found For "${searchQuery}"`}
-                  </h3>
-                  <p className="sd-empty-subheading">
-                    {language === 'es' ? 'Intente realizar otra búsqueda o póngase en contacto con nosotros.' : 'Please Try Another Search Or Contact Us.'}
-                  </p>
-                </div>
-
-                {/* Show fallback suggestions below */}
-                <div className="sd-empty-suggestions-section">
-                  <h4 className="sd-col-title uppercase" style={{ marginBottom: '20px' }}>
-                    {language === 'es' ? 'Novedades' : 'New In'}
-                  </h4>
                   <div className="sd-product-grid">
-                    {suggestedProducts.map((p) => (
+                    {searchResults.map((p) => (
                       <SearchProductCard 
                         key={p.handle} 
                         product={p} 
@@ -484,41 +548,8 @@ export default function SearchDrawer() {
                     ))}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* STATE 3: Active Results Grid */}
-            {searchQuery.trim() && searchResults.length > 0 && (
-              <div className="sd-results-container">
-                <header className="sd-results-header">
-                  <span className="sd-results-count-title">
-                    {language === 'es' ? 'Resultados de la búsqueda' : 'Search Results'} ({searchResults.length})
-                    {isSearching && <span className="sd-pulse-dot">...</span>}
-                  </span>
-                  <button 
-                    type="button" 
-                    className="sd-results-filter-btn"
-                    onClick={() => {
-                      closeSearch();
-                      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                    }}
-                  >
-                    {language === 'es' ? 'Filtrar' : 'Filter'}
-                  </button>
-                </header>
-
-                <div className="sd-product-grid">
-                  {searchResults.map((p) => (
-                    <SearchProductCard 
-                      key={p.handle} 
-                      product={p} 
-                      formatPrice={formatPrice} 
-                      closeSearch={closeSearch} 
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
           </main>
         </div>
@@ -623,6 +654,24 @@ export default function SearchDrawer() {
             padding: 0 16px 24px 16px !important;
           }
         }
+
+        /* ── Transitions between tabs ── */
+        .sd-transition-wrap {
+          transition: opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+        .sd-fade-in {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .sd-fade-out {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
         @media (min-width: 768px) {
           /* Desktop: top overlay covering 60% height with a 2D dice/tilt roll */
           .sd-overlay {
