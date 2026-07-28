@@ -149,13 +149,21 @@ function normalizeProduct(node: Record<string, any>): Product {
 }
 
 export function deduplicateProductsByTitle(products: Product[]): Product[] {
-  // Sort the products from newest to oldest (by createdAt descending)
-  const result = [...products];
-  result.sort((a, b) => {
+  const sorted = [...products].sort((a, b) => {
     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return timeB - timeA;
   });
+  const seen = new Set<string>();
+  const result: Product[] = [];
+  for (const p of sorted) {
+    const key = p.handle || p.title;
+    if (!key) continue;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(p);
+    }
+  }
   return result;
 }
 

@@ -449,11 +449,11 @@ export default function SearchDrawer() {
                       <div className="sd-suggest-inner-wrap">
                         <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
                         <div className="sd-suggest-strip">
-                          {suggestedProducts.map((p) => {
+                          {suggestedProducts.map((p, idx) => {
                             const image = p.imageUrl || p.images?.[0];
                             return (
                               <Link 
-                                key={p.handle} 
+                                key={`${p.handle}-${idx}`} 
                                 href={`/product/${p.handle}`}
                                 className="sd-mini-card"
                                 onClick={closeSearch}
@@ -474,11 +474,11 @@ export default function SearchDrawer() {
                   <div className="sd-mobile-suggest-bottom">
                     <h4 className="sd-col-title">{language === 'es' ? 'También te Recomendamos' : 'We Also Suggest'}</h4>
                     <div className="sd-suggest-strip">
-                      {suggestedProducts.map((p) => {
+                      {suggestedProducts.map((p, idx) => {
                         const image = p.imageUrl || p.images?.[0];
                         return (
                           <Link 
-                            key={p.handle} 
+                            key={`${p.handle}-${idx}`} 
                             href={`/product/${p.handle}`}
                             className="sd-mini-card"
                             onClick={closeSearch}
@@ -516,9 +516,9 @@ export default function SearchDrawer() {
                       {language === 'es' ? 'Novedades' : 'New In'}
                     </h4>
                     <div className="sd-product-grid">
-                      {suggestedProducts.map((p) => (
+                      {suggestedProducts.map((p, idx) => (
                         <SearchProductCard 
-                          key={p.handle} 
+                          key={`${p.handle}-${idx}`} 
                           product={p} 
                           formatPrice={formatPrice} 
                           closeSearch={closeSearch} 
@@ -550,9 +550,9 @@ export default function SearchDrawer() {
                   </header>
 
                   <div className="sd-product-grid">
-                    {searchResults.map((p) => (
+                    {searchResults.map((p, idx) => (
                       <SearchProductCard 
-                        key={p.handle} 
+                        key={`${p.handle}-${idx}`} 
                         product={p} 
                         formatPrice={formatPrice} 
                         closeSearch={closeSearch} 
