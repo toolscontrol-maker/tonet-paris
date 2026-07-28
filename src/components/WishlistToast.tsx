@@ -86,7 +86,6 @@ export default function WishlistToast() {
           left: 24px;
           z-index: 10002;
           background: #ffffff;
-          border: 1px solid #111111;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
           width: 420px;
           max-width: calc(100vw - 48px);
