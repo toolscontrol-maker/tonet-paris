@@ -64,7 +64,7 @@ export default function AnnouncementBar() {
 
       <style>{`
         .ann-bar {
-          height: 24px;
+          height: 40px;
           background-color: #000000;
           color: #ffffff;
           display: flex;
@@ -103,8 +103,6 @@ export default function AnnouncementBar() {
         .ann-close {
           position: absolute;
           right: 20px;
-          top: 50%;
-          transform: translateY(-50%);
           background: none;
           border: none;
           color: #ffffff;
