@@ -90,7 +90,7 @@ export default function WishlistToast() {
           width: 420px;
           max-width: calc(100vw - 48px);
           box-sizing: border-box;
-          padding: 24px 24px;
+          padding: 16px 24px 24px 24px;
           border-radius: 0 !important;
           opacity: 0;
           transform: translateY(20px);
@@ -110,8 +110,8 @@ export default function WishlistToast() {
 
         .wt-close {
           position: absolute;
-          top: 8px;
-          right: 8px;
+          top: 10px;
+          right: 10px;
           background: none;
           border: none;
           cursor: pointer;
@@ -141,7 +141,7 @@ export default function WishlistToast() {
           gap: 12px;
           align-items: flex-start;
           align-self: flex-start;
-          margin-top: 4px;
+          margin-top: -6px;
         }
 
         .wt-title-row {
@@ -216,7 +216,7 @@ export default function WishlistToast() {
             bottom: 16px;
             left: 16px;
             max-width: calc(100vw - 32px);
-            padding: 20px 16px;
+            padding: 14px 16px 16px 16px;
             gap: 12px;
           }
           
