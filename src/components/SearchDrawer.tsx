@@ -547,7 +547,7 @@ export default function SearchDrawer() {
           opacity: 0;
           pointer-events: none;
           z-index: 10000;
-          transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: opacity 0.85s linear;
         }
         .sd-backdrop.open {
           opacity: 1;
@@ -583,7 +583,7 @@ export default function SearchDrawer() {
 
         /* Responsive placement */
         @media (max-width: 767px) {
-          /* Mobile: slide from left, 100% viewport width and height, slower slide animation, no rotation, no rounded corners */
+          /* Mobile: slide from right, 100% viewport width and height, slower linear slide animation, no rotation, no rounded corners */
           .sd-overlay {
             width: 100%;
             max-width: 100%;
@@ -591,8 +591,8 @@ export default function SearchDrawer() {
             max-height: 100vh;
             bottom: 0;
             opacity: 1;
-            transform: translateX(-100%);
-            transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(100%);
+            transition: transform 0.85s linear;
             box-shadow: none;
           }
           .sd-overlay.open {
