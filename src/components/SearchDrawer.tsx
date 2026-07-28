@@ -48,6 +48,11 @@ function SearchProductCard({
   const carouselRef = useRef<HTMLDivElement>(null);
   const images: string[] = product.images && product.images.length > 0 ? product.images : ([product.imageUrl].filter(Boolean) as string[]);
 
+  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => ({ ...prev, [index]: true }));
+  };
+
   const { toggle, has } = useWishlist();
   const isFavorite = has(product.handle);
 
@@ -117,8 +122,13 @@ function SearchProductCard({
                 src={getOptimizedImageUrl(imgUrl, 800)}
                 alt={`${product.title} - Vista ${i + 1}`}
                 className={`amiri-product-img ${imageClass}`}
+                style={{
+                  opacity: loadedImages[i] ? 1 : 0,
+                  transition: 'opacity 0.4s ease'
+                }}
                 loading="lazy"
                 draggable={false}
+                onLoad={() => handleImageLoad(i)}
               />
             </Link>
           ))}
@@ -162,7 +172,7 @@ export default function SearchDrawer() {
   const [allProductsCache, setAllProductsCache] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasExpanded, setHasExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<"suggestions" | "results" | "empty">("suggestions");
+  const [activeTab, setActiveTab] = useState<"suggestions" | "results" | "empty" | "loading">("suggestions");
   const [transitionState, setTransitionState] = useState<"in" | "out">("in");
 
   // Fallback recommended products for "También Te Sugerimos" / "New In"
@@ -293,10 +303,12 @@ export default function SearchDrawer() {
   // Tab transition state machine
   useEffect(() => {
     const hasQuery = !!searchQuery.trim();
-    let targetTab: "suggestions" | "results" | "empty" = "suggestions";
+    let targetTab: "suggestions" | "results" | "empty" | "loading" = "suggestions";
     
     if (hasQuery) {
-      if (searchResults.length > 0 || isSearching) {
+      if (isSearching) {
+        targetTab = "loading";
+      } else if (searchResults.length > 0) {
         targetTab = "results";
       } else {
         targetTab = "empty";
@@ -311,7 +323,7 @@ export default function SearchDrawer() {
     const t = setTimeout(() => {
       setActiveTab(targetTab);
       setTransitionState("in");
-    }, 200);
+    }, 500); // 500ms delay matches 0.5s CSS transition
     
     return () => clearTimeout(t);
   }, [searchQuery, searchResults, isSearching, activeTab]);
@@ -657,7 +669,7 @@ export default function SearchDrawer() {
 
         /* ── Transitions between tabs ── */
         .sd-transition-wrap {
-          transition: opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+          transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
           width: 100%;
           display: flex;
           flex-direction: column;
