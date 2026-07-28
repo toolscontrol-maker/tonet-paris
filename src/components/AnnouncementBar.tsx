@@ -79,7 +79,7 @@ export default function AnnouncementBar() {
           font-size: 10px;
           font-weight: 400;
           letter-spacing: 0.15em;
-          text-transform: uppercase;
+          text-transform: lowercase !important;
           padding: 0 40px;
           box-sizing: border-box;
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -90,7 +90,7 @@ export default function AnnouncementBar() {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          text-transform: uppercase;
+          text-transform: lowercase !important;
         }
         .ann-fade-in {
           opacity: 0.95;
