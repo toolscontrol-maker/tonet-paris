@@ -957,7 +957,7 @@ export default function SearchDrawer() {
         /* ══ PRODUCT GRID ══ */
         .sd-product-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 1px;
           background-color: #ffffff;
           margin-top: 16px;
@@ -966,7 +966,7 @@ export default function SearchDrawer() {
         }
         @media (min-width: 768px) {
           .sd-product-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1px;
             margin-left: -24px;
             margin-right: -24px;
@@ -974,7 +974,7 @@ export default function SearchDrawer() {
         }
         @media (min-width: 1024px) {
           .sd-product-grid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 1px;
             margin-left: -40px;
             margin-right: -40px;
