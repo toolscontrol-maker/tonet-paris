@@ -1116,18 +1116,35 @@ export default function Navbar() {
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
           }
-          .acne-mob-icon { width: 32px; height: 54px; }
-          .acne-right-icon { width: 32px; height: 54px; }
+          .acne-mob-icon { width: 28px !important; height: 54px; }
+          .acne-right-icon { width: 28px !important; height: 54px; }
+          .acne-mob-icon svg,
+          .acne-right-icon svg {
+            width: 21px !important;
+            height: 21px !important;
+          }
+          .acne-right-icons {
+            gap: 6px !important;
+          }
+          .acne-nav-left-mobile {
+            gap: 6px !important;
+          }
           .acne-wishlist-icon { display: none !important; }
           
           /* Swap positions of header elements on mobile (when menu is closed) */
           .acne-header:not(.menu-open) .acne-nav-left {
             grid-column: 3 !important;
+            grid-row: 1 !important;
             justify-content: flex-end !important;
           }
           .acne-header:not(.menu-open) .acne-nav-right {
             grid-column: 1 !important;
+            grid-row: 1 !important;
             justify-content: flex-start !important;
+          }
+          .acne-header:not(.menu-open) .acne-logo.acne-mobile-only {
+            grid-column: 2 !important;
+            grid-row: 1 !important;
           }
           .acne-header:not(.menu-open) .acne-nav-left-mobile {
             flex-direction: row-reverse;
