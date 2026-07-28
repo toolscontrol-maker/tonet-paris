@@ -742,9 +742,9 @@ export default function Navbar() {
         }
         
         .acne-logo-img {
-          width: 190px;
-          height: 190px;
-          object-fit: contain;
+          width: auto;
+          height: 38px;
+          max-width: 100%;
           position: absolute;
           top: 50%;
           left: 50%;
@@ -753,15 +753,13 @@ export default function Navbar() {
         }
 
         .acne-logo-img.logo-black {
-          filter: none;
-          mix-blend-mode: multiply;
+          filter: brightness(0);
           opacity: 1;
           z-index: 2;
         }
 
         .acne-logo-img.logo-white {
-          filter: invert(1);
-          mix-blend-mode: screen;
+          filter: brightness(0) invert(1);
           opacity: 0;
           z-index: 1;
         }
@@ -1104,8 +1102,8 @@ export default function Navbar() {
             width: 140px;
           }
           .acne-logo-img {
-            width: 160px !important;
-            height: 160px !important;
+            width: auto !important;
+            height: 32px !important;
             position: absolute !important;
             top: 50% !important;
             left: 50% !important;
