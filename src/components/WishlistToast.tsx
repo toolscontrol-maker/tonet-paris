@@ -201,7 +201,6 @@ export default function WishlistToast() {
           align-items: center;
           justify-content: center;
           box-sizing: border-box;
-          border: 1px solid rgba(0, 0, 0, 0.05);
           overflow: hidden;
         }
 
