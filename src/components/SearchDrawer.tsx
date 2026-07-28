@@ -763,6 +763,11 @@ export default function SearchDrawer() {
           padding: 0;
           box-sizing: border-box;
         }
+        @media (max-width: 767px) {
+          .sd-input {
+            font-size: 16px;
+          }
+        }
         .sd-input::placeholder {
           color: #999999;
         }
