@@ -64,7 +64,7 @@ export default function AnnouncementBar() {
 
       <style>{`
         .ann-bar {
-          height: 40px;
+          height: 64px;
           background-color: #000000;
           color: #ffffff;
           display: flex;
@@ -121,6 +121,7 @@ export default function AnnouncementBar() {
         }
         @media (max-width: 767px) {
           .ann-bar {
+            height: 54px;
             font-size: 9px;
             letter-spacing: 0.12em;
             padding: 0 32px 0 16px;

@@ -87,6 +87,19 @@ export default function Navbar() {
   const [subnavOpen, setSubnavOpen] = useState(false);
   const currentCollection = collections.find(c => c.handle === currentCollectionHandle);
 
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(64);
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setHeaderHeight(entry.target.clientHeight);
+      }
+    });
+    resizeObserver.observe(headerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const [hasBanner, setHasBanner] = useState(true);
 
   useEffect(() => {
@@ -101,7 +114,7 @@ export default function Navbar() {
     return () => window.removeEventListener("announcement-dismissed", handleDismiss);
   }, []);
 
-  const BANNER_H = (hasBanner && !isProduct) ? 40 : 0;
+  const BANNER_H = (hasBanner && !isProduct) ? headerHeight : 0;
 
   // Smart header: hide on scroll down, show solid on scroll up
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -134,19 +147,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
-
-  const headerRef = useRef<HTMLElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(64);
-  useEffect(() => {
-    if (!headerRef.current) return;
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        setHeaderHeight(entry.target.clientHeight);
-      }
-    });
-    resizeObserver.observe(headerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
 
   // Body padding: always pad body to accommodate the header height + banner (0 on homepage/product page for transparent overlay)
   useEffect(() => {
