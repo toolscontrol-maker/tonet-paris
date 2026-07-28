@@ -90,7 +90,7 @@ export default function WishlistToast() {
           width: 420px;
           max-width: calc(100vw - 48px);
           box-sizing: border-box;
-          padding: 20px 24px;
+          padding: 24px 24px;
           border-radius: 0 !important;
           opacity: 0;
           transform: translateY(20px);
@@ -188,12 +188,12 @@ export default function WishlistToast() {
         .wt-thumbnails {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 4px;
         }
 
         .wt-thumb-wrap {
           width: 48px;
-          height: 48px;
+          height: 64px;
           background-color: #f7f8fa;
           display: flex;
           align-items: center;
@@ -215,7 +215,7 @@ export default function WishlistToast() {
             bottom: 16px;
             left: 16px;
             max-width: calc(100vw - 32px);
-            padding: 16px;
+            padding: 20px 16px;
             gap: 12px;
           }
           
@@ -225,7 +225,7 @@ export default function WishlistToast() {
 
           .wt-thumb-wrap {
             width: 42px;
-            height: 42px;
+            height: 56px;
           }
         }
       `}</style>
