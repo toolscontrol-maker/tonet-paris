@@ -2123,7 +2123,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           background: #f7f8fa;
           padding: 2px;
           box-sizing: border-box;
-          aspect-ratio: 3 / 4;
+          aspect-ratio: 15 / 23;
         }
         .tonet-mobile-slide img {
           width: 100%;
