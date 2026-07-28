@@ -732,8 +732,8 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: center;
-          height: 56px;
-          width: 170px;
+          height: 60px;
+          width: 180px;
           overflow: hidden;
           position: relative;
         }
@@ -750,7 +750,7 @@ export default function Navbar() {
         
         .acne-logo-img {
           width: auto;
-          height: 38px;
+          height: 50px;
           max-width: 100%;
           position: absolute;
           top: 50%;
@@ -862,6 +862,10 @@ export default function Navbar() {
           text-decoration: none;
           padding: 0;
           transition: opacity 0.3s ease;
+        }
+        .acne-right-icon svg {
+          width: 21px;
+          height: 21px;
         }
         .acne-right-icon:hover { opacity: 0.6; }
         .acne-right-icon svg { stroke: rgba(0, 0, 0, 0.9); }
@@ -1105,12 +1109,12 @@ export default function Navbar() {
             align-items: stretch; 
           }
           .acne-logo {
-            height: 48px;
-            width: 140px;
+            height: 50px;
+            width: 150px;
           }
           .acne-logo-img {
             width: auto !important;
-            height: 32px !important;
+            height: 42px !important;
             position: absolute !important;
             top: 50% !important;
             left: 50% !important;
