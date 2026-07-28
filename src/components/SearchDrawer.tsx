@@ -552,6 +552,7 @@ export default function SearchDrawer() {
         .sd-backdrop.open {
           opacity: 1;
           pointer-events: auto;
+          transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* ══ OVERLAY CONTAINER ══ */
@@ -599,6 +600,7 @@ export default function SearchDrawer() {
             opacity: 1;
             pointer-events: auto;
             transform: translateX(0);
+            transition-delay: 0.5s;
           }
           .sd-overlay.open.expanded {
             height: 100vh;
