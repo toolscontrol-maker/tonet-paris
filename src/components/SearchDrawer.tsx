@@ -606,6 +606,22 @@ export default function SearchDrawer() {
             height: 100vh;
             max-height: 100vh;
           }
+
+          /* Match search header row with main header row on mobile */
+          .sd-wrapper {
+            padding: 0 !important;
+          }
+          .sd-header {
+            height: 54px !important;
+            margin-top: var(--banner-height) !important;
+            padding: 0 16px !important;
+            margin-bottom: 24px !important;
+            padding-bottom: 0 !important;
+            box-sizing: border-box !important;
+          }
+          .sd-body {
+            padding: 0 16px 24px 16px !important;
+          }
         }
         @media (min-width: 768px) {
           /* Desktop: top overlay covering 60% height with a 2D dice/tilt roll */
