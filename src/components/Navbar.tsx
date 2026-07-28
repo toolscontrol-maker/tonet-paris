@@ -305,6 +305,13 @@ export default function Navbar() {
                   >
                     Kids
                   </Link>
+                  <Link 
+                    href="/collection" 
+                    className="acne-nav-desktop-link"
+                    onMouseEnter={() => setActiveMegaMenu(null)}
+                  >
+                    T-UNIVERSE!
+                  </Link>
                 </div>
 
                 <div className="acne-right-icons">
