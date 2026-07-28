@@ -541,13 +541,13 @@ export default function SearchDrawer() {
         .sd-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.15);
-          backdrop-filter: blur(4px);
-          -webkit-backdrop-filter: blur(4px);
+          background: rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           opacity: 0;
           pointer-events: none;
           z-index: 10000;
-          transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sd-backdrop.open {
           opacity: 1;
@@ -583,18 +583,22 @@ export default function SearchDrawer() {
 
         /* Responsive placement */
         @media (max-width: 767px) {
-          /* Mobile: top overlay covering 60% height with a 2D dice/tilt roll */
+          /* Mobile: slide from left, 100% viewport width and height, slower slide animation, no rotation, no rounded corners */
           .sd-overlay {
             width: 100%;
             max-width: 100%;
-            height: 60vh;
-            max-height: 60vh;
-            transform: translateY(-100%) rotate(-4deg);
+            height: 100vh;
+            max-height: 100vh;
+            bottom: 0;
+            opacity: 1;
+            transform: translateX(-100%);
+            transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: none;
           }
           .sd-overlay.open {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(0) rotate(0deg);
+            transform: translateX(0);
           }
           .sd-overlay.open.expanded {
             height: 100vh;
