@@ -1120,6 +1120,19 @@ export default function Navbar() {
           .acne-right-icon { width: 32px; height: 54px; }
           .acne-wishlist-icon { display: none !important; }
           
+          /* Swap positions of header elements on mobile (when menu is closed) */
+          .acne-header:not(.menu-open) .acne-nav-left {
+            grid-column: 3 !important;
+            justify-content: flex-end !important;
+          }
+          .acne-header:not(.menu-open) .acne-nav-right {
+            grid-column: 1 !important;
+            justify-content: flex-start !important;
+          }
+          .acne-header:not(.menu-open) .acne-nav-left-mobile {
+            flex-direction: row-reverse;
+          }
+          
           /* Active states */
           .acne-mob-icon:active,
           .acne-right-icon:active {
