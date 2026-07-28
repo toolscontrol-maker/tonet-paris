@@ -51,7 +51,7 @@ export default function AnnouncementBar() {
     window.dispatchEvent(new Event("announcement-dismissed"));
   };
 
-  if (!visible) return null;
+  if (!visible || pathname.startsWith("/product/")) return null;
 
   return (
     <div className="ann-bar">
@@ -70,7 +70,7 @@ export default function AnnouncementBar() {
           display: flex;
           align-items: center;
           justify-content: center;
-          position: absolute;
+          position: fixed;
           top: 0;
           left: 0;
           right: 0;

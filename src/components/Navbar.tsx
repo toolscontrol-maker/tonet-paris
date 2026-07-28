@@ -101,7 +101,7 @@ export default function Navbar() {
     return () => window.removeEventListener("announcement-dismissed", handleDismiss);
   }, []);
 
-  const BANNER_H = hasBanner ? 40 : 0;
+  const BANNER_H = (hasBanner && !isProduct) ? 40 : 0;
 
   // Smart header: hide on scroll down, show solid on scroll up
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -122,7 +122,7 @@ export default function Navbar() {
     requestAnimationFrame(() => {
       const y = window.scrollY;
       setHeaderVisible(true);
-      setNavTop(Math.max(0, BANNER_H - y));
+      setNavTop(BANNER_H);
       const threshold = pathname === "/" ? window.innerHeight : 10;
       setIsAtTop(y < threshold);
       lastScrollY.current = y;
