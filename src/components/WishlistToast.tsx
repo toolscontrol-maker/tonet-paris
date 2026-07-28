@@ -138,8 +138,10 @@ export default function WishlistToast() {
         .wt-left {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 12px;
           align-items: flex-start;
+          align-self: flex-start;
+          margin-top: 4px;
         }
 
         .wt-title-row {
@@ -192,8 +194,8 @@ export default function WishlistToast() {
         }
 
         .wt-thumb-wrap {
-          width: 48px;
-          height: 64px;
+          width: 54px;
+          height: 72px;
           background-color: #f7f8fa;
           display: flex;
           align-items: center;
@@ -224,8 +226,8 @@ export default function WishlistToast() {
           }
 
           .wt-thumb-wrap {
-            width: 42px;
-            height: 56px;
+            width: 45px;
+            height: 60px;
           }
         }
       `}</style>
