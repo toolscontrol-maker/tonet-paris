@@ -207,6 +207,14 @@ export default function SearchDrawer() {
     }
   ];
 
+  const trendingSearches = allProductsCache.length > 0
+    ? allProductsCache.slice(0, 3).map(p => p.title)
+    : [
+        "Unisex Vintage Wash Layered T-Shirt",
+        "Cotton Knit Short Sleeve Henley T-Shirt",
+        "Essential Cotton T-Shirt"
+      ];
+
   // Load cache & recent searches on mount/open
   useEffect(() => {
     if (!isSearchOpen) return;
@@ -405,8 +413,8 @@ export default function SearchDrawer() {
                     <div className="sd-suggest-col">
                       <h4 className="sd-col-title">{language === 'es' ? 'Búsquedas Populares' : 'Trending Searches'}</h4>
                       <ul className="sd-list">
-                        {TRENDING_SEARCHES.map((term) => (
-                          <li key={term}>
+                        {trendingSearches.map((term, idx) => (
+                          <li key={`${term}-${idx}`}>
                             <button type="button" className="sd-list-btn" onClick={() => handleTermClick(term)}>
                               {term}
                             </button>
