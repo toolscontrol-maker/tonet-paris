@@ -1,3 +1,5 @@
+import { getManualProducts, getManualProduct } from '@/data/manualProducts';
+
 const DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ?? '';
 const TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_PUBLIC_TOKEN ?? '';
 const API_VERSION = '2024-10';
@@ -34,6 +36,13 @@ export interface Product {
   images: string[];
   variants: ShopifyVariant[];
   collectionHandles?: string[];
+  isManual?: boolean;
+  contactForAvailability?: boolean;
+  stock?: number;
+  contactOptions?: {
+    whatsapp?: string;
+    instagram?: string;
+  };
 }
 
 async function shopifyFetch<T>(
@@ -219,26 +228,40 @@ export function splitProductsByColor(products: Product[]): Product[] {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
-    `query GetProducts { products(first: 250, query: "available_for_sale:true", sortKey: CREATED_AT, reverse: true) { edges { node { ${PRODUCT_FIELDS} } } } }`
-  );
-  return deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
+  const manual = getManualProducts();
+  try {
+    const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
+      `query GetProducts { products(first: 250, query: "available_for_sale:true", sortKey: CREATED_AT, reverse: true) { edges { node { ${PRODUCT_FIELDS} } } } }`
+    );
+    const shopifyProds = deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
+    return [...manual, ...shopifyProds];
+  } catch (e) {
+    console.error("Error fetching Shopify products:", e);
+    return manual;
+  }
 }
 
 export async function getNewArrivals(first = 50): Promise<Product[]> {
-  const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
-    `query GetNewArrivals($first: Int!) {
-      products(first: $first, sortKey: CREATED_AT, reverse: true, query: "available_for_sale:true") {
-        edges {
-          node {
-            ${PRODUCT_FIELDS}
+  const manual = getManualProducts();
+  try {
+    const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
+      `query GetNewArrivals($first: Int!) {
+        products(first: $first, sortKey: CREATED_AT, reverse: true, query: "available_for_sale:true") {
+          edges {
+            node {
+              ${PRODUCT_FIELDS}
+            }
           }
         }
-      }
-    }`,
-    { first }
-  );
-  return deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
+      }`,
+      { first }
+    );
+    const shopifyProds = deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
+    return [...manual, ...shopifyProds].slice(0, first);
+  } catch (e) {
+    console.error("Error fetching Shopify new arrivals:", e);
+    return manual.slice(0, first);
+  }
 }
 
 export interface CollectionSummary {
@@ -290,6 +313,12 @@ export async function getCollections(max = 20): Promise<CollectionSummary[]> {
 }
 
 export async function getCollection(handle: string): Promise<CollectionDetail | null> {
+  const manual = getManualProducts().filter(p => {
+    if (!p.collectionHandles || p.collectionHandles.length === 0) return true;
+    if (handle === 'all') return true;
+    return p.collectionHandles.includes(handle);
+  });
+
   const data = await shopifyFetch<{ collectionByHandle: Record<string, any> | null }>(
     `query GetCollection($handle: String!) {
       collectionByHandle(handle: $handle) {
@@ -305,7 +334,19 @@ export async function getCollection(handle: string): Promise<CollectionDetail | 
     }`,
     { handle }
   );
-  if (!data.collectionByHandle) return null;
+  if (!data.collectionByHandle) {
+    if (manual.length > 0) {
+      return {
+        id: `col-manual-${handle}`,
+        handle,
+        title: handle.toUpperCase(),
+        description: '',
+        imageUrl: manual[0].imageUrl,
+        products: manual,
+      };
+    }
+    return null;
+  }
   const node = data.collectionByHandle;
 
   let products = ((node.products?.edges ?? []) as { node: Record<string, any> }[]).map(e =>
@@ -332,7 +373,7 @@ export async function getCollection(handle: string): Promise<CollectionDetail | 
     title: node.title as string,
     description: (node.description as string) ?? '',
     imageUrl: (node.image?.url as string) ?? '',
-    products: deduplicateProductsByTitle(products),
+    products: [...manual, ...deduplicateProductsByTitle(products)],
   };
 }
 
@@ -350,6 +391,7 @@ export interface RecommendedProduct {
   collectionTitle: string;
   collectionHandle: string;
   siblings: CollectionSibling[];
+  isManual?: boolean;
 }
 
 export async function getRecommendedProducts(
@@ -445,18 +487,33 @@ export async function getRecommendedProducts(
 
 export async function searchProducts(query: string, count = 8): Promise<Product[]> {
   if (!query.trim()) return [];
-  const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
-    `query SearchProducts($query: String!, $first: Int!) {
-      products(first: $first, query: $query) {
-        edges { node { ${PRODUCT_FIELDS} } }
-      }
-    }`,
-    { query: query.trim(), first: count }
+  const q = query.trim().toLowerCase();
+  const manualMatches = getManualProducts().filter(p =>
+    p.title.toLowerCase().includes(q) ||
+    p.description.toLowerCase().includes(q) ||
+    p.tags.some(t => t.toLowerCase().includes(q))
   );
-  return deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
+
+  try {
+    const data = await shopifyFetch<{ products: { edges: { node: Record<string, any> }[] } }>(
+      `query SearchProducts($query: String!, $first: Int!) {
+        products(first: $first, query: $query) {
+          edges { node { ${PRODUCT_FIELDS} } }
+        }
+      }`,
+      { query: query.trim(), first: count }
+    );
+    const shopifyMatches = deduplicateProductsByTitle(data.products.edges.map(e => normalizeProduct(e.node)));
+    return [...manualMatches, ...shopifyMatches].slice(0, count);
+  } catch (e) {
+    return manualMatches.slice(0, count);
+  }
 }
 
 export async function getProduct(handle: string): Promise<Product | null> {
+  const manual = getManualProduct(handle);
+  if (manual) return manual;
+
   const data = await shopifyFetch<{ productByHandle: Record<string, any> | null }>(
     `query GetProduct($handle: String!) { productByHandle(handle: $handle) { ${PRODUCT_FIELDS} } }`,
     { handle }

@@ -71,9 +71,13 @@ export default function WishlistClient() {
 
                   {/* Image */}
                   <Link href={`/product/${item.handle}`} className="pa-img-link">
-                    <div className="pa-img-wrap">
+                    <div className={`pa-img-wrap ${(item as any).isManual || item.imageUrl.startsWith('/products/') ? 'tonet-custom-slide-fill' : ''}`}>
                       {item.imageUrl && (
-                        <img src={item.imageUrl} alt={item.title} className="pa-img" />
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.title} 
+                          className={`pa-img ${(item as any).isManual || item.imageUrl.startsWith('/products/') ? 'tonet-custom-img-fill' : ''}`} 
+                        />
                       )}
                     </div>
                   </Link>
@@ -228,13 +232,14 @@ export default function WishlistClient() {
         .pa-img-wrap {
           width: 108px;
           aspect-ratio: 3 / 4;
-          background: rgba(255,255,255,0.025);
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           overflow: hidden;
         }
         .pa-img {
           width: 100%;
           height: 100%;
           object-fit: contain;
+          mix-blend-mode: multiply;
           display: block;
           filter: grayscale(0.1);
           transition: filter 0.4s;

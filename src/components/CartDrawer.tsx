@@ -93,8 +93,15 @@ export default function CartDrawer() {
           ) : (
             items.map((item) => (
               <div key={item.id} className="cd-item">
-                <div className="cd-item-img">
-                  {item.image && <img src={getOptimizedImageUrl(item.image, 200)} alt={item.name} draggable={false} />}
+                <div className={`cd-item-img ${item.image?.startsWith('/products/') ? 'tonet-custom-slide-fill' : ''}`}>
+                  {item.image && (
+                    <img 
+                      src={getOptimizedImageUrl(item.image, 200)} 
+                      alt={item.name} 
+                      draggable={false} 
+                      className={item.image?.startsWith('/products/') ? 'tonet-custom-img-fill' : ''} 
+                    />
+                  )}
                 </div>
                 <div className="cd-item-info">
                   <span className="cd-item-name">{item.name}</span>
@@ -255,7 +262,7 @@ export default function CartDrawer() {
         .cd-item-img {
           width: 60%; /* 60% of the cart width */
           flex-shrink: 0;
-          background: #f7f8fa; /* Warm sand/bone background */
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat; /* Warm sand/bone studio background */
           aspect-ratio: 3 / 4;
           display: flex;
           align-items: center;
@@ -265,12 +272,22 @@ export default function CartDrawer() {
           box-sizing: border-box;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); /* Subtle shadow effect */
         }
+        .cd-item-img.tonet-custom-slide-fill {
+          padding: 0 !important;
+        }
         .cd-item-img img {
           width: 100%;
           height: 100%;
           object-fit: contain;
           display: block;
           mix-blend-mode: multiply;
+        }
+        .cd-item-img img.tonet-custom-img-fill,
+        .cd-item-img img[src*="/products/"] {
+          object-fit: cover !important;
+          mix-blend-mode: normal !important;
+          width: 100% !important;
+          height: 100% !important;
         }
         .cd-item-info {
           flex: 1;

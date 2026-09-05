@@ -518,6 +518,67 @@ body *:not(.acne-header):not(.acne-header *):not(input):not(textarea) {
   text-transform: capitalize;
 }
 
+/* Product Studio Background (AVIF) */
+.v-product-gallery-container,
+.v-product-carousel-slide,
+.tonet-mobile-slide,
+.tonet-mobile-grid-item,
+.tonet-mobile-stack-item,
+.tonet-desktop-main-wrapper,
+.tonet-desktop-secondary-wrapper,
+.tonet-preview-stage,
+.tonet-preview-sidebar-item,
+.amiri-ctl-image-panel,
+.tonet-wishlist-toast-thumb,
+.cd-item-img,
+.tonet-house-carousel__image-wrap,
+.sd-mini-card-img-wrap,
+.amiri-search-img-wrap,
+.wt-thumb-wrap,
+.tonet-archive-card__image-wrap,
+.hc-img-wrap,
+.dior-card-media-wrap,
+.dior-list-img,
+.dior-order-item-img,
+.pa-img-wrap {
+  background-color: #f7f8fa !important;
+  background-image: url('/product-bg.avif') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+}
 
+/* Custom Product Images Fill Styling Everywhere */
+img[src*="/products/"],
+img[src*="acne-studios"],
+.tonet-custom-img-fill,
+.amiri-product-img--custom-fill,
+.tonet-pdp-img--custom-fill {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  mix-blend-mode: normal !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
-
+*:has(> img[src*="/products/"]),
+*:has(> img[src*="acne-studios"]),
+*:has(> img.tonet-custom-img-fill),
+.tonet-custom-slide-fill,
+.v-product-carousel-slide--custom,
+.tonet-mobile-slide--custom,
+.tonet-mobile-grid-item--custom,
+.tonet-desktop-main-wrapper--custom,
+.tonet-desktop-secondary-wrapper--custom,
+.tonet-house-carousel__image-wrap--custom,
+.amiri-search-img-wrap--custom,
+.sd-mini-card-img-wrap--custom,
+.cd-item-img.tonet-custom-slide-fill,
+.wt-thumb-wrap.tonet-custom-slide-fill {
+  padding: 0 !important;
+  overflow: hidden !important;
+}

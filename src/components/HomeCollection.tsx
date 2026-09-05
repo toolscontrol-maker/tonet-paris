@@ -82,12 +82,12 @@ export default function HomeCollection({ products }: HomeCollectionProps) {
               href={`/product/${product.handle}`}
               className="hc-card"
             >
-              <div className="hc-img-wrap">
+              <div className={`hc-img-wrap ${product.isManual ? 'tonet-custom-slide-fill' : ''}`}>
                 {product.imageUrl && (
                   <img
                     src={getOptimizedImageUrl(product.imageUrl, 700)}
                     alt={product.title}
-                    className="hc-img"
+                    className={`hc-img ${product.isManual ? 'tonet-custom-img-fill' : ''}`}
                     loading="lazy"
                     decoding="async"
                   />
@@ -217,14 +217,15 @@ export default function HomeCollection({ products }: HomeCollectionProps) {
         .hc-img-wrap {
           aspect-ratio: 3 / 4;
           overflow: hidden;
-          background: #100f0d;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
         }
         .hc-img {
           width: 100%;
           height: 100%;
           object-fit: contain;
           display: block;
-          opacity: 0.7;
+          mix-blend-mode: multiply;
+          opacity: 0.85;
           transition: opacity 0.8s ease, transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .hc-card:hover .hc-img {

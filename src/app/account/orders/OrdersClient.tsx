@@ -436,7 +436,8 @@ export default function OrdersClient() {
           width: 52px;
           height: 68px;
           object-fit: contain;
-          background: #f4f3f1;
+          mix-blend-mode: multiply;
+          background: #f4f3f1 url('/product-bg.avif') center / cover no-repeat;
           padding: 6px;
           box-sizing: border-box;
         }

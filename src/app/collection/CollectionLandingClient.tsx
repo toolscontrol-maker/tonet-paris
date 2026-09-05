@@ -575,15 +575,16 @@ export default function CollectionLandingClient({ products }: CollectionLandingC
         .tonet-archive-card__image-wrap {
           position: relative;
           aspect-ratio: 4 / 5;
-          background: #E7E4DF;
-          border-radius: 2px;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
+          border-radius: 0;
           overflow: hidden;
           transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .tonet-archive-card__image {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
+          mix-blend-mode: multiply;
           display: block;
           transition: opacity 400ms ease-in-out;
         }

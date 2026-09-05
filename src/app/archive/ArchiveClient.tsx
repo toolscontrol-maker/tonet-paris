@@ -857,7 +857,7 @@ export default function ArchiveClient() {
         .dior-card-media-wrap {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: rgba(0, 0, 0, 0.015);
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           overflow: hidden;
           position: relative;
           display: block;
@@ -866,6 +866,7 @@ export default function ArchiveClient() {
           width: 100%;
           height: 100%;
           object-fit: contain;
+          mix-blend-mode: multiply;
           filter: grayscale(1) contrast(1.02);
           transition: filter 0.5s, transform 0.5s;
           padding: 24px;
@@ -986,7 +987,8 @@ export default function ArchiveClient() {
           width: 64px;
           height: 80px;
           object-fit: contain;
-          background: rgba(0, 0, 0, 0.015);
+          mix-blend-mode: multiply;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           padding: 8px;
           box-sizing: border-box;
           filter: grayscale(0.5);

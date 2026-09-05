@@ -153,13 +153,13 @@ function ProductCard({
             <Link 
               key={i} 
               href={`/product/${product.handle}`} 
-              className="v-product-carousel-slide"
+              className={`v-product-carousel-slide ${product.isManual ? 'v-product-carousel-slide--custom tonet-custom-slide-fill' : ''}`}
               draggable={false}
             >
               <img
                 src={getOptimizedImageUrl(imgUrl, 800)}
                 alt={`${product.title} - Vista ${i + 1}`}
-                className={`amiri-product-img ${imageClass}`}
+                className={`amiri-product-img ${imageClass} ${product.isManual ? 'amiri-product-img--custom-fill tonet-custom-img-fill' : ''}`}
                 loading="lazy"
                 draggable={false}
               />
@@ -1473,7 +1473,7 @@ export default function CollectionClient({ collection }: { collection: Collectio
           aspect-ratio: 3 / 4;
           position: relative;
           overflow: hidden;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           flex-shrink: 0;
         }
 
@@ -1515,10 +1515,10 @@ export default function CollectionClient({ collection }: { collection: Collectio
           position: relative;
           padding: 12px;
           box-sizing: border-box;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
         }
         .v-product-carousel-slide:hover {
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           opacity: 1;
         }
 

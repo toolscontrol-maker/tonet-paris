@@ -114,14 +114,14 @@ function SearchProductCard({
             <Link 
               key={i} 
               href={`/product/${product.handle}`} 
-              className="v-product-carousel-slide"
+              className={`v-product-carousel-slide ${product.isManual || (imgUrl && imgUrl.startsWith('/products/')) ? 'v-product-carousel-slide--custom tonet-custom-slide-fill' : ''}`}
               draggable={false}
               onClick={closeSearch}
             >
               <img
                 src={getOptimizedImageUrl(imgUrl, 800)}
                 alt={`${product.title} - Vista ${i + 1}`}
-                className={`amiri-product-img ${imageClass}`}
+                className={`amiri-product-img ${imageClass} ${product.isManual || (imgUrl && imgUrl.startsWith('/products/')) ? 'amiri-product-img--custom-fill tonet-custom-img-fill' : ''}`}
                 style={{
                   opacity: loadedImages[i] ? 1 : 0,
                   transition: 'opacity 0.4s ease'
@@ -466,8 +466,14 @@ export default function SearchDrawer() {
                                 className="sd-mini-card"
                                 onClick={closeSearch}
                               >
-                                <div className="sd-mini-card-img-wrap">
-                                  {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                                <div className={`sd-mini-card-img-wrap ${p.isManual || (image && image.startsWith('/products/')) ? 'sd-mini-card-img-wrap--custom tonet-custom-slide-fill' : ''}`}>
+                                  {image && (
+                                    <img 
+                                      src={getOptimizedImageUrl(image, 180)} 
+                                      alt={p.title} 
+                                      className={p.isManual || (image && image.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''} 
+                                    />
+                                  )}
                                 </div>
                               </Link>
                             );
@@ -487,12 +493,18 @@ export default function SearchDrawer() {
                         return (
                           <Link 
                             key={`${p.handle}-${idx}`} 
-                            href={`/product/${p.handle}`}
+                            href={`/product/${p.handle}`} 
                             className="sd-mini-card"
                             onClick={closeSearch}
                           >
-                            <div className="sd-mini-card-img-wrap">
-                              {image && <img src={getOptimizedImageUrl(image, 180)} alt={p.title} />}
+                            <div className={`sd-mini-card-img-wrap ${p.isManual || (image && image.startsWith('/products/')) ? 'sd-mini-card-img-wrap--custom tonet-custom-slide-fill' : ''}`}>
+                              {image && (
+                                <img 
+                                  src={getOptimizedImageUrl(image, 180)} 
+                                  alt={p.title} 
+                                  className={p.isManual || (image && image.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''} 
+                                />
+                              )}
                             </div>
                           </Link>
                         );
@@ -916,13 +928,27 @@ export default function SearchDrawer() {
           overflow: hidden;
           padding: 8px;
           box-sizing: border-box;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
+        }
+        .sd-mini-card-img-wrap.tonet-custom-slide-fill,
+        .sd-mini-card-img-wrap--custom {
+          padding: 0 !important;
         }
         .sd-mini-card-img-wrap img {
           width: 100%;
           height: 100%;
           object-fit: contain;
           mix-blend-mode: multiply;
+        }
+        .sd-mini-card-img-wrap img.tonet-custom-img-fill,
+        .sd-mini-card-img-wrap img[src*="/products/"] {
+          width: 100% !important;
+          height: 100% !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: cover !important;
+          mix-blend-mode: normal !important;
+          display: block !important;
         }
 
         /* ══ RESULTS CONTAINER ══ */
@@ -1057,10 +1083,10 @@ export default function SearchDrawer() {
           position: relative;
           padding: 12px;
           box-sizing: border-box;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
         }
         .v-product-carousel-slide:hover {
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           opacity: 1;
         }
 

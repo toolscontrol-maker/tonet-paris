@@ -67,11 +67,11 @@ export default function WishlistToast() {
           {/* Right section: Thumbnails */}
           <div className="wt-thumbnails">
             {latestItems.map((item, idx) => (
-              <div key={`${item.handle}-${idx}`} className="wt-thumb-wrap">
+              <div key={`${item.handle}-${idx}`} className={`wt-thumb-wrap ${item.imageUrl?.startsWith('/products/') ? 'tonet-custom-slide-fill' : ''}`}>
                 <img 
                   src={getOptimizedImageUrl(item.imageUrl, 100)} 
                   alt={item.title} 
-                  className="wt-thumb-img" 
+                  className={`wt-thumb-img ${item.imageUrl?.startsWith('/products/') ? 'tonet-custom-img-fill' : ''}`} 
                 />
               </div>
             ))}
@@ -196,7 +196,7 @@ export default function WishlistToast() {
         .wt-thumb-wrap {
           width: 54px;
           height: 72px;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -209,6 +209,12 @@ export default function WishlistToast() {
           height: 100%;
           object-fit: contain;
           mix-blend-mode: multiply;
+        }
+
+        .wt-thumb-img.tonet-custom-img-fill,
+        .wt-thumb-img[src*="/products/"] {
+          object-fit: cover !important;
+          mix-blend-mode: normal !important;
         }
 
         @media (max-width: 767px) {

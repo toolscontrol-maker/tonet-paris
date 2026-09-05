@@ -437,6 +437,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const [sizeDropdownOpen, setSizeDropdownOpen] = useState(false);
   const [stickyDropdownOpen, setStickyDropdownOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeDesktopIdx, setActiveDesktopIdx] = useState(0);
   const mobileCarouselRef = useRef<HTMLDivElement>(null);
 
   const [stickyBarVisible, setStickyBarVisible] = useState(false);
@@ -578,6 +579,19 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
     })?.value ?? ''
   );
   const [selectedSize, setSelectedSize] = useState<string>('');
+  const [channelModalOpen, setChannelModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (product.variants.length === 1 && !selectedSize) {
+      const opt = product.variants[0].selectedOptions.find(o => o.name.toLowerCase() === 'size');
+      if (opt?.value) {
+        setSelectedSize(opt.value);
+      } else if (product.variants[0].title && product.variants[0].title !== 'Default Title') {
+        setSelectedSize(product.variants[0].title);
+      }
+    }
+  }, [product, selectedSize]);
+
   const [previewModalOpen, setPreviewModalOpen] = useState<boolean>(false);
   const [previewImageIndex, setPreviewImageIndex] = useState<number>(0);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -685,18 +699,32 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   }, []);
 
   const colorOptions = useMemo(() => {
-    if (!colorOptionName) return [];
     const seen = new Set<string>();
-    const result: { value: string; imageUrl: string }[] = [];
-    for (const v of product.variants) {
-      const opt = v.selectedOptions.find(o => o.name === colorOptionName);
-      if (opt && !seen.has(opt.value)) {
-        seen.add(opt.value);
-        result.push({ value: opt.value, imageUrl: v.image?.url ?? '' });
+    const result: { value: string; imageUrl: string; handle?: string }[] = [];
+    if (colorOptionName) {
+      for (const v of product.variants) {
+        const opt = v.selectedOptions.find(o => o.name === colorOptionName);
+        if (opt && !seen.has(opt.value)) {
+          seen.add(opt.value);
+          result.push({ value: opt.value, imageUrl: v.image?.url ?? '' });
+        }
+      }
+    }
+    if (relatedProductsByTag) {
+      for (const sib of relatedProductsByTag) {
+        if (sib.title.trim().toLowerCase() === product.title.trim().toLowerCase()) {
+          for (const sv of sib.variants) {
+            const sOpt = sv.selectedOptions.find(o => o.name.toLowerCase() === 'color' || o.name.toLowerCase() === 'colour');
+            if (sOpt && !seen.has(sOpt.value)) {
+              seen.add(sOpt.value);
+              result.push({ value: sOpt.value, imageUrl: sib.imageUrl, handle: sib.handle });
+            }
+          }
+        }
       }
     }
     return result;
-  }, [colorOptionName]);
+  }, [colorOptionName, product.variants, product.title, relatedProductsByTag]);
 
   const sizeOptions = useMemo(() => {
     if (!sizeOptionName) return [];
@@ -712,8 +740,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   const allImages = product.images.length > 0 ? product.images : [product.imageUrl].filter(Boolean);
 
   const images = useMemo(() => {
+    if (product.isManual) {
+      return allImages;
+    }
+
     if (!selectedColor || !colorOptionName) {
-      return allImages.slice(0, 2);
+      return allImages;
     }
 
     // Find all variants for the selected color
@@ -916,8 +948,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
   }
 
   function handleColorChange(colorValue: string) {
+    const targetOption = colorOptions.find(c => c.value === colorValue);
+    if (targetOption?.handle) {
+      router.push(`/product/${targetOption.handle}`);
+      return;
+    }
     setSelectedColor(colorValue);
     setCurrentSlide(0);
+    setActiveDesktopIdx(0);
     setPreviewImageIndex(0);
     if (colorOptionName) {
       const updated = { ...selectedOptionsState, [colorOptionName]: colorValue };
@@ -965,11 +1003,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             <div className="tonet-mobile-gallery">
               <div className="tonet-mobile-carousel" ref={mobileCarouselRef} onScroll={handleMobileScroll}>
                 {images.map((img, i) => (
-                  <div key={i} className="tonet-mobile-slide">
+                  <div key={i} className={`tonet-mobile-slide ${product.isManual ? 'tonet-mobile-slide--custom tonet-custom-slide-fill' : ''}`}>
                     <img 
                       src={getOptimizedImageUrl(img, 1000)} 
                       alt={`${product.title} - ${i}`} 
-                      className="tonet-pdp-img amiri-fade-in" 
+                      className={`tonet-pdp-img amiri-fade-in ${product.isManual ? 'tonet-pdp-img--custom-fill tonet-custom-img-fill' : ''}`} 
                       loading={i === 0 ? "eager" : "lazy"}
                       decoding="async"
                       onLoad={(e) => e.currentTarget.classList.add('loaded')}
@@ -998,15 +1036,15 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             {/* Desktop Gallery (Main image fixed on left, secondary scrollable thumbnails on right) */}
             <div className="tonet-desktop-gallery">
               <div 
-                className="tonet-desktop-main-wrapper"
-                onClick={() => openPreview(0)}
+                className={`tonet-desktop-main-wrapper ${product.isManual ? 'tonet-desktop-main-wrapper--custom tonet-custom-slide-fill' : ''}`}
+                onClick={() => openPreview(activeDesktopIdx)}
                 style={{ cursor: 'pointer' }}
                 title="Click para ampliar"
               >
                 <img 
-                  src={getOptimizedImageUrl(images[0], 1600)} 
+                  src={getOptimizedImageUrl(images[activeDesktopIdx] || images[0], 1600)} 
                   alt={`${product.title} - Main`} 
-                  className="tonet-pdp-img amiri-fade-in" 
+                  className={`tonet-pdp-img amiri-fade-in ${product.isManual ? 'tonet-pdp-img--custom-fill tonet-custom-img-fill' : ''}`} 
                   loading="eager"
                   decoding="async"
                   onLoad={(e) => e.currentTarget.classList.add('loaded')}
@@ -1019,17 +1057,18 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               {images.length > 1 && (
                 <div className="tonet-desktop-secondary-container">
                   <div className="tonet-desktop-secondary-scroll">
-                    {images.slice(1).map((img, i) => (
+                    {images.map((img, i) => (
                       <div 
                         key={i} 
-                        className="tonet-desktop-secondary-wrapper"
-                        onClick={() => openPreview(i + 1)}
-                        title="Click para ampliar en previsualizador"
+                        className={`tonet-desktop-secondary-wrapper ${product.isManual ? 'tonet-desktop-secondary-wrapper--custom tonet-custom-slide-fill' : ''} ${i === activeDesktopIdx ? 'tonet-desktop-secondary-active' : ''}`}
+                        onClick={() => setActiveDesktopIdx(i)}
+                        onDoubleClick={() => openPreview(i)}
+                        title="Click para seleccionar o ampliar"
                       >
                         <img 
                           src={getOptimizedImageUrl(img, 800)} 
                           alt={`${product.title} - ${i + 1}`} 
-                          className="tonet-pdp-img amiri-fade-in" 
+                          className={`tonet-pdp-img amiri-fade-in ${product.isManual ? 'tonet-pdp-img--custom-fill tonet-custom-img-fill' : ''}`} 
                           loading="lazy"
                           decoding="async"
                           onLoad={(e) => e.currentTarget.classList.add('loaded')}
@@ -1049,41 +1088,48 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           <div className="tonet-info-column">
             <div className="tonet-info-sticky">
               
-              {/* Title & Wishlist Row */}
-              <div className="tonet-title-wishlist-row">
-                <h1 className="tonet-product-title">{toTitleCase(product.title)}</h1>
-                <button 
-                  type="button" 
-                  className="tonet-pdp-wishlist-btn mobile-only-wishlist"
-                  onClick={handleWishlistToggle}
-                  title={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
-                  aria-label={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
-                >
-                  <span className="tonet-wishlist-icon">{inWishlist ? '★' : '☆'}</span>
-                </button>
-              </div>
+              {/* Title */}
+              <h1 className="tonet-product-title">{toTitleCase(product.title)}</h1>
+
+              {/* Wishlist Button - Centered directly below title */}
+              <button 
+                type="button" 
+                className="tonet-pdp-wishlist-btn"
+                onClick={handleWishlistToggle}
+                title={inWishlist 
+                  ? (language === 'es' ? 'Eliminar de la Wishlist' : 'Remove from Wishlist') 
+                  : (language === 'es' ? 'Añadir a la Wishlist' : 'Add to Wishlist')
+                }
+                aria-label={inWishlist 
+                  ? (language === 'es' ? 'Eliminar de la Wishlist' : 'Remove from Wishlist') 
+                  : (language === 'es' ? 'Añadir a la Wishlist' : 'Add to Wishlist')
+                }
+              >
+                <span className="tonet-wishlist-icon">{inWishlist ? '★' : '☆'}</span>
+                <span className="tonet-wishlist-text">
+                  {inWishlist 
+                    ? (language === 'es' ? 'Eliminar de la Wishlist' : 'Remove from Wishlist') 
+                    : (language === 'es' ? 'Añadir a la Wishlist' : 'Add to Wishlist')
+                  }
+                </span>
+              </button>
               
               {/* Price */}
               <div className="tonet-pdp-price-row">
                 <span className="tonet-product-price">{priceFormatted}</span>
               </div>
 
-              {/* Desktop Wishlist Button */}
-              <button 
-                type="button" 
-                className="tonet-pdp-wishlist-btn desktop-only-wishlist"
-                onClick={handleWishlistToggle}
-                title={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
-                aria-label={inWishlist ? 'Eliminar de la Wishlist' : 'Agregar a la Wishlist'}
-              >
-                <span className="tonet-wishlist-icon">{inWishlist ? '★' : '☆'}</span>
-                <span className="tonet-wishlist-text">
-                  {inWishlist 
-                    ? (language === 'es' ? 'Eliminar de la Wishlist' : 'Remove from Wishlist') 
-                    : (language === 'es' ? 'Agregar a la Wishlist' : 'Add to Wishlist')
-                  }
-                </span>
-              </button>
+              {/* Stock / Units Counter Badge */}
+              {product.stock !== undefined && (
+                <div className="tonet-pdp-stock-badge">
+                  <span className="tonet-stock-dot" />
+                  <span className="tonet-stock-label">
+                    {language === 'es'
+                      ? `${product.stock} ${product.stock === 1 ? 'UNIDAD DISPONIBLE' : 'UNIDADES DISPONIBLES'}`
+                      : `${product.stock} ${product.stock === 1 ? 'PIECE IN STOCK' : 'PIECES IN STOCK'}`}
+                  </span>
+                </div>
+              )}
 
               {/* Color Row */}
               <div className="tonet-pdp-color-row">
@@ -1140,38 +1186,55 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               )}
 
               {/* Main Action Button */}
-              <button 
-                type="button" 
-                ref={mainButtonWrapRef}
-                className="tonet-pdp-main-btn"
-                onClick={selectedSize ? handleAddToBag : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
-                disabled={adding && selectedSize !== null}
-              >
-                <span>
-                  {selectedSize 
-                    ? (adding ? 'Añadiendo...' : 'Comprar') 
-                    : 'Confirme un talle'
-                  }
-                </span>
-              </button>
-
-              {/* Express Checkout */}
-              <div className="tonet-pdp-express-box">
-                <span className="tonet-pdp-express-label">Pago exprés</span>
+              {product.contactForAvailability ? (
                 <button 
                   type="button" 
-                  className="tonet-pdp-express-btn" 
-                  onClick={selectedSize ? handleExpressCheckout : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
-                  disabled={expressLoading}
+                  ref={mainButtonWrapRef}
+                  className="tonet-pdp-main-btn tonet-pdp-contact-btn"
+                  onClick={() => setChannelModalOpen(true)}
                 >
-                  <span>{expressLoading ? 'Cargando PayPal...' : 'Pagar con PayPal'}</span>
+                  <span>
+                    {language === 'es' ? 'Contactar para disponibilidad' : 'Contact for availability'}
+                  </span>
                 </button>
-              </div>
+              ) : (
+                <button 
+                  type="button" 
+                  ref={mainButtonWrapRef}
+                  className="tonet-pdp-main-btn"
+                  onClick={selectedSize ? handleAddToBag : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
+                  disabled={adding && selectedSize !== null}
+                >
+                  <span>
+                    {selectedSize 
+                      ? (adding ? 'Añadiendo...' : 'Comprar') 
+                      : 'Confirme un talle'
+                    }
+                  </span>
+                </button>
+              )}
 
-              {/* Klarna Info Text */}
-              <p className="tonet-pdp-klarna-text">
-                Compra ahora, paga después con Klarna. <span className="underline cursor-pointer" onClick={() => alert('Klarna estará disponible en la pasarela de pago.')}>Más información</span>
-              </p>
+              {/* Express Checkout (only for standard products) */}
+              {!product.contactForAvailability && (
+                <div className="tonet-pdp-express-box">
+                  <span className="tonet-pdp-express-label">Pago exprés</span>
+                  <button 
+                    type="button" 
+                    className="tonet-pdp-express-btn" 
+                    onClick={selectedSize ? handleExpressCheckout : () => alert(language === 'es' ? 'Por favor, seleccione un talle.' : 'Please select a size.')}
+                    disabled={expressLoading}
+                  >
+                    <span>{expressLoading ? 'Cargando PayPal...' : 'Pagar con PayPal'}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Klarna Info Text (only for standard products) */}
+              {!product.contactForAvailability && (
+                <p className="tonet-pdp-klarna-text">
+                  Compra ahora, paga después con Klarna. <span className="underline cursor-pointer" onClick={() => alert('Klarna estará disponible en la pasarela de pago.')}>Más información</span>
+                </p>
+              )}
 
               {/* Accordions */}
               <div className="tonet-accordions">
@@ -1232,11 +1295,11 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               <div className="tonet-mobile-extra-grid">
                 <div className={images.length === 1 ? "tonet-mobile-single" : "tonet-mobile-grid"}>
                   {images.map((img, i) => (
-                    <div key={i} className="tonet-mobile-grid-item">
+                    <div key={i} className={`tonet-mobile-grid-item ${product.isManual ? 'tonet-mobile-grid-item--custom tonet-custom-slide-fill' : ''}`}>
                       <img 
                         src={img} 
                         alt={`${product.title} - ${i}`} 
-                        className="tonet-pdp-img amiri-fade-in" 
+                        className={`tonet-pdp-img amiri-fade-in ${product.isManual ? 'tonet-pdp-img--custom-fill tonet-custom-img-fill' : ''}`} 
                         onLoad={(e) => e.currentTarget.classList.add('loaded')}
                         ref={(el) => {
                           if (el && el.complete) el.classList.add('loaded');
@@ -1277,14 +1340,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                     <div className="amiri-ctl-item" key={p.handle}>
                       <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
                         <div 
-                          className="amiri-ctl-image-panel"
+                          className={`amiri-ctl-image-panel ${p.isManual || (p.imageUrl && p.imageUrl.startsWith('/products/')) ? 'tonet-custom-slide-fill' : ''}`}
                           ref={idx === 0 ? outfitImgRef : null}
                         >
                           {p.imageUrl && (
                             <img 
                               src={p.imageUrl} 
                               alt={p.title} 
-                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
+                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in ${p.isManual || (p.imageUrl && p.imageUrl.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}`}
                               loading="lazy"
                               decoding="async"
                               onLoad={(e) => e.currentTarget.classList.add('loaded')}
@@ -1347,14 +1410,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                     <div className="amiri-ctl-item" key={p.handle}>
                       <Link href={`/product/${p.handle}`} className="amiri-ctl-card">
                         <div 
-                          className="amiri-ctl-image-panel"
+                          className={`amiri-ctl-image-panel ${p.isManual || (p.imageUrl && p.imageUrl.startsWith('/products/')) ? 'tonet-custom-slide-fill' : ''}`}
                           ref={idx === 0 ? recImgRef : null}
                         >
                           {p.imageUrl && (
                             <img 
                               src={p.imageUrl} 
                               alt={p.title} 
-                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in`}
+                              className={`amiri-ctl-image amiri-ctl-image--${pType} amiri-fade-in ${p.isManual || (p.imageUrl && p.imageUrl.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}`}
                               loading="lazy"
                               decoding="async"
                               onLoad={(e) => e.currentTarget.classList.add('loaded')}
@@ -1766,6 +1829,102 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         </div>
       )}
 
+      {/* ══ CHANNEL MODAL (CONTACTAR PARA DISPONIBILIDAD: WHATSAPP / INSTAGRAM) ══ */}
+      {channelModalOpen && (
+        <div className="tonet-contact-overlay" onClick={() => setChannelModalOpen(false)}>
+          <div className="tonet-channel-modal" onClick={e => e.stopPropagation()}>
+            <div className="tonet-channel-header">
+              <span className="tonet-channel-tag">ATELIER ASSISTANCE</span>
+              <button 
+                type="button" 
+                className="tonet-contact-close-btn" 
+                onClick={() => setChannelModalOpen(false)}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="tonet-channel-body">
+              <h3 className="tonet-channel-title">
+                {language === 'es' ? 'Consultar Disponibilidad' : 'Inquire Availability'}
+              </h3>
+              <p className="tonet-channel-desc">
+                {language === 'es'
+                  ? 'Esta pieza cuenta con unidades exclusivas de archivo. Elige cómo prefieres contactar directamente con nuestro atelier para gestionar su disponibilidad y entrega:'
+                  : 'This garment has exclusive archive inventory. Select your preferred channel to directly consult with our atelier regarding availability and acquisition:'}
+              </p>
+
+              <div className="tonet-channel-product-summary">
+                <div className={`tonet-channel-thumb ${product.isManual ? 'tonet-custom-slide-fill' : ''}`}>
+                  <img src={product.imageUrl} alt={product.title} className={product.isManual ? 'tonet-custom-img-fill' : ''} />
+                </div>
+                <div className="tonet-channel-summary-info">
+                  <h4 className="tonet-channel-prod-title">{product.title}</h4>
+                  <div className="tonet-channel-meta-row">
+                    <span className="tonet-channel-spec">TALLE: {selectedSize || 'M'}</span>
+                    {product.stock !== undefined && (
+                      <span className="tonet-channel-stock">● {product.stock} {product.stock === 1 ? 'UNIDAD DISPONIBLE' : 'UNIDADES DISPONIBLES'}</span>
+                    )}
+                  </div>
+                  <span className="tonet-channel-price">{priceFormatted}</span>
+                </div>
+              </div>
+
+              <div className="tonet-channel-actions">
+                {/* WhatsApp Button */}
+                <a
+                  href={`https://wa.me/${(product.contactOptions?.whatsapp || '+34600000000').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                    language === 'es'
+                      ? `Hola, me interesa consultar la disponibilidad de: ${product.title} (Talla: ${selectedSize || 'M'}, Ref: ${product.handle}).`
+                      : `Hello, I would like to inquire about availability for: ${product.title} (Size: ${selectedSize || 'M'}, Ref: ${product.handle}).`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tonet-channel-btn tonet-channel-whatsapp"
+                  onClick={() => setChannelModalOpen(false)}
+                >
+                  <div className="tonet-channel-btn-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                  </div>
+                  <div className="tonet-channel-btn-text">
+                    <span className="tonet-channel-btn-title">WhatsApp</span>
+                    <span className="tonet-channel-btn-sub">
+                      {language === 'es' ? 'Chat directo con atelier' : 'Direct atelier chat'}
+                    </span>
+                  </div>
+                  <span className="tonet-channel-btn-arrow">→</span>
+                </a>
+
+                {/* Instagram Button */}
+                <a
+                  href={`https://ig.me/m/${product.contactOptions?.instagram || 'tonetparis'}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tonet-channel-btn tonet-channel-instagram"
+                  onClick={() => setChannelModalOpen(false)}
+                >
+                  <div className="tonet-channel-btn-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="20" height="20" x="2" y="2" rx="0" ry="0"/>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                    </svg>
+                  </div>
+                  <div className="tonet-channel-btn-text">
+                    <span className="tonet-channel-btn-title">Instagram Direct</span>
+                    <span className="tonet-channel-btn-sub">@{product.contactOptions?.instagram || 'tonetparis'}</span>
+                  </div>
+                  <span className="tonet-channel-btn-arrow">→</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══ WISHLIST TOAST NOTIFICATION ══ */}
       {wishlistToastVisible && (
         <div className="tonet-wishlist-toast">
@@ -1835,9 +1994,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             </div>
 
             <div className="tonet-ceremony-split">
-              <div className="tonet-ceremony-image">
+              <div className={`tonet-ceremony-image ${product.isManual || (product.imageUrl && product.imageUrl.startsWith('/products/')) ? 'tonet-custom-slide-fill' : ''}`}>
                 {product.imageUrl && (
-                  <img src={getOptimizedImageUrl(product.imageUrl, 800)} alt={product.title} className="ac-tonet-img" />
+                  <img 
+                    src={getOptimizedImageUrl(product.imageUrl, 800)} 
+                    alt={product.title} 
+                    className={`ac-tonet-img ${product.isManual || (product.imageUrl && product.imageUrl.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}`} 
+                  />
                 )}
               </div>
 
@@ -1922,22 +2085,34 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
             </div>
           )}
           
-          <button 
-            type="button" 
-            className="tonet-sticky-buy-btn"
-            onClick={needsSizeSelection ? () => setStickySizesOpen(prev => !prev) : handleAddToBag}
-            disabled={adding}
-          >
-            <span>
-              {needsSizeSelection 
-                ? (language === 'es' ? 'Confirme un talle' : 'Confirm size') 
-                : (adding 
-                    ? (language === 'es' ? 'Añadiendo...' : 'Adding...') 
-                    : (language === 'es' ? 'Añadir a la bolsa' : 'Add to bag')
-                  )
-              }
-            </span>
-          </button>
+          {product.contactForAvailability ? (
+            <button 
+              type="button" 
+              className="tonet-sticky-buy-btn tonet-sticky-contact-btn"
+              onClick={() => setChannelModalOpen(true)}
+            >
+              <span>
+                {language === 'es' ? 'Contactar para disponibilidad' : 'Contact for availability'}
+              </span>
+            </button>
+          ) : (
+            <button 
+              type="button" 
+              className="tonet-sticky-buy-btn"
+              onClick={needsSizeSelection ? () => setStickySizesOpen(prev => !prev) : handleAddToBag}
+              disabled={adding}
+            >
+              <span>
+                {needsSizeSelection 
+                  ? (language === 'es' ? 'Confirme un talle' : 'Confirm size') 
+                  : (adding 
+                      ? (language === 'es' ? 'Añadiendo...' : 'Adding...') 
+                      : (language === 'es' ? 'Añadir a la bolsa' : 'Add to bag')
+                    )
+                }
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1957,7 +2132,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               <img 
                 src={getOptimizedImageUrl(images[previewImageIndex] || images[0], 2400)} 
                 alt={`${product.title} - Preview`} 
-                className="tonet-preview-img"
+                className={`tonet-preview-img ${product.isManual || ((images[previewImageIndex] || images[0]) && (images[previewImageIndex] || images[0]).startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}`}
               />
             </div>
 
@@ -2011,7 +2186,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
               {images.map((img, i) => (
                 <div 
                   key={i} 
-                  className={`tonet-preview-sidebar-item ${previewImageIndex === i ? 'active' : ''}`}
+                  className={`tonet-preview-sidebar-item ${previewImageIndex === i ? 'active' : ''} ${product.isManual || (img && img.startsWith('/products/')) ? 'tonet-custom-slide-fill' : ''}`}
                   onClick={() => {
                     setPreviewImageIndex(i);
                     setZoomLevel(1);
@@ -2020,6 +2195,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
                   <img 
                     src={getOptimizedImageUrl(img, 600)} 
                     alt={`${product.title} - ${i}`}
+                    className={product.isManual || (img && img.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}
                   />
                 </div>
               ))}
@@ -2120,7 +2296,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           justify-content: center;
           align-items: center;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           padding: 2px;
           box-sizing: border-box;
           aspect-ratio: 15 / 23;
@@ -2174,7 +2350,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-grid-item {
           aspect-ratio: 3 / 4;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2196,7 +2372,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-mobile-stack-item {
           aspect-ratio: 3 / 4;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2225,7 +2401,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-desktop-main-wrapper {
           width: 100%;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -2265,7 +2441,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-desktop-secondary-wrapper {
           width: 100%;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           aspect-ratio: 3 / 4;
           display: flex;
           justify-content: center;
@@ -2276,8 +2452,10 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           transition: opacity 0.2s ease;
           opacity: 0.85;
         }
-        .tonet-desktop-secondary-wrapper:hover {
+        .tonet-desktop-secondary-wrapper:hover,
+        .tonet-desktop-secondary-wrapper.tonet-desktop-secondary-active {
           opacity: 1;
+          border-color: #000000;
         }
         .tonet-desktop-secondary-wrapper img {
           width: 100%;
@@ -2308,7 +2486,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           overflow: hidden;
           padding: 40px;
           box-sizing: border-box;
@@ -2451,7 +2629,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-preview-sidebar-item {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2480,46 +2658,48 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         @media (min-width: 1024px) {
           .tonet-info-column {
             padding: 140px 64px 120px 64px;
-            display: block;
+            display: flex;
+            justify-content: center;
           }
         }
         .tonet-info-sticky {
           position: relative;
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
-          text-align: left;
+          align-items: center;
+          text-align: center;
           width: 100%;
-          gap: 20px;
+          gap: 16px;
         }
         @media (min-width: 1024px) {
           .tonet-info-sticky {
             position: sticky;
             top: 140px;
-            align-items: flex-start;
-            text-align: left;
-            max-width: 460px;
-            margin-left: 0;
-            margin-right: auto;
+            align-items: center;
+            text-align: center;
+            max-width: 420px;
+            margin: 0 auto;
           }
         }
 
         /* Title */
         .tonet-product-title {
           font-family: var(--font-primary), sans-serif;
-          font-size: 18px;
-          font-weight: 400;
-          letter-spacing: 0.05em;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
           line-height: 1.4;
           margin: 0;
-          text-transform: none;
+          text-transform: uppercase;
           color: #000000;
-          text-align: left;
+          text-align: center;
+          width: 100%;
         }
         @media (min-width: 1024px) {
           .tonet-product-title {
-            font-size: 22px;
-            text-align: left;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
           }
         }
 
@@ -2527,35 +2707,43 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-pdp-price-row {
           width: 100%;
           display: flex;
-          justify-content: flex-start;
+          justify-content: center;
+          align-items: center;
         }
         .tonet-product-price {
           font-family: var(--font-primary), sans-serif;
-          font-size: 15px;
-          font-weight: 500;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           color: #000000;
+          text-align: center;
         }
 
         .tonet-title-wishlist-row {
+          position: relative;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: center;
+          text-align: center;
           width: 100%;
-          gap: 16px;
         }
 
-        /* Wishlist Button */
+        /* Wishlist Button - Centered below product title */
         .tonet-pdp-wishlist-btn {
           background: transparent;
           border: none;
           padding: 0;
+          margin: 2px auto 6px auto;
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
-          font-weight: 400;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
           color: #000000;
           cursor: pointer;
-          display: flex;
+          display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 6px;
           flex-shrink: 0;
           transition: opacity 0.2s;
@@ -2564,59 +2752,46 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           opacity: 0.7;
         }
         .tonet-wishlist-icon {
-          font-size: 18px;
+          font-size: 13px;
           line-height: 1;
-        }
-
-        /* Mobile-only & Desktop-only wishlist visibility */
-        .mobile-only-wishlist {
-          display: flex;
-        }
-        .desktop-only-wishlist {
-          display: none;
-          margin-top: 4px;
-          margin-bottom: 8px;
-        }
-        @media (min-width: 1024px) {
-          .mobile-only-wishlist {
-            display: none !important;
-          }
-          .desktop-only-wishlist {
-            display: flex !important;
-          }
         }
 
         /* ── Help & Boutique Actions Section ── */
         .tonet-pdp-actions-section {
           width: 100%;
-          margin-top: 32px;
-          margin-bottom: 24px;
+          max-width: 380px;
+          margin: 20px auto 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
         .tonet-pdp-actions-divider {
-          width: 100%;
-          height: 1px;
-          background-color: #e5e5e5;
-          margin-bottom: 24px;
+          display: none;
         }
         .tonet-pdp-actions-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          align-items: start;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 24px;
+          width: 100%;
+          flex-wrap: wrap;
         }
         .tonet-pdp-action-btn {
           display: flex;
-          align-items: flex-start;
-          gap: 10px;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
           background: none;
           border: none;
           padding: 0;
           margin: 0;
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 400;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
           color: #000000;
-          text-align: left;
+          text-align: center;
           text-decoration: none;
           cursor: pointer;
           line-height: 1.4;
@@ -2627,16 +2802,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-action-icon {
           flex-shrink: 0;
-          margin-top: 2px;
           color: #333333;
         }
         @media (max-width: 600px) {
           .tonet-pdp-actions-grid {
-            grid-template-columns: 1fr 1fr;
             gap: 16px;
           }
           .tonet-pdp-action-btn {
-            font-size: 12px;
+            font-size: 9.5px;
           }
         }
 
@@ -2644,25 +2817,29 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-pdp-color-row {
           display: flex;
           align-items: center;
-          gap: 20px;
+          justify-content: center;
+          gap: 14px;
           width: 100%;
         }
         .tonet-pdp-color-label {
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 400;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
           color: #000000;
         }
         .tonet-pdp-color-swatches {
           display: flex;
           align-items: center;
-          gap: 12px;
+          justify-content: center;
+          gap: 10px;
         }
         .tonet-pdp-color-dot {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          border: 1px solid rgba(0, 0, 0, 0.15);
+          width: 15px;
+          height: 15px;
+          border-radius: 0 !important;
+          border: 1px solid rgba(0, 0, 0, 0.2);
           cursor: pointer;
           padding: 0;
           box-sizing: border-box;
@@ -2676,30 +2853,36 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           right: -3px;
           bottom: -3px;
           border: 1px solid #000000;
-          border-radius: 50%;
+          border-radius: 0 !important;
         }
 
         /* Sizes container */
         .tonet-pdp-sizes-container {
           display: flex;
           flex-direction: column;
+          align-items: center;
           gap: 8px;
           width: 100%;
         }
         .tonet-pdp-sizes-row {
           display: flex;
           align-items: center;
-          gap: 20px;
+          justify-content: center;
+          gap: 14px;
+          width: 100%;
         }
         .tonet-pdp-sizes-label {
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 400;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
           color: #000000;
         }
         .tonet-pdp-sizes-list {
           display: flex;
           align-items: center;
+          justify-content: center;
           flex-wrap: wrap;
           gap: 12px;
         }
@@ -2708,8 +2891,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           border: none;
           padding: 0 0 2px 0;
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 400;
+          font-size: 11px;
+          font-weight: 700;
           color: #000000;
           cursor: pointer;
           border-bottom: 1px solid transparent;
@@ -2727,27 +2910,33 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           border: none;
           padding: 0;
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
           color: #666666;
           text-decoration: underline;
           cursor: pointer;
           width: fit-content;
-          text-align: left;
+          text-align: center;
+          margin: 0 auto;
         }
 
         /* PDP Buy Button */
         .tonet-pdp-main-btn {
           width: 100%;
-          height: 40px;
+          max-width: 380px;
+          margin: 0 auto;
+          height: 42px;
           background: #000000;
           color: #ffffff;
           border: none;
           border-radius: 0 !important;
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.1em;
-          text-transform: none;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -2762,11 +2951,13 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-pdp-express-box {
           position: relative;
           width: 100%;
+          max-width: 380px;
+          margin: 8px auto 0;
           border: 1px solid #e5e5e5;
           border-radius: 0 !important;
           padding: 24px 20px 20px;
           box-sizing: border-box;
-          margin-top: 8px;
+          text-align: center;
         }
         .tonet-pdp-express-label {
           position: absolute;
@@ -2776,8 +2967,9 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           background: #ffffff;
           padding: 0 10px;
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
-          letter-spacing: 0.05em;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           color: #666666;
           text-transform: uppercase;
         }
@@ -2789,13 +2981,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           border-radius: 0 !important;
           color: #000000;
           font-family: var(--font-primary), sans-serif;
-          font-size: 13px;
-          font-weight: 500;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: background-color 0.2s ease;
         }
         .tonet-pdp-express-btn:hover {
           background-color: #f9f9f9;
@@ -2804,12 +2997,14 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         /* Klarna */
         .tonet-pdp-klarna-text {
           font-family: var(--font-primary), sans-serif;
-          font-size: 11px;
-          color: #666666;
-          margin: 0;
+          font-size: 10px;
+          font-weight: 700;
           line-height: 1.4;
+          color: #666666;
+          margin: 4px auto 0;
           width: 100%;
-          text-align: left;
+          max-width: 380px;
+          text-align: center;
         }
         .tonet-pdp-klarna-text span {
           text-decoration: underline;
@@ -2819,10 +3014,12 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         /* Minimal Accordions */
         .tonet-accordions {
           width: 100%;
-          border-top: 1px solid rgba(0, 0, 0, 0.04);
+          max-width: 380px;
+          margin: 12px auto 0;
+          border-top: none;
         }
         .tonet-accordion-item {
-          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
           width: 100%;
         }
         .tonet-accordion-header {
@@ -2831,41 +3028,48 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           border: none;
           outline: none;
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
-          padding: 16px 0;
-          font-size: 11px;
+          position: relative;
+          padding: 14px 0;
+          font-size: 10px;
           font-family: var(--font-primary), sans-serif;
-          font-weight: 400;
-          letter-spacing: 0.1em;
+          font-weight: 700;
+          letter-spacing: 0.15em;
           color: #000000;
           text-transform: uppercase;
           cursor: pointer;
+          text-align: center;
         }
         .tonet-accordion-icon {
+          position: absolute;
+          right: 0;
           font-size: 11px;
-          font-weight: 300;
+          font-weight: 400;
           color: #888888;
         }
         .tonet-accordion-content {
-          padding: 0 0 20px;
-          text-align: left;
-          font-size: 10.5px;
+          padding: 0 0 18px;
+          text-align: center;
+          font-size: 9.5px;
           line-height: 1.6;
-          font-weight: 300;
-          letter-spacing: 0.05em;
-          color: #555555;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          color: #444444;
           text-transform: uppercase;
         }
         .tonet-accordion-content p {
           margin: 0 0 10px;
+          text-align: center;
         }
         .tonet-specs-list {
           list-style: none;
           padding: 0;
-          margin: 12px 0 0;
+          margin: 10px auto 0;
           display: flex;
           flex-direction: column;
+          align-items: center;
+          text-align: center;
           gap: 6px;
         }
         .tonet-size-guide-link {
@@ -2874,7 +3078,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           padding: 0;
           margin-top: 8px;
           font-size: 10px;
-          font-weight: 400;
+          font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #000000;
@@ -2882,6 +3086,8 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
           text-underline-offset: 3px;
           cursor: pointer;
           display: block;
+          margin-left: auto;
+          margin-right: auto;
         }
 
         /* ── RELATED CAROUSEL ── */
@@ -3355,7 +3561,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .amiri-ctl-image-panel {
           width: 100%;
           aspect-ratio: 3 / 4;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -4206,7 +4412,7 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         .tonet-wishlist-toast-thumb {
           width: 60px;
           height: 80px;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           flex-shrink: 0;
           border: 1px solid #eeeeee;
           display: flex;
@@ -4238,6 +4444,243 @@ export default function ProductClient({ product, relatedProductsByTag }: Props) 
         }
         .tonet-wishlist-toast-link:hover {
           opacity: 0.7;
+        }
+
+        /* Stock Counter Badge on PDP */
+        .tonet-pdp-stock-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 6px 14px;
+          background: #0c0c0c;
+          color: #ffffff;
+          margin: 6px auto 10px auto;
+          width: fit-content;
+          border-radius: 0 !important;
+        }
+        .tonet-stock-dot {
+          width: 6px;
+          height: 6px;
+          background: #22c55e;
+          border-radius: 0 !important;
+          display: inline-block;
+          animation: tonetPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes tonetPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.35; }
+        }
+        .tonet-stock-label {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 9.5px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        /* Contact for Availability Buttons - Frosted Glass & Rounded Corners */
+        .tonet-pdp-contact-btn {
+          background: rgba(255, 255, 255, 0.45) !important;
+          color: #000000 !important;
+          border: 1px solid rgba(0, 0, 0, 0.8) !important;
+          border-radius: 9999px !important;
+          backdrop-filter: blur(16px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+          letter-spacing: 0.15em !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .tonet-pdp-contact-btn:hover {
+          background: rgba(0, 0, 0, 0.07) !important;
+          border-color: #000000 !important;
+          color: #000000 !important;
+          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1) !important;
+          transform: translateY(-1px);
+        }
+        .tonet-pdp-contact-btn:active {
+          transform: translateY(0);
+          background: rgba(0, 0, 0, 0.12) !important;
+        }
+        .tonet-sticky-contact-btn {
+          background: rgba(255, 255, 255, 0.7) !important;
+          color: #000000 !important;
+          border: 1px solid rgba(0, 0, 0, 0.8) !important;
+          border-radius: 9999px !important;
+          backdrop-filter: blur(16px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+          letter-spacing: 0.15em !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+          transition: all 0.3s ease !important;
+        }
+        .tonet-sticky-contact-btn:hover {
+          background: rgba(0, 0, 0, 0.07) !important;
+          border-color: #000000 !important;
+          color: #000000 !important;
+        }
+
+        /* Channel Modal (WhatsApp / Instagram) */
+        .tonet-channel-modal {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          width: 90%;
+          max-width: 480px;
+          border-radius: 18px !important;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+          animation: tonetFadeIn 0.25s ease-out;
+          overflow: hidden;
+          position: relative;
+          z-index: 10000;
+        }
+        .tonet-channel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 24px;
+          background: #f7f8fa;
+        }
+        .tonet-channel-tag {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 9px;
+          letter-spacing: 0.3em;
+          color: rgba(0, 0, 0, 0.5);
+          text-transform: uppercase;
+        }
+        .tonet-channel-body {
+          padding: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .tonet-channel-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 20px;
+          font-weight: 300;
+          letter-spacing: -0.01em;
+          color: #000000;
+          margin: 0;
+          text-transform: uppercase;
+        }
+        .tonet-channel-desc {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          line-height: 1.5;
+          color: #555555;
+          margin: 0;
+        }
+        .tonet-channel-product-summary {
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          padding: 12px;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
+          border-radius: 0 !important;
+          margin: 4px 0 6px 0;
+        }
+        .tonet-channel-thumb {
+          width: 60px;
+          height: 80px;
+          background: transparent;
+          flex-shrink: 0;
+          overflow: hidden;
+        }
+        .tonet-channel-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+        }
+        .tonet-channel-summary-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .tonet-channel-prod-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          color: #000000;
+          margin: 0;
+        }
+        .tonet-channel-meta-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .tonet-channel-spec {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          color: #666666;
+        }
+        .tonet-channel-stock {
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          color: #15803d;
+          font-weight: 500;
+        }
+        .tonet-channel-price {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          color: #000000;
+        }
+        .tonet-channel-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-top: 6px;
+        }
+        .tonet-channel-btn {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 22px;
+          text-decoration: none;
+          color: #000000;
+          background: #ffffff;
+          border: 1px solid #000000;
+          border-radius: 9999px !important;
+          transition: all 0.25s ease;
+          cursor: pointer;
+        }
+        .tonet-channel-btn:hover {
+          background: #000000;
+          color: #ffffff;
+          opacity: 1;
+        }
+        .tonet-channel-btn-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .tonet-channel-btn-text {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          flex: 1;
+          text-align: left;
+        }
+        .tonet-channel-btn-title {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+        .tonet-channel-btn-sub {
+          font-family: var(--font-primary), sans-serif;
+          font-size: 11px;
+          opacity: 0.7;
+        }
+        .tonet-channel-btn-arrow {
+          font-size: 16px;
+          transition: transform 0.2s ease;
+        }
+        .tonet-channel-btn:hover .tonet-channel-btn-arrow {
+          transform: translateX(4px);
         }
       `}</style>
     </>

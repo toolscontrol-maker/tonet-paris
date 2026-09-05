@@ -18,19 +18,19 @@ export default function RecommendedCard({ product }: Props) {
   return (
     <div className="tonet-house-carousel__card-wrap">
       <Link href={displayHref} className="tonet-house-carousel__card">
-        <div className="tonet-house-carousel__image-wrap">
+        <div className={`tonet-house-carousel__image-wrap ${product.isManual || (product.imageUrl && product.imageUrl.startsWith('/products/')) ? 'tonet-house-carousel__image-wrap--custom tonet-custom-slide-fill' : ''}`}>
           {product.imageUrl && (
             <img 
               src={primaryImage} 
               alt={product.title} 
-              className="tonet-house-carousel__image tonet-house-carousel__image--primary" 
+              className={`tonet-house-carousel__image tonet-house-carousel__image--primary ${product.isManual || (product.imageUrl && product.imageUrl.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}`} 
             />
           )}
           {secondImage && (
             <img 
               src={secondImage} 
               alt={product.title} 
-              className="tonet-house-carousel__image tonet-house-carousel__image--secondary" 
+              className={`tonet-house-carousel__image tonet-house-carousel__image--secondary ${product.isManual || (secondImage && secondImage.startsWith('/products/')) ? 'tonet-custom-img-fill' : ''}`} 
             />
           )}
         </div>
@@ -56,7 +56,7 @@ export default function RecommendedCard({ product }: Props) {
           position: relative;
           width: 100%;
           aspect-ratio: 3 / 4;
-          background: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
           border-radius: 0;
           overflow: hidden;
           transition: transform 0.3s ease, box-shadow 0.3s ease;

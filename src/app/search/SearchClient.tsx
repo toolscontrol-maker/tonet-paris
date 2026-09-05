@@ -83,19 +83,19 @@ export default function SearchClient({ query, products, collections }: Props) {
                   return (
                     <Link key={p.handle} href={`/product/${p.handle}`} className={`amiri-search-card ${p.images && p.images.length > 1 ? 'amiri-search-card--has-hover' : ''}`}>
                       <span className="amiri-search-card-tag">NEW IN</span>
-                      <div className="amiri-search-img-wrap">
+                      <div className={`amiri-search-img-wrap ${p.isManual ? 'amiri-search-img-wrap--custom tonet-custom-slide-fill' : ''}`}>
                         {p.imageUrl && (
                           <img 
                             src={p.imageUrl} 
                             alt={p.title} 
-                            className={`amiri-search-img amiri-search-img--primary ${imageClass}`} 
+                            className={`amiri-search-img amiri-search-img--primary ${imageClass} ${p.isManual ? 'tonet-custom-img-fill' : ''}`} 
                           />
                         )}
                         {p.images && p.images.length > 1 && (
                           <img 
                             src={p.images[1]} 
                             alt={p.title} 
-                            className={`amiri-search-img amiri-search-img--secondary ${imageClass}`} 
+                            className={`amiri-search-img amiri-search-img--secondary ${imageClass} ${p.isManual ? 'tonet-custom-img-fill' : ''}`} 
                           />
                         )}
                       </div>
@@ -132,19 +132,19 @@ export default function SearchClient({ query, products, collections }: Props) {
                   return (
                     <Link key={p.handle} href={`/product/${p.handle}`} className={`amiri-search-card ${p.images && p.images.length > 1 ? 'amiri-search-card--has-hover' : ''}`}>
                       <span className="amiri-search-card-tag">NEW IN</span>
-                      <div className="amiri-search-img-wrap">
+                      <div className={`amiri-search-img-wrap ${p.isManual ? 'amiri-search-img-wrap--custom tonet-custom-slide-fill' : ''}`}>
                         {p.imageUrl && (
                           <img 
                             src={p.imageUrl} 
                             alt={p.title} 
-                            className={`amiri-search-img amiri-search-img--primary ${imageClass}`} 
+                            className={`amiri-search-img amiri-search-img--primary ${imageClass} ${p.isManual ? 'tonet-custom-img-fill' : ''}`} 
                           />
                         )}
                         {p.images && p.images.length > 1 && (
                           <img 
                             src={p.images[1]} 
                             alt={p.title} 
-                            className={`amiri-search-img amiri-search-img--secondary ${imageClass}`} 
+                            className={`amiri-search-img amiri-search-img--secondary ${imageClass} ${p.isManual ? 'tonet-custom-img-fill' : ''}`} 
                           />
                         )}
                       </div>
@@ -336,7 +336,7 @@ export default function SearchClient({ query, products, collections }: Props) {
           height: 100%;
           position: relative;
           isolation: isolate;
-          background-color: #f7f8fa;
+          background: #f7f8fa url('/product-bg.avif') center / cover no-repeat;
         }
         @media (max-width: 767px) {
           .amiri-search-img-wrap {
